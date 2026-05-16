@@ -1,0 +1,39 @@
+http:
+  routers:
+    inutriguide-api:
+      rule: Host(`api.localhost`)
+      entryPoints:
+        - web
+      service: inutriguide-api
+    inutriguide-admin:
+      rule: Host(`admin.localhost`)
+      entryPoints:
+        - web
+      service: inutriguide-admin
+    inutriguide-logs:
+      rule: Host(`logs.localhost`)
+      entryPoints:
+        - web
+      middlewares:
+        - dozzle-auth
+      service: inutriguide-logs
+
+  middlewares:
+    dozzle-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
+
+  services:
+    inutriguide-api:
+      loadBalancer:
+        servers:
+          - url: http://backend:8000
+    inutriguide-admin:
+      loadBalancer:
+        servers:
+          - url: http://admin_panel:80
+    inutriguide-logs:
+      loadBalancer:
+        servers:
+          - url: http://dozzle:8080

@@ -1,0 +1,36 @@
+services:
+  traefik:
+    command: !override
+      - --configFile=/etc/traefik/routes-smoke.yml
+    ports: !override
+      - "18080:80"
+    volumes: !override
+      - ./infra/traefik/routes-smoke.yml:/etc/traefik/routes-smoke.yml:ro
+      - ./infra/traefik/routes-smoke-dynamic.yml:/etc/traefik/routes-smoke-dynamic.yml:ro
+
+  backend:
+    environment:
+      DJANGO_ALLOWED_HOSTS: api.localhost,localhost,127.0.0.1
+      CORS_ALLOWED_ORIGINS: http://admin.localhost:18080
+      CSRF_TRUSTED_ORIGINS: http://api.localhost:18080,http://admin.localhost:18080
+    labels: !override
+      - traefik.enable=true
+      - traefik.http.routers.inutriguide-api.rule=Host(`api.localhost`)
+      - traefik.http.routers.inutriguide-api.entrypoints=web
+      - traefik.http.services.inutriguide-api.loadbalancer.server.port=8000
+
+  admin_panel:
+    labels: !override
+      - traefik.enable=true
+      - traefik.http.routers.inutriguide-admin.rule=Host(`admin.localhost`)
+      - traefik.http.routers.inutriguide-admin.entrypoints=web
+      - traefik.http.services.inutriguide-admin.loadbalancer.server.port=80
+
+  dozzle:
+    labels: !override
+      - traefik.enable=true
+      - traefik.http.routers.inutriguide-logs.rule=Host(`logs.localhost`)
+      - traefik.http.routers.inutriguide-logs.entrypoints=web
+      - traefik.http.routers.inutriguide-logs.middlewares=dozzle-auth
+      - traefik.http.middlewares.dozzle-auth.basicauth.users=${DOZZLE_BASIC_AUTH}
+      - traefik.http.services.inutriguide-logs.loadbalancer.server.port=8080

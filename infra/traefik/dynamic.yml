@@ -1,0 +1,7 @@
+http:
+  middlewares:
+    dozzle-auth:
+      basicAuth:
+        users:
+          - "admin:hashed_password_here"
+
