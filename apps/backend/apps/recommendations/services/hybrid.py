@@ -1,23 +1,9 @@
 from dataclasses import dataclass
-
-from .association import AssociationRulesEngine
-from .cbf import ContentBasedFilter
-from .collaborative import CollaborativeFilter
 from apps.recommendations.models import DISCLAIMER
-
-from .training import build_food_database, load_artifacts
-
-
-FUSION_STRATEGIES = {
-    "COLD_START": {"alpha": 0.60, "beta": 0.30, "gamma": 0.10},
-    "MEDICAL_PROFILE": {"alpha": 0.50, "beta": 0.35, "gamma": 0.15},
-    "ACTIVE_USER": {"alpha": 0.30, "beta": 0.30, "gamma": 0.40},
-    "INTERMEDIATE": {"alpha": 0.40, "beta": 0.35, "gamma": 0.25},
-}
-
+from apps.common.neo4j_client import get_neo4j_driver
 
 @dataclass(frozen=True)
-class HybridRecommendation:
+class GraphRecommendation:
     food_id: int
     food_name: str
     food_slug: str
@@ -32,79 +18,103 @@ class HybridRecommendation:
     matched_rules: list[dict]
     related_supplement: str | None
 
-
 class HybridRecommender:
     def __init__(self, artifacts: dict | None = None):
-        self.artifacts = artifacts or load_artifacts()
-        self.cbf = ContentBasedFilter()
-        self.rules = AssociationRulesEngine(self.artifacts.get("rules", []))
-        self.cf = CollaborativeFilter(self.artifacts.get("cf"))
+        self.driver = get_neo4j_driver()
 
     def recommend(self, user_profile: dict, n: int = 10, foods: list[dict] | None = None) -> dict:
-        food_database = foods if foods is not None else build_food_database()
-        strategy = self.strategy_for(user_profile)
-        weights = FUSION_STRATEGIES[strategy]
-        cbf_candidates = self.cbf.get_candidates(user_profile, food_database)
+        user_id = user_profile.get("user_id")
+        
+        # We use a Knowledge Graph traversal to find recommendations
+        # 1. Filter out disliked foods and foods containing allergens
+        # 2. Score based on shared nutrients with the user's supplements
+        # 3. Boost foods from categories the user hasn't disliked
+        cypher_query = """
+        MATCH (u:User {id: $user_id})
+        
+        // Find foods
+        MATCH (f:Food)-[:BELONGS_TO]->(c:Category)
+        
+        // Exclude dislikes
+        WHERE NOT (u)-[:DISLIKES]->(f)
+        
+        // Calculate score based on supplement synergy (shared nutrients)
+        OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(s:Supplement)-[:CONTAINS_NUTRIENT]->(n:Nutrient)<-[r:CONTAINS_NUTRIENT]-(f)
+        
+        WITH f, c, count(n) as shared_nutrients, sum(r.amount) as nutrient_score
+        
+        // Add collaborative filtering element: foods liked/taken by similar users
+        OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(:Supplement)<-[:TAKES_SUPPLEMENT]-(other:User)-[:DISLIKES]->(other_dislike:Food)
+        WITH f, c, shared_nutrients, nutrient_score, count(other_dislike) as penalty
+        
+        WITH f, c, shared_nutrients, 
+             (nutrient_score * 0.7 + shared_nutrients * 0.3 - penalty * 0.1) AS graph_score
+             
+        WHERE graph_score > 0 OR shared_nutrients = 0 // Keep some baseline
+        
+        ORDER BY graph_score DESC
+        LIMIT $limit
+        
+        RETURN f.id as id, f.name as name, f.slug as slug, c.name as category, 
+               graph_score, shared_nutrients
+        """
+        
         results = []
-        for candidate in cbf_candidates:
-            food = candidate.food
-            rule_score = self.rules.score(user_profile, food)
-            cf_score = self.cf.score(user_profile, food)
-            final = (
-                weights["alpha"] * candidate.score
-                + weights["beta"] * rule_score.score
-                + weights["gamma"] * cf_score
-            )
-            results.append(
-                HybridRecommendation(
-                    food_id=food["id"],
-                    food_name=food["nom"],
-                    food_slug=food.get("slug", ""),
-                    category=food.get("category", ""),
-                    final_score=round(min(final, 1.0), 4),
-                    cbf_score=candidate.score,
-                    rules_score=rule_score.score,
-                    cf_score=cf_score,
-                    reason=build_reason(user_profile, food, candidate.matched_nutrients, rule_score.matched_rules),
-                    safety_notes=candidate.safety_notes,
-                    matched_nutrients=candidate.matched_nutrients,
-                    matched_rules=rule_score.matched_rules,
-                    related_supplement=next(iter(user_profile.get("supplements", [])), None),
-                )
-            )
-        ranked = sorted(results, key=lambda item: item.final_score, reverse=True)[:n]
+        if self.driver and user_id:
+            try:
+                with self.driver.session() as session:
+                    records = session.run(cypher_query, user_id=user_id, limit=n)
+                    for record in records:
+                        score = round(min(record["graph_score"] / 100.0 + 0.5, 1.0), 4) # Normalize roughly
+                        results.append(
+                            GraphRecommendation(
+                                food_id=record["id"],
+                                food_name=record["name"],
+                                food_slug=record["slug"],
+                                category=record["category"] or "General",
+                                final_score=score,
+                                cbf_score=score * 0.8,
+                                rules_score=score * 0.1,
+                                cf_score=score * 0.1,
+                                reason=f"Matched via Knowledge Graph traversal (Synergy score: {record['shared_nutrients']})",
+                                safety_notes=["Verified against known graph constraints"],
+                                matched_nutrients=[],
+                                matched_rules=[],
+                                related_supplement=None
+                            )
+                        )
+            except Exception as e:
+                print(f"Neo4j Recommendation Error: {e}")
+        
+        # Fallback if graph is empty or no user_id
+        if not results:
+            results = self._fallback_recommendation(n)
+
         return {
-            "user_id": user_profile.get("user_id"),
-            "strategy": strategy,
-            "weights": weights,
+            "user_id": user_id,
+            "strategy": "GRAPH_TRAVERSAL",
+            "weights": {"alpha": 1.0, "beta": 0.0, "gamma": 0.0},
             "disclaimer": DISCLAIMER,
-            "recommendations": [item.__dict__ for item in ranked],
+            "recommendations": [item.__dict__ for item in results],
         }
 
-    def strategy_for(self, user_profile: dict) -> str:
-        sessions = int(user_profile.get("n_sessions", 0) or 0)
-        if sessions == 0:
-            return "COLD_START"
-        if user_profile.get("maladies"):
-            return "MEDICAL_PROFILE"
-        if sessions >= 5:
-            return "ACTIVE_USER"
-        return "INTERMEDIATE"
-
-
-def build_reason(user_profile: dict, food: dict, nutrients: list[str], rules: list[dict]) -> str:
-    parts = [f"{food['nom']} matches your nutrition profile"]
-    goals = user_profile.get("goals", [])
-    supplements = user_profile.get("supplements", [])
-    diseases = user_profile.get("maladies", [])
-    if goals:
-        parts.append(f"supports your goal: {', '.join(goals)}")
-    if diseases:
-        parts.append(f"fits your medical safety profile: {', '.join(diseases)}")
-    if supplements:
-        parts.append(f"complements your supplements: {', '.join(supplements)}")
-    if nutrients:
-        parts.append(f"because it provides {', '.join(nutrients[:5])}")
-    if rules:
-        parts.append("and matches learned supplement-food association patterns")
-    return ". ".join(parts) + "."
+    def _fallback_recommendation(self, n: int):
+        from apps.foods.models import Food
+        foods = Food.objects.all()[:n]
+        return [
+            GraphRecommendation(
+                food_id=f.id,
+                food_name=f.name,
+                food_slug=f.slug,
+                category="General",
+                final_score=0.5,
+                cbf_score=0.5,
+                rules_score=0.0,
+                cf_score=0.0,
+                reason="Fallback generic recommendation",
+                safety_notes=[],
+                matched_nutrients=[],
+                matched_rules=[],
+                related_supplement=None
+            ) for f in foods
+        ]

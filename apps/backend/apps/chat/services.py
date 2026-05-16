@@ -280,8 +280,9 @@ def _system_prompt() -> str:
         "You are I-NutriGuide's nutrition chat assistant. Use only the provided cited_recommendations for "
         "personalized food recommendations. You may explain general nutrition ideas, but clearly separate them "
         "from personalized recommendations. Respect allergies, diet type, dietary restrictions, disliked foods, "
-        "and warnings. Do not diagnose, cure, or replace advice from a doctor, pharmacist, or registered dietitian. "
-        "Keep answers concise, practical, and friendly."
+        "and warnings. If graph_context is provided, use those exact nutrient paths to explain why a supplement "
+        "or food is beneficial or dangerous. Do not diagnose, cure, or replace advice from a doctor, pharmacist, "
+        "or registered dietitian. Keep answers concise, practical, and friendly."
     )
 
 
@@ -304,6 +305,34 @@ def _fallback_answer(intent: str, profile: dict, cited_items: list[dict], error_
 
     if intent == "medical_safety":
         return f"I can share general nutrition guidance, but I cannot diagnose or treat conditions. {DISCLAIMER}"
+
+    if error_code == "http_403":
+        return (
+            "Groq refused this request with HTTP 403, usually because the API key or selected model is not allowed "
+            "for the current Groq organization. I can still answer from the app recommendation engine when your "
+            "message asks for food, diet, supplement, or weight guidance."
+        )
+
+    suffix = f" Provider status: {error_code}." if error_code else ""
+    return f"I can help with supplement-aware food ideas once I have recommendation context.{suffix}"
+
+
+def serialize_recommendation_run(run: RecommendationRun | None):
+    if not run:
+        return None
+    return RecommendationRunSerializer(run).data
+
+
+def _extract_provider_error(exc: urllib.error.HTTPError) -> str:
+    try:
+        payload = json.loads(exc.read().decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return ""
+    error = payload.get("error")
+    if isinstance(error, dict):
+        return str(error.get("message") or error.get("code") or "")[:500]
+    return str(error or "")[:500]
+agnose or treat conditions. {DISCLAIMER}"
 
     if error_code == "http_403":
         return (

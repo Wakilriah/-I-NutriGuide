@@ -111,5 +111,10 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  neo4j_data:
   admin_node_modules:
+  mobile_node_modules:
+e_modules:
+  mobile_node_modules:
+es:
   mobile_node_modules:
