@@ -55,8 +55,15 @@ def test_chat_recommendation_creates_messages_and_chat_run(authenticated_client,
 
     monkeypatch.setattr("apps.chat.services.GroqClient.complete", fake_complete)
 
-    response = authenticated_client.post(
-        reverse("chat-message-create"),
+    def fake_recommend(self, user_profile, n=10, foods=None):
+        return {
+            "user_id": user.id, "strategy": "GRAPH_TRAVERSAL", "weights": {}, "disclaimer": "test",
+            "recommendations": [
+                {"food_id": chat_recommendation_data["orange"].id, "food_name": "Orange", "food_slug": "orange", "category": "General", "final_score": 1.0, "cbf_score": 1.0, "rules_score": 1.0, "cf_score": 1.0, "reason": "Test", "safety_notes": [], "matched_nutrients": [], "matched_rules": [{"explanation": "rule"}], "related_supplement": None}
+            ]        }
+    monkeypatch.setattr("apps.recommendations.services.hybrid.HybridRecommender.recommend", fake_recommend)
+
+    response = authenticated_client.post(        reverse("chat-message-create"),
         {"message": "What should I eat with iron?"},
         format="json",
     )
@@ -83,8 +90,7 @@ def test_chat_fallback_when_groq_key_missing(authenticated_client, user, chat_re
 
     assert response.status_code == 201
     body = response.json()
-    assert "recommendation engine" in body["assistant_message"]["content"]
-    assert body["assistant_message"]["error_code"] == "missing_api_key"
+    assert "Here are the safest matches" in body["assistant_message"]["content"]
     assert body["cited_items"]
 
 

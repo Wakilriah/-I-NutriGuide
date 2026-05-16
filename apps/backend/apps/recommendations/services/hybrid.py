@@ -43,14 +43,10 @@ class HybridRecommender:
         
         WITH f, c, count(n) as shared_nutrients, sum(r.amount) as nutrient_score
         
-        // Add collaborative filtering element: foods liked/taken by similar users
-        OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(:Supplement)<-[:TAKES_SUPPLEMENT]-(other:User)-[:DISLIKES]->(other_dislike:Food)
-        WITH f, c, shared_nutrients, nutrient_score, count(other_dislike) as penalty
-        
         WITH f, c, shared_nutrients, 
-             (nutrient_score * 0.7 + shared_nutrients * 0.3 - penalty * 0.1) AS graph_score
+             (nutrient_score * 0.7 + shared_nutrients * 0.3) AS graph_score
              
-        WHERE graph_score > 0 OR shared_nutrients = 0 // Keep some baseline
+        WHERE graph_score >= 0 // Keep all safe foods for baseline fallback
         
         ORDER BY graph_score DESC
         LIMIT $limit
@@ -88,7 +84,7 @@ class HybridRecommender:
         
         # Fallback if graph is empty or no user_id
         if not results:
-            results = self._fallback_recommendation(n)
+            results = self._fallback_recommendation(n, user_profile)
 
         return {
             "user_id": user_id,
@@ -98,15 +94,24 @@ class HybridRecommender:
             "recommendations": [item.__dict__ for item in results],
         }
 
-    def _fallback_recommendation(self, n: int):
+    def _fallback_recommendation(self, n: int, user_profile: dict = None):
         from apps.foods.models import Food
-        foods = Food.objects.all()[:n]
+        queryset = Food.objects.filter(is_active=True)
+        if user_profile:
+            aliments_exclus = user_profile.get("aliments_exclus", [])
+            allergies = user_profile.get("allergies", [])
+            if aliments_exclus:
+                queryset = queryset.exclude(slug__in=aliments_exclus)
+            if allergies:
+                for allergy in allergies:
+                    queryset = queryset.exclude(slug__icontains=allergy)
+        foods = queryset[:n]
         return [
             GraphRecommendation(
                 food_id=f.id,
                 food_name=f.name,
                 food_slug=f.slug,
-                category="General",
+                category=f.category.name if hasattr(f, 'category') and f.category else "General",
                 final_score=0.5,
                 cbf_score=0.5,
                 rules_score=0.0,

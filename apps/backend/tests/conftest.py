@@ -1,6 +1,16 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from unittest.mock import patch
+
+
+@pytest.fixture(autouse=True)
+def mock_neo4j_client():
+    """Mock the Neo4j client for all tests to avoid requiring a real graph DB."""
+    with patch("apps.common.neo4j_client.Neo4jClient.get_driver") as mock_get_driver:
+        # We can configure the mock to return a dummy driver or MagicMock if tests start needing it.
+        mock_get_driver.return_value = None
+        yield mock_get_driver
 
 
 @pytest.fixture
