@@ -263,16 +263,45 @@ def _cited_items(run: RecommendationRun | None) -> list[dict]:
     ]
 
 
+from apps.common.neo4j_client import get_neo4j_driver
+
 def _profile_context(user) -> dict:
     profile, _created = UserProfile.objects.get_or_create(user=user)
-    return {
+    context = {
         "goal": profile.goal,
         "activity_level": profile.activity_level,
         "diet_type": profile.diet_type,
         "allergies": list(profile.allergies.values_list("slug", flat=True)),
         "dietary_restrictions": list(profile.dietary_restrictions.values_list("slug", flat=True)),
         "disliked_foods": list(user.disliked_foods.values_list("slug", flat=True)),
+        "graph_context": None
     }
+    
+    driver = get_neo4j_driver()
+    if driver:
+        try:
+            with driver.session() as session:
+                query = """
+                MATCH (u:User {id: $user_id})
+                OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(s:Supplement)-[:CONTAINS_NUTRIENT]->(n:Nutrient)
+                OPTIONAL MATCH (u)-[:ALLERGIC_TO]->(a:Allergen)
+                OPTIONAL MATCH (u)-[:DISLIKES]->(f:Food)
+                RETURN 
+                    collect(DISTINCT s.name + " (provides " + n.name + ")") as supplement_paths,
+                    collect(DISTINCT a.name) as allergy_paths,
+                    collect(DISTINCT f.name) as dislike_paths
+                """
+                record = session.run(query, user_id=user.id).single()
+                if record:
+                    context["graph_context"] = {
+                        "supplements_and_nutrients": record["supplement_paths"],
+                        "allergies": record["allergy_paths"],
+                        "disliked_foods": record["dislike_paths"]
+                    }
+        except Exception as e:
+            print(f"Neo4j RAG error: {e}")
+            
+    return context
 
 
 def _system_prompt() -> str:
@@ -305,34 +334,6 @@ def _fallback_answer(intent: str, profile: dict, cited_items: list[dict], error_
 
     if intent == "medical_safety":
         return f"I can share general nutrition guidance, but I cannot diagnose or treat conditions. {DISCLAIMER}"
-
-    if error_code == "http_403":
-        return (
-            "Groq refused this request with HTTP 403, usually because the API key or selected model is not allowed "
-            "for the current Groq organization. I can still answer from the app recommendation engine when your "
-            "message asks for food, diet, supplement, or weight guidance."
-        )
-
-    suffix = f" Provider status: {error_code}." if error_code else ""
-    return f"I can help with supplement-aware food ideas once I have recommendation context.{suffix}"
-
-
-def serialize_recommendation_run(run: RecommendationRun | None):
-    if not run:
-        return None
-    return RecommendationRunSerializer(run).data
-
-
-def _extract_provider_error(exc: urllib.error.HTTPError) -> str:
-    try:
-        payload = json.loads(exc.read().decode("utf-8"))
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return ""
-    error = payload.get("error")
-    if isinstance(error, dict):
-        return str(error.get("message") or error.get("code") or "")[:500]
-    return str(error or "")[:500]
-agnose or treat conditions. {DISCLAIMER}"
 
     if error_code == "http_403":
         return (

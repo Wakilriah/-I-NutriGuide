@@ -9,6 +9,11 @@ services:
       file: docker-compose.yml
       service: redis
 
+  neo4j:
+    extends:
+      file: docker-compose.yml
+      service: neo4j
+
   backend:
     build:
       context: ./apps/backend
@@ -26,6 +31,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      neo4j:
         condition: service_healthy
 
   celery_worker:
@@ -113,8 +120,4 @@ volumes:
   redis_data:
   neo4j_data:
   admin_node_modules:
-  mobile_node_modules:
-e_modules:
-  mobile_node_modules:
-es:
   mobile_node_modules:

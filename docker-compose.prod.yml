@@ -121,7 +121,9 @@ volumes:
   redis_data:
   neo4j_data:
   traefik_letsencrypt:
-H:-admin:$$apr1$$replace$$with-real-htpasswd-hash}
+dis_data:
+  traefik_letsencrypt:
+d-hash}
       - traefik.http.services.inutriguide-logs.loadbalancer.server.port=8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
