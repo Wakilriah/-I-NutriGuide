@@ -28,17 +28,19 @@ class Command(BaseCommand):
         )
         admin.is_staff = True
         admin.is_superuser = True
+        admin.is_active = True
         admin.name = admin.name or "Riah Wakil"
         admin.set_password(ADMIN_PASSWORD)
-        admin.save()
+        admin.save(update_fields=["is_staff", "is_superuser", "is_active", "name", "password"])
 
         demo_user, demo_created = user_model.objects.get_or_create(
             email=DEMO_EMAIL,
             defaults={"name": "Demo User"},
         )
         demo_user.name = "Demo User"
+        demo_user.is_active = True
         demo_user.set_password(DEMO_PASSWORD)
-        demo_user.save()
+        demo_user.save(update_fields=["name", "is_active", "password"])
 
         profile, _created = UserProfile.objects.get_or_create(user=demo_user)
         profile.age = 34

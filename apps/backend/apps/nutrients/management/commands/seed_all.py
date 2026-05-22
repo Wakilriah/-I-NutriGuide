@@ -10,4 +10,5 @@ class Command(BaseCommand):
         call_command("seed_foods")
         call_command("seed_supplements")
         call_command("seed_rules")
+        call_command("seed_interactions")
         self.stdout.write(self.style.SUCCESS("Seeded all baseline data."))

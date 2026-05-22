@@ -17,7 +17,7 @@ class RecommendationFeedbackViewSet(mixins.CreateModelMixin, mixins.ListModelMix
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
-        queryset = RecommendationFeedback.objects.select_related("user", "recommendation_item__food", "recommendation_item__run")
+        queryset = RecommendationFeedback.objects.select_related("user", "food", "recommendation_item__food", "recommendation_item__run")
         if self.request.user.is_staff:
             search = self.request.query_params.get("search")
             helpful = self.request.query_params.get("is_helpful")

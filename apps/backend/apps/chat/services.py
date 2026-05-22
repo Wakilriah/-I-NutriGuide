@@ -96,6 +96,7 @@ class GroqClient:
             headers={
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
+                "User-Agent": "I-NutriGuide/1.0",
             },
             method="POST",
         )
@@ -104,6 +105,7 @@ class GroqClient:
                 body = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             error_message = _extract_provider_error(exc)
+            print(f"Groq API Error ({exc.code}): {error_message}")
             return GroqResult(content="", model=self.model, token_usage={}, error_code=f"http_{exc.code}", error_message=error_message)
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
             return GroqResult(content="", model=self.model, token_usage={}, error_code="provider_unavailable")
@@ -120,6 +122,8 @@ class GroqClient:
 def send_chat_message(user, message: str, session_id=None) -> dict:
     if not _allow_chat_request(user.id):
         raise ChatRateLimited("Too many chat messages. Please try again in a minute.")
+    if not _allow_daily_chat_request(user.id):
+        raise ChatRateLimited("You reached today's chat limit. Your daily chat allowance resets tomorrow.")
 
     session = _get_or_create_session(user, message, session_id)
     user_message = ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content=message)
@@ -218,6 +222,19 @@ def _allow_chat_request(user_id: int) -> bool:
     except ValueError:
         cache.set(key, 1, timeout=60)
         return True
+
+
+def _allow_daily_chat_request(user_id: int) -> bool:
+    limit = settings.CHAT_DAILY_LIMIT_PER_USER
+    if limit <= 0:
+        return True
+    today = timezone.localdate()
+    used_today = ChatMessage.objects.filter(
+        session__user_id=user_id,
+        role=ChatMessage.Role.USER,
+        created_at__date=today,
+    ).count()
+    return used_today < limit
 
 
 def _get_or_create_session(user, message: str, session_id=None) -> ChatSession:

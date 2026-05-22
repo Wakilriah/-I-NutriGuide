@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from apps.accounts.models import Allergy, DislikedFood, UserProfile
@@ -146,6 +147,103 @@ def test_chat_sessions_are_listed_with_history(authenticated_client, user, chat_
     assert response.status_code == 200
     assert response.json()[0]["id"] == create_response.json()["session_id"]
     assert len(response.json()[0]["messages"]) == 2
+
+
+def test_user_can_clear_own_chat_history(authenticated_client, user, other_user):
+    own_session = ChatSession.objects.create(user=user, title="Own session")
+    ChatMessage.objects.create(session=own_session, role=ChatMessage.Role.USER, content="Hello")
+    other_session = ChatSession.objects.create(user=other_user, title="Other session")
+    ChatMessage.objects.create(session=other_session, role=ChatMessage.Role.USER, content="Keep me")
+
+    response = authenticated_client.delete(reverse("chat-session-clear"))
+
+    assert response.status_code == 200
+    assert response.json()["deleted"] >= 1
+    assert not ChatSession.objects.filter(user=user).exists()
+    assert ChatSession.objects.filter(user=other_user).exists()
+
+
+def test_admin_can_monitor_chat_sessions(api_client, user):
+    admin_user = get_user_model().objects.create_user(
+        email="admin@example.com",
+        password="StrongPassword123",
+        name="Admin",
+        is_staff=True,
+    )
+    session = ChatSession.objects.create(user=user, title="Recommend food")
+    ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content="What should I eat?")
+    ChatMessage.objects.create(
+        session=session,
+        role=ChatMessage.Role.ASSISTANT,
+        content="Try orange.",
+        metadata={
+            "cited_items": [
+                {
+                    "id": 7,
+                    "food": {"id": 3, "name": "Orange", "slug": "orange", "category": "Fruits"},
+                    "score": 0.91,
+                    "explanation": "Orange provides vitamin C.",
+                }
+            ]
+        },
+    )
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.get(reverse("admin-chat-session-list"), {"search": "orange"})
+
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+    result = response.json()["results"][0]
+    assert result["user"]["email"] == user.email
+    assert result["messages"][1]["metadata"]["cited_items"][0]["food"]["name"] == "Orange"
+
+
+def test_admin_chat_users_are_grouped_by_user(api_client, user):
+    admin_user = get_user_model().objects.create_user(
+        email="chat-admin@example.com",
+        password="StrongPassword123",
+        name="Admin",
+        is_staff=True,
+    )
+    session = ChatSession.objects.create(user=user, title="Recommend food")
+    ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content="What should I eat?")
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.get(reverse("admin-chat-user-list"))
+
+    assert response.status_code == 200
+    assert response.json()["results"][0]["email"] == user.email
+    assert response.json()["results"][0]["chat_session_count"] == 1
+    assert response.json()["results"][0]["chat_message_count"] == 1
+
+
+def test_admin_can_clear_one_users_chats(api_client, user, other_user):
+    admin_user = get_user_model().objects.create_user(
+        email="clear-admin@example.com",
+        password="StrongPassword123",
+        name="Admin",
+        is_staff=True,
+    )
+    ChatSession.objects.create(user=user, title="Delete me")
+    ChatSession.objects.create(user=other_user, title="Keep me")
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.delete(reverse("admin-chat-user-clear", kwargs={"user_id": user.id}))
+
+    assert response.status_code == 200
+    assert not ChatSession.objects.filter(user=user).exists()
+    assert ChatSession.objects.filter(user=other_user).exists()
+
+
+def test_daily_chat_limit_resets_by_date(authenticated_client, user, settings):
+    settings.CHAT_DAILY_LIMIT_PER_USER = 1
+    session = ChatSession.objects.create(user=user, title="Earlier today")
+    ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content="First")
+
+    response = authenticated_client.post(reverse("chat-message-create"), {"message": "Second"}, format="json")
+
+    assert response.status_code == 429
+    assert "daily chat allowance resets tomorrow" in response.json()["detail"]
 
 
 def test_chat_requires_authentication(api_client):

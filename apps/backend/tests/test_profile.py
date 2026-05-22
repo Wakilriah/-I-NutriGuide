@@ -45,6 +45,28 @@ def test_authenticated_user_can_update_profile_preferences(authenticated_client,
     assert DislikedFood.objects.filter(user=user, slug="broccoli").count() == 1
 
 
+def test_profile_rejects_unsupported_profile_choices(authenticated_client):
+    response = authenticated_client.patch(
+        reverse("profile"),
+        {
+            "age": 8,
+            "gender": "anything",
+            "height_cm": "300.00",
+            "weight_kg": "20.00",
+            "goal": "random",
+            "activity_level": "extreme",
+            "allergies": ["made up allergy"],
+            "dietary_restrictions": ["made up diet"],
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "age" in response.json()
+    assert "allergies" in response.json()
+    assert "dietary_restrictions" in response.json()
+
+
 def test_profile_endpoint_requires_authentication(api_client):
     response = api_client.get(reverse("profile"))
 
@@ -60,4 +82,3 @@ def test_profile_endpoint_is_scoped_to_authenticated_user(api_client, user, othe
     assert response.status_code == 200
     assert response.json()["age"] == 24
     assert other_user.profile.age == 61
-

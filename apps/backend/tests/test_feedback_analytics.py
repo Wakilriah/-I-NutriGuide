@@ -132,6 +132,12 @@ def test_admin_dashboard_and_analytics(admin_api_client, authenticated_client, r
 
     assert dashboard.status_code == 200
     assert dashboard.json()["total_recommendations"] == 1
+    assert dashboard.json()["total_recommendation_items"] == 1
+    assert dashboard.json()["total_feedback"] == 1
+    assert dashboard.json()["helpful_feedback"] == 1
+    assert dashboard.json()["active_users"] >= 1
+    assert dashboard.json()["active_foods"] == 1
+    assert dashboard.json()["total_nutrients"] == 2
     assert dashboard.json()["total_saved_foods"] == 1
     assert dashboard.json()["most_saved_foods"][0]["recommendation_item__food__name"] == "Orange"
     assert recommendation_analytics.status_code == 200

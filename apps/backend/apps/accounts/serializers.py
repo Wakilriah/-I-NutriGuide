@@ -6,9 +6,44 @@ from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Allergy, DietaryRestriction, DislikedFood, UserProfile
+from .models import Allergy, DailyTracking, DietaryRestriction, DislikedFood, UserProfile
 
 User = get_user_model()
+
+PROFILE_GENDERS = {"female", "male", "other", "prefer_not_to_say"}
+PROFILE_GOALS = {"general_health", "energy", "immunity", "muscle", "weight_loss", "digestive_health"}
+PROFILE_ACTIVITY_LEVELS = {"light", "moderate", "active", "very_active"}
+MAX_PROFILE_LIST_ITEMS = 8
+MAX_DISLIKED_FOODS = 12
+
+ALLERGY_ALIASES = {
+    "peanut": "peanuts",
+    "peanuts": "peanuts",
+    "tree-nuts": "tree_nuts",
+    "tree_nuts": "tree_nuts",
+    "tree nuts": "tree_nuts",
+    "milk": "milk",
+    "egg": "eggs",
+    "eggs": "eggs",
+    "shellfish": "shellfish",
+    "fish": "fish",
+    "soy": "soy",
+    "wheat": "wheat",
+    "gluten": "gluten",
+    "sesame": "sesame",
+}
+DIETARY_RESTRICTION_ALIASES = {
+    "halal": "halal",
+    "vegetarian": "vegetarian",
+    "vegan": "vegan",
+    "pescatarian": "pescatarian",
+    "gluten-free": "gluten_free",
+    "gluten_free": "gluten_free",
+    "gluten free": "gluten_free",
+    "lactose-free": "lactose_free",
+    "lactose_free": "lactose_free",
+    "lactose free": "lactose_free",
+}
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -195,6 +230,47 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["created_at", "updated_at"]
 
+    def validate_age(self, value):
+        if value is not None and not 13 <= value <= 120:
+            raise serializers.ValidationError("Age must be between 13 and 120.")
+        return value
+
+    def validate_gender(self, value):
+        if value and value not in PROFILE_GENDERS:
+            raise serializers.ValidationError("Choose one of the supported gender options.")
+        return value
+
+    def validate_height_cm(self, value):
+        if value is not None and not 80 <= value <= 250:
+            raise serializers.ValidationError("Height must be between 80 and 250 cm.")
+        return value
+
+    def validate_weight_kg(self, value):
+        if value is not None and not 30 <= value <= 300:
+            raise serializers.ValidationError("Weight must be between 30 and 300 kg.")
+        return value
+
+    def validate_goal(self, value):
+        if value and value not in PROFILE_GOALS:
+            raise serializers.ValidationError("Choose one of the supported nutrition goals.")
+        return value
+
+    def validate_activity_level(self, value):
+        if value and value not in PROFILE_ACTIVITY_LEVELS:
+            raise serializers.ValidationError("Choose one of the supported activity levels.")
+        return value
+
+    def validate_allergies(self, value):
+        return self._validate_limited_choice_list(value, ALLERGY_ALIASES, "allergies")
+
+    def validate_dietary_restrictions(self, value):
+        return self._validate_limited_choice_list(value, DIETARY_RESTRICTION_ALIASES, "dietary restrictions")
+
+    def validate_disliked_foods(self, value):
+        if len(value) > MAX_DISLIKED_FOODS:
+            raise serializers.ValidationError(f"Choose up to {MAX_DISLIKED_FOODS} disliked foods.")
+        return value
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["allergies"] = list(instance.allergies.values_list("slug", flat=True))
@@ -243,6 +319,23 @@ class ProfileSerializer(serializers.ModelSerializer):
             seen_slugs.add(slug)
             disliked_foods.append(DislikedFood(user=user, name=name, slug=slug))
         DislikedFood.objects.bulk_create(disliked_foods)
+
+    def _validate_limited_choice_list(self, values, aliases, label):
+        if len(values) > MAX_PROFILE_LIST_ITEMS:
+            raise serializers.ValidationError(f"Choose up to {MAX_PROFILE_LIST_ITEMS} {label}.")
+        normalized = []
+        unsupported = []
+        for raw_value in values:
+            key = raw_value.strip().lower().replace("_", " ")
+            slug_key = slugify(raw_value.strip()).replace("-", "_")
+            canonical = aliases.get(key) or aliases.get(slug_key) or aliases.get(slugify(raw_value.strip()))
+            if canonical is None:
+                unsupported.append(raw_value)
+            elif canonical not in normalized:
+                normalized.append(canonical)
+        if unsupported:
+            raise serializers.ValidationError(f"Unsupported {label}: {', '.join(unsupported)}.")
+        return normalized
 
 
 class AdminUserWriteSerializer(serializers.ModelSerializer):
@@ -293,3 +386,43 @@ class AdminUserWriteSerializer(serializers.ModelSerializer):
         serializer = ProfileSerializer(instance=profile, data=profile_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+
+class DailyTrackingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyTracking
+        fields = [
+            "date",
+            "weight_kg",
+            "water_ml",
+            "calories",
+            "protein_g",
+            "fiber_g",
+            "steps",
+            "supplements_taken",
+            "goals_completed",
+            "notes",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["date", "created_at", "updated_at"]
+
+    def validate_water_ml(self, value):
+        if value > 10000:
+            raise serializers.ValidationError("Water should be 10000 ml or less.")
+        return value
+
+    def validate_calories(self, value):
+        if value > 10000:
+            raise serializers.ValidationError("Calories should be 10000 or less.")
+        return value
+
+    def validate_steps(self, value):
+        if value > 100000:
+            raise serializers.ValidationError("Steps should be 100000 or less.")
+        return value
+
+    def validate_supplements_taken(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Supplements taken must be a list.")
+        return value[:50]

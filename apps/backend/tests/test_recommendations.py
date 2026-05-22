@@ -94,7 +94,8 @@ def test_generate_recommendations_filters_and_ranks(authenticated_client, user, 
     assert "peanut-butter" not in slugs
     assert "archived-apple" not in slugs
     assert body["items"][0]["matched_nutrients"] == ["vitamine_c"]
-    assert "complements your supplements" in body["items"][0]["explanation"]
+    assert body["items"][0]["confidence_score"] >= 0
+    assert "summary" in body["items"][0]["explanation"]
     assert RecommendationRun.objects.filter(user=user).count() == 1
     assert RecommendationItem.objects.filter(run__user=user).count() == len(body["items"])
 
@@ -105,7 +106,7 @@ def test_disabled_rule_is_ignored(authenticated_client, recommendation_data):
     assert response.status_code == 201
     spinach = next(item for item in response.json()["items"] if item["food"]["slug"] == "spinach")
     assert spinach["rule_score"] == 0
-    assert "directly matched rule" not in spinach["explanation"]
+    assert "directly matched rule" not in spinach["explanation"]["summary"]
 
 
 def test_hybrid_food_endpoint_returns_subscores(authenticated_client, user, recommendation_data):

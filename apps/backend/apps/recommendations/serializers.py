@@ -9,6 +9,7 @@ class RecommendedFoodSerializer(serializers.Serializer):
     name = serializers.CharField()
     slug = serializers.CharField()
     category = serializers.CharField()
+    nutrients = serializers.ListField(child=serializers.CharField(), required=False)
 
 
 class RecommendedSupplementSerializer(serializers.Serializer):
@@ -21,16 +22,24 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
     food = serializers.SerializerMethodField()
     matched_supplement = serializers.SerializerMethodField()
     run_id = serializers.UUIDField(source="run.id", read_only=True)
+    recommendation_id = serializers.IntegerField(source="id", read_only=True)
+    explanation = serializers.SerializerMethodField()
+    warnings = serializers.SerializerMethodField()
+    feedback = serializers.SerializerMethodField()
 
     class Meta:
         model = RecommendationItem
         fields = [
             "id",
+            "recommendation_id",
             "run_id",
             "rank",
             "food",
             "matched_supplement",
             "score",
+            "confidence_score",
+            "confidence_label",
+            "score_breakdown",
             "nutrient_score",
             "rule_score",
             "preference_score",
@@ -39,6 +48,7 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
             "tags",
             "warnings",
             "explanation",
+            "feedback",
         ]
 
     @extend_schema_field(RecommendedFoodSerializer)
@@ -48,6 +58,7 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
             "name": obj.food.name,
             "slug": obj.food.slug,
             "category": obj.food.category.name,
+            "nutrients": list(obj.food.nutrients.values_list("nutrient__slug", flat=True)),
         }
 
     @extend_schema_field(RecommendedSupplementSerializer)
@@ -55,6 +66,44 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
         if not obj.supplement:
             return None
         return {"id": obj.supplement.id, "name": obj.supplement.name, "slug": obj.supplement.slug}
+
+    def get_explanation(self, obj):
+        return obj.explanation_details or {"summary": obj.explanation, "reasons": []}
+
+    def get_warnings(self, obj):
+        warnings = obj.warnings or []
+        normalized = []
+        for warning in warnings:
+            if isinstance(warning, dict):
+                normalized.append(warning)
+            else:
+                normalized.append(
+                    {
+                        "level": "caution",
+                        "type": "legacy_warning",
+                        "title": "Recommendation warning",
+                        "message": str(warning),
+                        "related_items": [],
+                    }
+                )
+        return normalized
+
+    def get_feedback(self, obj):
+        request = self.context.get("request")
+        user_feedback = None
+        if request and request.user.is_authenticated:
+            feedback = obj.feedback.filter(user=request.user).first()
+            if feedback:
+                user_feedback = {
+                    "id": feedback.id,
+                    "feedback_type": feedback.feedback_type,
+                    "rating": feedback.rating,
+                    "comment": feedback.comment,
+                }
+        return {
+            "user_feedback": user_feedback,
+            "available_actions": ["liked", "disliked", "saved", "tried", "not_interested"],
+        }
 
 
 class RecommendationRunSerializer(serializers.ModelSerializer):

@@ -11,6 +11,7 @@ from .views import (
     SavedRecommendationItemDestroyView,
     SavedRecommendationItemListCreateView,
 )
+from apps.feedback.views import RecommendationFeedbackViewSet
 
 
 urlpatterns = [
@@ -21,6 +22,7 @@ urlpatterns = [
     path("recommendations/history/<uuid:run_id>/", RecommendationHistoryDetailView.as_view(), name="recommendation-history-detail"),
     path("recommendations/saved-foods/", SavedRecommendationItemListCreateView.as_view(), name="saved-recommendation-list"),
     path("recommendations/saved-foods/<int:pk>/", SavedRecommendationItemDestroyView.as_view(), name="saved-recommendation-detail"),
+    path("recommendations/feedback/", RecommendationFeedbackViewSet.as_view({"post": "create"}), name="recommendation-feedback"),
     path("admin/recommendations/", AdminRecommendationRunListView.as_view(), name="admin-recommendation-list"),
     path("admin/recommendations/<uuid:run_id>/", AdminRecommendationRunDetailView.as_view(), name="admin-recommendation-detail"),
 ]

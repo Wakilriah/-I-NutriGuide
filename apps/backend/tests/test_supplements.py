@@ -94,6 +94,17 @@ def test_user_can_manage_only_own_supplements(api_client, user, other_user, iron
     assert forbidden_response.status_code == 404
 
 
+def test_user_supplement_frequency_is_limited_to_daily(authenticated_client, iron_supplement):
+    response = authenticated_client.post(
+        reverse("user-supplement-list"),
+        {"supplement_id": iron_supplement.id, "dose": "18 mg", "frequency": "weekly", "time_of_day": "morning"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "Only daily supplement routines are supported." in response.json()["frequency"]
+
+
 def test_seed_supplements_command_is_idempotent():
     call_command("seed_supplements")
     call_command("seed_supplements")

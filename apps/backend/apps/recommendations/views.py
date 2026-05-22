@@ -14,9 +14,11 @@ from .serializers import (
 )
 from .services.cache import get_cached_recommendations, set_cached_recommendations
 from .services.engine import generate_recommendations, get_food_recommendations_payload, get_recommendation_cache_key
+from .services.enrichment import enrich_scored_recommendation, to_api_result
 from .services.hybrid import HybridRecommender
 from .services.training import build_preview_profile
 from apps.common.pagination import AdminPageNumberPagination
+from apps.foods.models import Food
 
 
 class GenerateRecommendationView(APIView):
@@ -71,7 +73,13 @@ class RecommendationPreviewView(APIView):
         serializer.is_valid(raise_exception=True)
         profile = build_preview_profile(serializer.validated_data)
         payload = HybridRecommender().recommend(profile, n=serializer.validated_data["n"])
-        return Response(payload)
+        results = []
+        for scored in payload["recommendations"]:
+            food = Food.objects.select_related("category").prefetch_related("nutrients__nutrient").get(id=scored["food_id"])
+            enriched = enrich_scored_recommendation(scored, food=food, user_profile=profile)
+            if enriched is not None:
+                results.append(to_api_result(enriched, food))
+        return Response({**payload, "results": results, "recommendations": results})
 
 
 class RecommendationHistoryView(generics.ListAPIView):
@@ -81,7 +89,7 @@ class RecommendationHistoryView(generics.ListAPIView):
     def get_queryset(self):
         return (
             RecommendationRun.objects.filter(user=self.request.user)
-            .prefetch_related("items__food__category", "items__supplement")
+            .prefetch_related("items__food__category", "items__food__nutrients__nutrient", "items__supplement", "items__feedback")
             .order_by("-created_at")
         )
 
@@ -95,7 +103,9 @@ class RecommendationHistoryDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         return RecommendationRun.objects.filter(user=self.request.user).prefetch_related(
             "items__food__category",
+            "items__food__nutrients__nutrient",
             "items__supplement",
+            "items__feedback",
         )
 
 
@@ -107,6 +117,7 @@ class SavedRecommendationItemListCreateView(generics.ListCreateAPIView):
         return (
             SavedRecommendationItem.objects.filter(user=self.request.user)
             .select_related("recommendation_item__food__category", "recommendation_item__supplement")
+            .prefetch_related("recommendation_item__food__nutrients__nutrient", "recommendation_item__feedback")
             .order_by("-created_at")
         )
 
@@ -126,7 +137,7 @@ class AdminRecommendationRunListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = (
             RecommendationRun.objects.select_related("user")
-            .prefetch_related("items__food__category", "items__supplement")
+            .prefetch_related("items__food__category", "items__food__nutrients__nutrient", "items__supplement", "items__feedback")
             .order_by("-created_at")
         )
         email = self.request.query_params.get("email")
@@ -157,5 +168,7 @@ class AdminRecommendationRunDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         return RecommendationRun.objects.select_related("user").prefetch_related(
             "items__food__category",
+            "items__food__nutrients__nutrient",
             "items__supplement",
+            "items__feedback",
         )

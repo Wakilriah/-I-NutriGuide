@@ -6,11 +6,12 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.utils import timezone
 
-from .models import UserProfile
+from .models import DailyTracking, UserProfile
 from apps.common.pagination import AdminPageNumberPagination
 
-from .serializers import AdminUserDetailSerializer, AdminUserSerializer, AdminUserWriteSerializer, ProfileSerializer, RegisterSerializer, UserSerializer
+from .serializers import AdminUserDetailSerializer, AdminUserSerializer, AdminUserWriteSerializer, DailyTrackingSerializer, ProfileSerializer, RegisterSerializer, UserSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -41,6 +42,23 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         profile, _created = UserProfile.objects.get_or_create(user=self.request.user)
         return profile
+
+
+class DailyTrackingTodayView(generics.RetrieveUpdateAPIView):
+    serializer_class = DailyTrackingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        tracking, _created = DailyTracking.objects.get_or_create(user=self.request.user, date=timezone.localdate())
+        return tracking
+
+
+class DailyTrackingHistoryView(generics.ListAPIView):
+    serializer_class = DailyTrackingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return DailyTracking.objects.filter(user=self.request.user).order_by("-date")[:30]
 
 
 class AdminUserListView(generics.ListCreateAPIView):

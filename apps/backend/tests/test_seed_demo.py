@@ -20,6 +20,8 @@ def test_seed_demo_creates_idempotent_demo_flow_data():
 
     assert admin.is_staff is True
     assert admin.is_superuser is True
+    assert admin.is_active is True
+    assert demo_user.is_active is True
     assert demo_user.profile.goal == "general_health"
     assert demo_user.profile.allergies.filter(slug="shellfish").exists()
     assert demo_user.profile.dietary_restrictions.filter(slug="vegetarian").exists()

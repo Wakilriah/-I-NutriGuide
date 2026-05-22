@@ -34,6 +34,25 @@ class ChatSessionSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "created_at", "updated_at", "messages"]
 
 
+class AdminChatSessionSerializer(ChatSessionSerializer):
+    user = serializers.SerializerMethodField()
+
+    class Meta(ChatSessionSerializer.Meta):
+        fields = ["id", "user", "title", "created_at", "updated_at", "messages"]
+
+    def get_user(self, obj):
+        return {"id": obj.user.id, "email": obj.user.email, "name": obj.user.name}
+
+
+class AdminChatUserSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    name = serializers.CharField()
+    chat_session_count = serializers.IntegerField()
+    chat_message_count = serializers.IntegerField()
+    latest_chat_at = serializers.DateTimeField(allow_null=True)
+
+
 class SendChatMessageSerializer(serializers.Serializer):
     session_id = serializers.UUIDField(required=False)
     message = serializers.CharField(max_length=settings.CHAT_MAX_INPUT_CHARS, trim_whitespace=True)
@@ -49,4 +68,3 @@ class ChatMessageResponseSerializer(serializers.Serializer):
     @extend_schema_field(RecommendationRunSerializer(allow_null=True))
     def get_recommendation_run(self, obj):
         return serialize_recommendation_run(obj.get("recommendation_run"))
-

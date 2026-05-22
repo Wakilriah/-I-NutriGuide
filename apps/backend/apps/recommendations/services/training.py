@@ -219,15 +219,24 @@ def build_food_interaction_scores() -> dict[int, dict[str, float]]:
         user_scores = scores.setdefault(item.run.user_id, {})
         slug = normalize_token(item.food.slug)
         user_scores[slug] = max(user_scores.get(slug, 0.0), clamp(item.score))
-    for feedback in RecommendationFeedback.objects.select_related("recommendation_item__food"):
+    positive_types = {"liked", "saved", "tried", "helpful"}
+    negative_types = {"disliked", "not_interested", "bad_taste", "not_helpful", "too_expensive"}
+    blocking_types = {"unsafe_for_me", "allergy_issue"}
+    for feedback in RecommendationFeedback.objects.select_related("recommendation_item__food", "food"):
         user_scores = scores.setdefault(feedback.user_id, {})
-        slug = normalize_token(feedback.recommendation_item.food.slug)
+        food = feedback.food or feedback.recommendation_item.food
+        slug = normalize_token(food.slug)
         value = clamp((feedback.rating or 0) / 5)
-        if feedback.is_helpful:
+        if feedback.feedback_type in blocking_types:
+            value = 0.0
+        elif feedback.feedback_type in positive_types or feedback.is_helpful:
             value = max(value, 0.7)
-        else:
+        elif feedback.feedback_type in negative_types or not feedback.is_helpful:
             value = min(value, 0.2)
-        user_scores[slug] = max(user_scores.get(slug, 0.0), value)
+        if feedback.feedback_type in blocking_types:
+            user_scores[slug] = value
+        else:
+            user_scores[slug] = max(user_scores.get(slug, 0.0), value)
     return scores
 
 

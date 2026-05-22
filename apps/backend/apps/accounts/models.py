@@ -64,6 +64,8 @@ class UserProfile(models.Model):
         VEGAN = "vegan", "Vegan"
         HALAL = "halal", "Halal"
         PESCATARIAN = "pescatarian", "Pescatarian"
+        KETO = "keto", "Keto"
+        MEDITERRANEAN = "mediterranean", "Mediterranean"
         GLUTEN_FREE = "gluten_free", "Gluten free"
         LACTOSE_FREE = "lactose_free", "Lactose free"
 
@@ -87,3 +89,28 @@ class UserProfile(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.email} profile"
+
+
+class DailyTracking(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="daily_tracking", on_delete=models.CASCADE)
+    date = models.DateField()
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    water_ml = models.PositiveIntegerField(default=0)
+    calories = models.PositiveIntegerField(default=0)
+    protein_g = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    fiber_g = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    steps = models.PositiveIntegerField(default=0)
+    supplements_taken = models.JSONField(default=list, blank=True)
+    goals_completed = models.BooleanField(default=False)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "date"], name="unique_daily_tracking_per_user"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user.email} tracking {self.date}"
