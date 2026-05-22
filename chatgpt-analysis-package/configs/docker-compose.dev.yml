@@ -1,0 +1,123 @@
+services:
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+
+  redis:
+    extends:
+      file: docker-compose.yml
+      service: redis
+
+  neo4j:
+    extends:
+      file: docker-compose.yml
+      service: neo4j
+
+  backend:
+    build:
+      context: ./apps/backend
+      target: development
+    env_file:
+      - apps/backend/.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+    command: sh -c "pip install -r requirements/dev.txt && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./apps/backend:/app
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+
+  celery_worker:
+    build:
+      context: ./apps/backend
+      target: development
+    env_file:
+      - apps/backend/.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+    command: sh -c "pip install -r requirements/dev.txt && celery -A config worker -l info"
+    volumes:
+      - ./apps/backend:/app
+    depends_on:
+      - backend
+      - redis
+
+  celery_beat:
+    build:
+      context: ./apps/backend
+      target: development
+    env_file:
+      - apps/backend/.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+    command: sh -c "pip install -r requirements/dev.txt && celery -A config beat -l info"
+    volumes:
+      - ./apps/backend:/app
+    depends_on:
+      - backend
+      - redis
+
+  admin_panel:
+    build:
+      context: ./apps/admin-panel
+      target: development
+    env_file:
+      - apps/admin-panel/.env
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ./apps/admin-panel:/app
+      - admin_node_modules:/app/node_modules
+    ports:
+      - "${ADMIN_PANEL_PORT:-5173}:5173"
+    depends_on:
+      - backend
+
+  mobile_app:
+    image: node:20-bookworm-slim
+    working_dir: /app
+    environment:
+      BROWSER: none
+      CHOKIDAR_USEPOLLING: "true"
+      EXPO_NO_TELEMETRY: "1"
+      EXPO_PUBLIC_API_BASE_URL: ${EXPO_PUBLIC_API_BASE_URL:-http://localhost:8000/api/v1}
+      REACT_NATIVE_PACKAGER_HOSTNAME: ${REACT_NATIVE_PACKAGER_HOSTNAME:-}
+      WATCHPACK_POLLING: "true"
+    command: sh -c "npm install && npx expo start --web --host lan --port 8081 --clear"
+    volumes:
+      - ./apps/mobile-app:/app
+      - mobile_node_modules:/app/node_modules
+    ports:
+      - "${EXPO_PORT:-8081}:8081"
+      - "${EXPO_DEVTOOLS_PORT:-19000}:19000"
+      - "${EXPO_METRO_PORT:-19001}:19001"
+      - "${EXPO_TUNNEL_PORT:-19002}:19002"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+  dozzle:
+    image: amir20/dozzle:latest
+    ports:
+      - "${DOZZLE_PORT:-9999}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  admin_node_modules:
+  mobile_node_modules:

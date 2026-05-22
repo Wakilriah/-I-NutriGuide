@@ -1,0 +1,2636 @@
+openapi: 3.0.3
+info:
+  title: I-NutriGuide API
+  version: 0.1.0
+  description: AI-powered supplement-food recommendation API.
+paths:
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/admin/analytics/feedback/:
+    get:
+      operationId: v1_admin_analytics_feedback_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackAnalytics'
+          description: ''
+  /api/v1/admin/analytics/recommendations/:
+    get:
+      operationId: v1_admin_analytics_recommendations_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationAnalytics'
+          description: ''
+  /api/v1/admin/association-rules/:
+    get:
+      operationId: v1_admin_association_rules_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssociationRule'
+          description: ''
+    post:
+      operationId: v1_admin_association_rules_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssociationRule'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssociationRule'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssociationRule'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationRule'
+          description: ''
+  /api/v1/admin/association-rules/{id}/:
+    get:
+      operationId: v1_admin_association_rules_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this association rule.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationRule'
+          description: ''
+    put:
+      operationId: v1_admin_association_rules_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this association rule.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssociationRule'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssociationRule'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssociationRule'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationRule'
+          description: ''
+    patch:
+      operationId: v1_admin_association_rules_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this association rule.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssociationRule'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAssociationRule'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAssociationRule'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociationRule'
+          description: ''
+    delete:
+      operationId: v1_admin_association_rules_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this association rule.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/dashboard/:
+    get:
+      operationId: v1_admin_dashboard_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAnalytics'
+          description: ''
+  /api/v1/admin/nutrients/:
+    get:
+      operationId: v1_admin_nutrients_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Nutrient'
+          description: ''
+    post:
+      operationId: v1_admin_nutrients_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Nutrient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Nutrient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Nutrient'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nutrient'
+          description: ''
+  /api/v1/admin/nutrients/{slug}/:
+    get:
+      operationId: v1_admin_nutrients_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nutrient'
+          description: ''
+    put:
+      operationId: v1_admin_nutrients_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Nutrient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Nutrient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Nutrient'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nutrient'
+          description: ''
+    patch:
+      operationId: v1_admin_nutrients_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNutrient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNutrient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNutrient'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nutrient'
+          description: ''
+    delete:
+      operationId: v1_admin_nutrients_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/recommendations/:
+    get:
+      operationId: v1_admin_recommendations_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRecommendationRun'
+          description: ''
+  /api/v1/admin/users/:
+    get:
+      operationId: v1_admin_users_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminUser'
+          description: ''
+  /api/v1/admin/users/{id}/:
+    get:
+      operationId: v1_admin_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/me/:
+    get:
+      operationId: v1_auth_me_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: v1_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/register/:
+    post:
+      operationId: v1_auth_register_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/v1/feedback/:
+    get:
+      operationId: v1_feedback_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecommendationFeedback'
+          description: ''
+    post:
+      operationId: v1_feedback_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationFeedback'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecommendationFeedback'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecommendationFeedback'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationFeedback'
+          description: ''
+  /api/v1/food-categories/:
+    get:
+      operationId: v1_food_categories_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodCategory'
+          description: ''
+    post:
+      operationId: v1_food_categories_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FoodCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FoodCategory'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodCategory'
+          description: ''
+  /api/v1/food-categories/{slug}/:
+    get:
+      operationId: v1_food_categories_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodCategory'
+          description: ''
+    put:
+      operationId: v1_food_categories_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FoodCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FoodCategory'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodCategory'
+          description: ''
+    patch:
+      operationId: v1_food_categories_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFoodCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFoodCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFoodCategory'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodCategory'
+          description: ''
+    delete:
+      operationId: v1_food_categories_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/foods/:
+    get:
+      operationId: v1_foods_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Food'
+          description: ''
+    post:
+      operationId: v1_foods_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Food'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Food'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Food'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+  /api/v1/foods/{slug}/:
+    get:
+      operationId: v1_foods_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+    put:
+      operationId: v1_foods_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Food'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Food'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Food'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+    patch:
+      operationId: v1_foods_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFood'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFood'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFood'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          description: ''
+    delete:
+      operationId: v1_foods_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/health/:
+    get:
+      operationId: v1_health_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+          description: ''
+  /api/v1/profile/:
+    get:
+      operationId: v1_profile_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    put:
+      operationId: v1_profile_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    patch:
+      operationId: v1_profile_partial_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/v1/recommendations/foods/:
+    get:
+      operationId: v1_recommendations_foods_retrieve
+      parameters:
+      - in: query
+        name: n
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/recommendations/generate/:
+    post:
+      operationId: v1_recommendations_generate_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRecommendation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GenerateRecommendation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GenerateRecommendation'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationRun'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationRun'
+          description: ''
+  /api/v1/recommendations/history/:
+    get:
+      operationId: v1_recommendations_history_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecommendationRun'
+          description: ''
+  /api/v1/recommendations/history/{run_id}/:
+    get:
+      operationId: v1_recommendations_history_retrieve
+      parameters:
+      - in: path
+        name: run_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationRun'
+          description: ''
+  /api/v1/recommendations/preview/:
+    post:
+      operationId: v1_recommendations_preview_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HybridPreview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HybridPreview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HybridPreview'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/supplements/:
+    get:
+      operationId: v1_supplements_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Supplement'
+          description: ''
+    post:
+      operationId: v1_supplements_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supplement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Supplement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Supplement'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplement'
+          description: ''
+  /api/v1/supplements/{slug}/:
+    get:
+      operationId: v1_supplements_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplement'
+          description: ''
+    put:
+      operationId: v1_supplements_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supplement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Supplement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Supplement'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplement'
+          description: ''
+    patch:
+      operationId: v1_supplements_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplement'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplement'
+          description: ''
+    delete:
+      operationId: v1_supplements_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/user-supplements/:
+    get:
+      operationId: v1_user_supplements_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSupplement'
+          description: ''
+    post:
+      operationId: v1_user_supplements_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSupplement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSupplement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSupplement'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSupplement'
+          description: ''
+  /api/v1/user-supplements/{id}/:
+    get:
+      operationId: v1_user_supplements_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSupplement'
+          description: ''
+    put:
+      operationId: v1_user_supplements_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSupplement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSupplement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSupplement'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSupplement'
+          description: ''
+    patch:
+      operationId: v1_user_supplements_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSupplement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSupplement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSupplement'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSupplement'
+          description: ''
+    delete:
+      operationId: v1_user_supplements_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    AdminRecommendationRun:
+      type: object
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        user:
+          allOf:
+          - $ref: '#/components/schemas/RecommendationRunUserSummary'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        disclaimer:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecommendationItem'
+      required:
+      - created_at
+      - items
+      - run_id
+      - user
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        is_staff:
+          type: boolean
+          readOnly: true
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        profile:
+          allOf:
+          - $ref: '#/components/schemas/AdminUserProfileSummary'
+          readOnly: true
+        supplement_count:
+          type: integer
+          readOnly: true
+        recommendation_count:
+          type: integer
+          readOnly: true
+        feedback_count:
+          type: integer
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - feedback_count
+      - id
+      - is_active
+      - is_staff
+      - name
+      - profile
+      - recommendation_count
+      - supplement_count
+    AdminUserProfileSummary:
+      type: object
+      properties:
+        age:
+          type: integer
+          nullable: true
+        gender:
+          type: string
+        goal:
+          type: string
+        activity_level:
+          type: string
+        diet_type:
+          type: string
+        allergies:
+          type: array
+          items:
+            type: string
+        dietary_restrictions:
+          type: array
+          items:
+            type: string
+        disliked_foods:
+          type: array
+          items:
+            type: string
+      required:
+      - activity_level
+      - age
+      - allergies
+      - diet_type
+      - dietary_restrictions
+      - disliked_foods
+      - gender
+      - goal
+    AssociationRule:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        antecedent_type:
+          $ref: '#/components/schemas/AssociationRuleEntityTypeEnum'
+        antecedent_slug:
+          type: string
+          maxLength: 150
+        consequent_type:
+          $ref: '#/components/schemas/AssociationRuleEntityTypeEnum'
+        consequent_slug:
+          type: string
+          maxLength: 150
+        support:
+          type: number
+          format: double
+        confidence:
+          type: number
+          format: double
+        lift:
+          type: number
+          format: double
+        explanation:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - antecedent_slug
+      - antecedent_type
+      - consequent_slug
+      - consequent_type
+      - created_at
+      - explanation
+      - id
+      - updated_at
+    AssociationRuleEntityTypeEnum:
+      enum:
+      - supplement
+      - nutrient
+      - food
+      - category
+      type: string
+      description: |-
+        * `supplement` - Supplement
+        * `nutrient` - Nutrient
+        * `food` - Food
+        * `category` - Category
+    DashboardAnalytics:
+      type: object
+      properties:
+        total_users:
+          type: integer
+        total_foods:
+          type: integer
+        total_supplements:
+          type: integer
+        total_recommendations:
+          type: integer
+        average_feedback_rating:
+          type: number
+          format: double
+        most_used_supplements:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        most_recommended_foods:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - average_feedback_rating
+      - most_recommended_foods
+      - most_used_supplements
+      - total_foods
+      - total_recommendations
+      - total_supplements
+      - total_users
+    DietTypeEnum:
+      enum:
+      - none
+      - vegetarian
+      - vegan
+      - halal
+      - pescatarian
+      - gluten_free
+      - lactose_free
+      type: string
+      description: |-
+        * `none` - None
+        * `vegetarian` - Vegetarian
+        * `vegan` - Vegan
+        * `halal` - Halal
+        * `pescatarian` - Pescatarian
+        * `gluten_free` - Gluten free
+        * `lactose_free` - Lactose free
+    FeedbackAnalytics:
+      type: object
+      properties:
+        total_feedback:
+          type: integer
+        average_rating:
+          type: number
+          format: double
+        helpful_count:
+          type: integer
+        not_helpful_count:
+          type: integer
+      required:
+      - average_rating
+      - helpful_count
+      - not_helpful_count
+      - total_feedback
+    FeedbackFoodSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+      required:
+      - id
+      - name
+      - slug
+    FeedbackRecommendationItemSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        rank:
+          type: integer
+        food:
+          $ref: '#/components/schemas/FeedbackFoodSummary'
+        run_id:
+          type: string
+          format: uuid
+      required:
+      - food
+      - id
+      - rank
+      - run_id
+    Food:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 220
+          pattern: ^[-a-zA-Z0-9_]+$
+        category:
+          type: string
+          readOnly: true
+        category_slug:
+          type: string
+          writeOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        scientific_name:
+          type: string
+          maxLength: 255
+        ciqual_code:
+          type: string
+          nullable: true
+          maxLength: 32
+        source:
+          type: string
+          maxLength: 50
+        serving_size_g:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        image_url:
+          type: string
+          format: uri
+          maxLength: 200
+        is_active:
+          type: boolean
+        nutrients:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodNutrient'
+          readOnly: true
+        nutrient_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodNutrientInput'
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - category_slug
+      - created_at
+      - id
+      - name
+      - nutrients
+      - updated_at
+    FoodCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        ciqual_group_code:
+          type: string
+          maxLength: 20
+        ciqual_subgroup_code:
+          type: string
+          maxLength: 20
+        ciqual_subsubgroup_code:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 50
+      required:
+      - id
+      - name
+    FoodNutrient:
+      type: object
+      properties:
+        name:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        unit:
+          type: string
+          maxLength: 20
+        per_quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        per_unit:
+          type: string
+          maxLength: 20
+      required:
+      - amount
+      - name
+      - slug
+      - unit
+    FoodNutrientInput:
+      type: object
+      properties:
+        nutrient_slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        unit:
+          type: string
+          maxLength: 20
+        per_quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          default: '100.000'
+        per_unit:
+          type: string
+          default: g
+          maxLength: 20
+      required:
+      - amount
+      - nutrient_slug
+    GenerateRecommendation:
+      type: object
+      properties:
+        limit:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 10
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+        redis:
+          type: string
+      required:
+      - database
+      - redis
+      - status
+    HybridPreview:
+      type: object
+      properties:
+        n_sessions:
+          type: integer
+          minimum: 0
+          default: 0
+        supplements:
+          type: array
+          items:
+            type: string
+        goals:
+          type: array
+          items:
+            type: string
+        maladies:
+          type: array
+          items:
+            type: string
+        diseases:
+          type: array
+          items:
+            type: string
+        allergies:
+          type: array
+          items:
+            type: string
+        aliments_exclus:
+          type: array
+          items:
+            type: string
+        excluded_foods:
+          type: array
+          items:
+            type: string
+        imc:
+          type: number
+          format: double
+        bmi:
+          type: number
+          format: double
+        imc_norm:
+          type: number
+          format: double
+        activite:
+          type: number
+          format: double
+          default: 0.0
+        activity:
+          type: number
+          format: double
+        n:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 10
+    Nutrient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        unit:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+        original_name_fr:
+          type: string
+          maxLength: 255
+        source_column:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    PatchedAssociationRule:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        antecedent_type:
+          $ref: '#/components/schemas/AssociationRuleEntityTypeEnum'
+        antecedent_slug:
+          type: string
+          maxLength: 150
+        consequent_type:
+          $ref: '#/components/schemas/AssociationRuleEntityTypeEnum'
+        consequent_slug:
+          type: string
+          maxLength: 150
+        support:
+          type: number
+          format: double
+        confidence:
+          type: number
+          format: double
+        lift:
+          type: number
+          format: double
+        explanation:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedFood:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 220
+          pattern: ^[-a-zA-Z0-9_]+$
+        category:
+          type: string
+          readOnly: true
+        category_slug:
+          type: string
+          writeOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        scientific_name:
+          type: string
+          maxLength: 255
+        ciqual_code:
+          type: string
+          nullable: true
+          maxLength: 32
+        source:
+          type: string
+          maxLength: 50
+        serving_size_g:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+        image_url:
+          type: string
+          format: uri
+          maxLength: 200
+        is_active:
+          type: boolean
+        nutrients:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodNutrient'
+          readOnly: true
+        nutrient_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodNutrientInput'
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedFoodCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        ciqual_group_code:
+          type: string
+          maxLength: 20
+        ciqual_subgroup_code:
+          type: string
+          maxLength: 20
+        ciqual_subsubgroup_code:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 50
+    PatchedNutrient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        unit:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+        original_name_fr:
+          type: string
+          maxLength: 255
+        source_column:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedProfile:
+      type: object
+      properties:
+        age:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        gender:
+          type: string
+          maxLength: 50
+        height_cm:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        goal:
+          type: string
+          maxLength: 100
+        activity_level:
+          type: string
+          maxLength: 100
+        diet_type:
+          $ref: '#/components/schemas/DietTypeEnum'
+        allergies:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          writeOnly: true
+        dietary_restrictions:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          writeOnly: true
+        disliked_foods:
+          type: array
+          items:
+            type: string
+            maxLength: 150
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSupplement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 170
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        common_dose:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+        nutrients:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplementNutrient'
+          readOnly: true
+        nutrient_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplementNutrientInput'
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUserSupplement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        supplement:
+          allOf:
+          - $ref: '#/components/schemas/Supplement'
+          readOnly: true
+        supplement_id:
+          type: integer
+          writeOnly: true
+        dose:
+          type: string
+          maxLength: 100
+        frequency:
+          type: string
+          maxLength: 100
+        time_of_day:
+          type: string
+          maxLength: 100
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Profile:
+      type: object
+      properties:
+        age:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        gender:
+          type: string
+          maxLength: 50
+        height_cm:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        goal:
+          type: string
+          maxLength: 100
+        activity_level:
+          type: string
+          maxLength: 100
+        diet_type:
+          $ref: '#/components/schemas/DietTypeEnum'
+        allergies:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          writeOnly: true
+        dietary_restrictions:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          writeOnly: true
+        disliked_foods:
+          type: array
+          items:
+            type: string
+            maxLength: 150
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - updated_at
+    RecommendationAnalytics:
+      type: object
+      properties:
+        total_runs:
+          type: integer
+        total_items:
+          type: integer
+        average_score:
+          type: number
+          format: double
+        top_foods:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - average_score
+      - top_foods
+      - total_items
+      - total_runs
+    RecommendationFeedback:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        recommendation_item_id:
+          type: integer
+          writeOnly: true
+        recommendation_item:
+          allOf:
+          - $ref: '#/components/schemas/FeedbackRecommendationItemSummary'
+          readOnly: true
+        user_email:
+          type: string
+          format: email
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        is_helpful:
+          type: boolean
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - rating
+      - recommendation_item
+      - recommendation_item_id
+      - user_email
+    RecommendationItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        rank:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        food:
+          allOf:
+          - $ref: '#/components/schemas/RecommendedFood'
+          readOnly: true
+        matched_supplement:
+          allOf:
+          - $ref: '#/components/schemas/RecommendedSupplement'
+          readOnly: true
+        score:
+          type: number
+          format: double
+        nutrient_score:
+          type: number
+          format: double
+        rule_score:
+          type: number
+          format: double
+        preference_score:
+          type: number
+          format: double
+        matched_nutrients: {}
+        tags: {}
+        warnings: {}
+        explanation:
+          type: string
+      required:
+      - explanation
+      - food
+      - id
+      - matched_supplement
+      - rank
+      - score
+    RecommendationRun:
+      type: object
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        disclaimer:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecommendationItem'
+      required:
+      - created_at
+      - items
+      - run_id
+    RecommendationRunUserSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+      required:
+      - email
+      - id
+      - name
+    RecommendedFood:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        category:
+          type: string
+      required:
+      - category
+      - id
+      - name
+      - slug
+    RecommendedSupplement:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+      required:
+      - id
+      - name
+      - slug
+    Register:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+        name:
+          type: string
+          maxLength: 150
+      required:
+      - email
+      - name
+      - password
+    Supplement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 170
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        common_dose:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+        nutrients:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplementNutrient'
+          readOnly: true
+        nutrient_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplementNutrientInput'
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - nutrients
+      - updated_at
+    SupplementNutrient:
+      type: object
+      properties:
+        name:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          nullable: true
+        unit:
+          type: string
+          maxLength: 20
+      required:
+      - name
+      - slug
+    SupplementNutrientInput:
+      type: object
+      properties:
+        nutrient_slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,3})?$
+          nullable: true
+        unit:
+          type: string
+          maxLength: 20
+      required:
+      - nutrient_slug
+    TokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - email
+      - password
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        name:
+          type: string
+          maxLength: 150
+        is_staff:
+          type: boolean
+          readOnly: true
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+      required:
+      - email
+      - id
+      - is_staff
+      - name
+    UserSupplement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        supplement:
+          allOf:
+          - $ref: '#/components/schemas/Supplement'
+          readOnly: true
+        supplement_id:
+          type: integer
+          writeOnly: true
+        dose:
+          type: string
+          maxLength: 100
+        frequency:
+          type: string
+          maxLength: 100
+        time_of_day:
+          type: string
+          maxLength: 100
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - supplement
+      - supplement_id
+      - updated_at
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
