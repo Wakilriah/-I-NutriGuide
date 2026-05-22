@@ -1,44 +1,54 @@
 export const colors = {
-  background: "#F3FAF3",
+  background: "#EFFDED",
   cream: "#FFF8ED",
   surface: "#FFFFFF",
-  surfaceSoft: "#F7FCF6",
-  primary: "#2F7D32",
-  primaryDark: "#1F2A1F",
-  primaryFresh: "#6BBF59",
-  primarySoft: "#E4F5E1",
-  mint: "#F3FAF3",
-  secondary: "#F28C28",
-  secondarySoft: "#FFF0DB",
-  tomato: "#D94F30",
-  text: "#1F2A1F",
-  muted: "#6B756B",
-  border: "#DDEBDD",
-  danger: "#D94F30",
-  dangerSoft: "#FFF0EA",
-  warning: "#A65F16",
-  warningSoft: "#FFF4DE",
-  successText: "#245D27",
-  overlay: "rgba(31,42,31,0.36)",
-  overlaySoft: "rgba(31,42,31,0.24)",
-  surfaceOnDark: "#F4FFF2",
-  placeholder: "#8A948A",
+  surfaceSoft: "#F6FFF4",
+  surfaceContainerLowest: "#FFFFFF",
+  surfaceContainerLow: "#E9F8E7",
+  surfaceContainer: "#E4F2E1",
+  surfaceContainerHigh: "#DEECDC",
+  surfaceContainerHighest: "#D8E6D6",
+  primary: "#0F631B",
+  primaryContainer: "#2F7D32",
+  primaryDark: "#002203",
+  primaryFresh: "#88D982",
+  primarySoft: "#DFF2DB",
+  mint: "#EFFDED",
+  secondary: "#914D00",
+  secondaryContainer: "#FC9430",
+  secondarySoft: "#FFDCC3",
+  tomato: "#C44022",
+  text: "#131E14",
+  muted: "#40493D",
+  mutedSoft: "#707A6C",
+  border: "#BFCABA",
+  borderSoft: "#D8E6D6",
+  danger: "#BA1A1A",
+  dangerSoft: "#FFDAD6",
+  warning: "#914D00",
+  warningSoft: "#FFF0DB",
+  successText: "#005311",
+  overlay: "rgba(19,30,20,0.46)",
+  overlaySoft: "rgba(19,30,20,0.22)",
+  surfaceOnDark: "#E7F5E4",
+  placeholder: "#7B8578",
 };
 
 export const radii = {
   sm: 12,
   md: 16,
   lg: 20,
-  xl: 28,
+  xl: 24,
+  hero: 32,
   pill: 999,
 };
 
 export const spacing = {
   xs: 6,
-  sm: 10,
+  sm: 12,
   md: 16,
-  lg: 22,
-  xl: 30,
+  lg: 24,
+  xl: 32,
 };
 
 export const iconSizes = {
@@ -49,34 +59,58 @@ export const iconSizes = {
 };
 
 export const shadow = {
-  shadowColor: "#1F2A1F",
-  shadowOffset: { width: 0, height: 12 },
-  shadowOpacity: 0.1,
-  shadowRadius: 24,
+  shadowColor: "#2F7D32",
+  shadowOffset: { width: 0, height: 18 },
+  shadowOpacity: 0.08,
+  shadowRadius: 28,
   elevation: 4,
 };
 
+export const warmShadow = {
+  shadowColor: "#FC9430",
+  shadowOffset: { width: 0, height: 14 },
+  shadowOpacity: 0.08,
+  shadowRadius: 24,
+  elevation: 3,
+};
+
 export const gradients = {
-  primary: [colors.primary, colors.primaryFresh],
+  primary: [colors.primary, colors.primaryContainer],
   warm: [colors.cream, colors.secondarySoft],
   heroOverlay: [colors.overlaySoft, colors.overlay],
 };
 
 export const cards = {
   default: {
-    borderColor: colors.border,
-    borderRadius: radii.lg,
+    borderColor: "rgba(255,255,255,0.72)",
+    borderRadius: radii.xl,
     borderWidth: 1,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
+    backgroundColor: "rgba(255,255,255,0.88)",
+    padding: spacing.lg,
+    ...shadow,
+  },
+  glass: {
+    borderColor: "rgba(255,255,255,0.58)",
+    borderRadius: radii.xl,
+    borderWidth: 1,
+    backgroundColor: "rgba(255,255,255,0.78)",
+    padding: spacing.lg,
     ...shadow,
   },
   soft: {
-    borderColor: colors.border,
-    borderRadius: radii.lg,
+    borderColor: "rgba(255,255,255,0.72)",
+    borderRadius: radii.xl,
     borderWidth: 1,
-    backgroundColor: colors.surfaceSoft,
-    padding: spacing.md,
+    backgroundColor: colors.surfaceContainerLow,
+    padding: spacing.lg,
+  },
+  cream: {
+    borderColor: "rgba(252,148,48,0.16)",
+    borderRadius: radii.xl,
+    borderWidth: 1,
+    backgroundColor: colors.cream,
+    padding: spacing.lg,
+    ...warmShadow,
   },
 };
 
@@ -85,19 +119,23 @@ export const images = {
   bowlClose: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85",
   breakfast: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=900&q=85",
   greens: "https://images.unsplash.com/photo-1506807803488-8eafc15316c7?auto=format&fit=crop&w=900&q=85",
+  avocado: "https://images.unsplash.com/photo-1603046891744-76e6300f82ef?auto=format&fit=crop&w=900&q=85",
+  salmonBowl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=85",
+  avatarWoman: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=80",
+  avatarMan: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80",
 };
 
 export const typography = {
   title: {
     color: colors.text,
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: "900" as const,
-    lineHeight: 36,
+    lineHeight: 40,
   },
   subtitle: {
     color: colors.muted,
-    fontSize: 15,
-    lineHeight: 23,
+    fontSize: 16,
+    lineHeight: 24,
   },
   label: {
     color: colors.text,
@@ -106,12 +144,12 @@ export const typography = {
   },
   section: {
     color: colors.text,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "900" as const,
   },
   body: {
     color: colors.muted,
-    fontSize: 15,
-    lineHeight: 23,
+    fontSize: 16,
+    lineHeight: 24,
   },
 };

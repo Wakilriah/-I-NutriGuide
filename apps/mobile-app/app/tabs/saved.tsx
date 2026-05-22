@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, AppCard, Badge, EmptyState, ErrorState, FoodCard, LoadingState, PageHeader, SectionHeader } from "../../src/components/ui";
+import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, FoodCard, LoadingState, PageHeader, SectionHeader } from "../../src/components/ui";
 import { listSavedRecommendationItems, removeSavedRecommendationItem } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
 
@@ -17,7 +17,7 @@ export default function SavedFoodsScreen() {
   });
 
   return (
-    <Screen>
+    <Screen topBar={<AppTopBar />}>
       <View style={{ gap: spacing.lg }}>
         <PageHeader eyebrow="Saved pairings" title="Saved Foods" subtitle="Keep your best supplement-aware food matches for meal planning and quick reference." />
 

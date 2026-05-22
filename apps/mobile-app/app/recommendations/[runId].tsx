@@ -1,21 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
-import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, AppCard, AppInput, Badge, EmptyState, ErrorState, LoadingState, NutrientCard, PageHeader, RecommendationActions, RecommendationCard, StatCard } from "../../src/components/ui";
-import { getRecommendationRun, saveRecommendationItem, type RecommendationItem, submitRecommendationFeedback } from "../../src/features/recommendations/api";
+import { AppCard, AppTopBar, Badge, EmptyState, ErrorState, LoadingState, PageHeader, RecommendationCard, StatCard } from "../../src/components/ui";
+import { getRecommendationRun, saveRecommendationItem, type FeedbackType, type RecommendationItem, submitRecommendationFeedback } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
-
-const feedbackSchema = z.object({
-  rating: z.string().regex(/^[1-5]$/, "Rating must be 1 to 5."),
-  comment: z.string(),
-});
-
-type FeedbackValues = z.infer<typeof feedbackSchema>;
 
 export default function RecommendationDetailScreen() {
   const { runId } = useLocalSearchParams<{ runId: string }>();
@@ -26,9 +16,9 @@ export default function RecommendationDetailScreen() {
   });
 
   return (
-    <Screen>
+    <Screen topBar={<AppTopBar />}>
       <View style={{ gap: spacing.lg }}>
-        <PageHeader eyebrow="Best complementary foods" title="Recommendation detail" subtitle="Review the selected supplement, match score, nutrients, and the simple absorption reason for each food." />
+        <PageHeader eyebrow="Best complementary foods" title="Recommendation detail" subtitle="Review confidence, warnings, score factors, and the reason each food was selected." />
         {run.data?.items[0]?.matched_supplement ? (
           <AppCard style={{ gap: spacing.sm, backgroundColor: colors.cream }}>
             <Badge label="Supplement selected" tone="orange" />
@@ -38,8 +28,8 @@ export default function RecommendationDetailScreen() {
         ) : null}
         {run.data?.items[0] ? (
           <View style={{ flexDirection: "row", gap: spacing.sm }}>
-            <StatCard icon="sparkles" label="Match" value={`${Math.round(Number(run.data.items[0].score) * 100)}%`} />
-            <StatCard icon="leaf" label="Synergy" tone="orange" value={`${Math.round(Number(run.data.items[0].nutrient_score) * 100)}%`} />
+            <StatCard icon="sparkles" label="Confidence" value={`${Math.round(Number(run.data.items[0].confidence_score ?? run.data.items[0].score) * 100)}%`} />
+            <StatCard icon="leaf" label="Synergy" tone="orange" value={`${Math.round(Number(run.data.items[0].score_breakdown?.nutrient_synergy_score ?? run.data.items[0].nutrient_score) * 100)}%`} />
           </View>
         ) : null}
         {run.isLoading ? <LoadingState message="Loading recommendations..." /> : null}
@@ -54,42 +44,19 @@ export default function RecommendationDetailScreen() {
         ) : null}
 
         {run.data?.items.map((item) => (
-          <View key={item.id} style={{ gap: spacing.sm }}>
-            <Badge label={`#${item.rank}`} tone="green" />
-            <RecommendationCard
-              category={item.food.category}
-              explanation={item.explanation}
-              foodName={item.food.name}
-              nutrients={item.tags.length ? item.tags : item.matched_nutrients}
-              score={Number(item.score)}
-              supplementName={item.matched_supplement?.name}
-              warnings={item.warnings}
-            />
-            <NutrientCard
-              badge="Why this food?"
-              description={`Selected for nutrient synergy, preference fit, and absorption support. ${item.matched_supplement?.name ? `${item.food.name} helps absorption of ${item.matched_supplement.name}.` : item.explanation}`}
-              icon="help-circle"
-              title="Selection rationale"
-            />
-            <QuickRecommendationActions item={item} />
-            <Text style={{ color: colors.text, lineHeight: 22 }}>{item.explanation}</Text>
-            {item.tags.length ? <Text style={{ color: colors.primary, fontWeight: "800" }}>Tags: {item.tags.join(", ")}</Text> : null}
-            {item.warnings.length ? <Text style={{ color: colors.danger, fontWeight: "800" }}>Warnings: {item.warnings.join(", ")}</Text> : null}
-            {item.warnings.length ? <Text style={{ color: colors.danger, fontWeight: "800" }}>Foods to avoid or separate: {item.warnings.join(", ")}</Text> : null}
-            <FeedbackForm item={item} />
-          </View>
+          <ExplainableRecommendationItem key={item.id} item={item} />
         ))}
       </View>
     </Screen>
   );
 }
 
-function QuickRecommendationActions({ item }: { item: RecommendationItem }) {
+function ExplainableRecommendationItem({ item }: { item: RecommendationItem }) {
   const [status, setStatus] = useState("");
   const feedbackMutation = useMutation({
     mutationFn: submitRecommendationFeedback,
     onError: () => {
-      setStatus("Unable to save quick feedback. Try the full feedback form below.");
+      setStatus("Unable to save feedback right now.");
     },
   });
   const saveMutation = useMutation({
@@ -97,97 +64,52 @@ function QuickRecommendationActions({ item }: { item: RecommendationItem }) {
     onError: () => {
       setStatus("Unable to save this food right now.");
     },
-    onSuccess: () => {
-      setStatus("Saved to your foods.");
-    },
   });
 
-  const submitQuickFeedback = (rating: number, isHelpful: boolean, comment: string) => {
+  const submitFeedback = (feedbackType: FeedbackType) => {
     setStatus("");
     feedbackMutation.mutate(
       {
         recommendation_item_id: item.id,
-        rating,
-        is_helpful: isHelpful,
-        comment,
+        food_id: item.food.id,
+        feedback_type: feedbackType,
+        rating: feedbackType === "liked" || feedbackType === "saved" || feedbackType === "tried" ? 5 : 2,
+        comment: `${feedbackType} from recommendation card`,
       },
       {
         onSuccess: () => {
-          setStatus(isHelpful ? "Preference learned. Similar pairings will be favored." : "Preference learned. Similar pairings will be reduced.");
+          setStatus(feedbackType === "disliked" || feedbackType === "not_interested" ? "Preference learned. Similar foods will be reduced." : "Preference learned for future recommendations.");
         },
       },
     );
   };
 
+  const saveFood = () => {
+    saveMutation.mutate(undefined, {
+      onSuccess: () => {
+        setStatus("Saved to your foods.");
+      },
+    });
+  };
+
   return (
-    <View style={{ gap: spacing.xs }}>
-      <RecommendationActions
-        onDislike={() => submitQuickFeedback(2, false, "Not for me from quick action.")}
-        onLike={() => submitQuickFeedback(5, true, "Liked from quick action.")}
-        onSave={() => saveMutation.mutate()}
+    <View style={{ gap: spacing.sm }}>
+      <Badge label={`#${item.rank}`} tone="green" />
+      <RecommendationCard
+        category={item.food.category}
+        confidenceLabel={item.confidence_label}
+        explanation={item.explanation}
+        foodName={item.food.name}
+        nutrients={item.tags.length ? item.tags : item.matched_nutrients}
+        onFeedback={submitFeedback}
+        onSave={saveFood}
+        score={Number(item.confidence_score ?? item.score)}
+        scoreBreakdown={item.score_breakdown}
+        supplementName={item.matched_supplement?.name}
+        warnings={item.warnings}
       />
       {status ? <Text style={feedbackMutation.isError || saveMutation.isError ? errorStyle : successStyle}>{status}</Text> : null}
     </View>
-  );
-}
-
-function FeedbackForm({ item }: { item: RecommendationItem }) {
-  const [submitted, setSubmitted] = useState(false);
-  const feedbackMutation = useMutation({
-    mutationFn: submitRecommendationFeedback,
-    onError: () => {
-      setSubmitted(false);
-    },
-    onSuccess: () => {
-      setSubmitted(true);
-      form.reset({ rating: "5", comment: "" });
-    },
-  });
-  const form = useForm<FeedbackValues>({
-    resolver: zodResolver(feedbackSchema),
-    defaultValues: { rating: "5", comment: "" },
-  });
-
-  const submitFeedback = form.handleSubmit((values) => {
-    setSubmitted(false);
-    feedbackMutation.mutate({
-      recommendation_item_id: item.id,
-      rating: Number(values.rating),
-      is_helpful: Number(values.rating) >= 4,
-      comment: values.comment,
-    });
-  });
-
-  return (
-    <AppCard style={{ gap: spacing.sm }}>
-      <Text style={{ color: colors.text, fontWeight: "900" }}>Feedback</Text>
-      <Controller
-        control={form.control}
-        name="rating"
-        render={({ field: { onChange, value } }) => (
-          <AppInput
-            accessibilityLabel={`Rating for ${item.food.name}`}
-            error={form.formState.errors.rating?.message}
-            keyboardType="number-pad"
-            label="Rating"
-            maxLength={1}
-            onChangeText={onChange}
-            placeholder="Rating 1-5"
-            value={value}
-          />
-        )}
-      />
-      <Controller
-        control={form.control}
-        name="comment"
-        render={({ field: { onChange, value } }) => (
-          <AppInput accessibilityLabel={`Comment for ${item.food.name}`} label="Comment" onChangeText={onChange} placeholder="Optional comment" value={value} />
-        )}
-      />
-      {feedbackMutation.isError ? <ErrorState message="Unable to send feedback. Please try again." /> : null}
-      {submitted ? <Text style={successStyle}>Feedback saved.</Text> : null}
-      <AppButton accessibilityLabel={`Submit feedback for ${item.food.name}`} disabled={feedbackMutation.isPending} icon="chatbox-ellipses" label={feedbackMutation.isPending ? "Sending" : "Send feedback"} onPress={submitFeedback} />
-    </AppCard>
   );
 }
 const successStyle = { color: colors.primary, fontWeight: "800" as const };

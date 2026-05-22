@@ -53,8 +53,11 @@ export async function listChatSessions() {
   return response.data;
 }
 
+export async function clearChatSessions() {
+  await apiClient.delete("/chat/sessions/clear/");
+}
+
 export async function sendChatMessage(payload: SendChatMessagePayload) {
   const response = await apiClient.post<SendChatMessageResponse>("/chat/messages/", payload);
   return response.data;
 }
-

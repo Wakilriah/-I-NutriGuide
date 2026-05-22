@@ -12,7 +12,7 @@ export function ButtonLink({ href, label }: ButtonLinkProps) {
     <Link
       href={href}
       style={{
-        minHeight: 48,
+        minHeight: 58,
         overflow: "hidden",
         borderRadius: radii.lg,
         backgroundColor: colors.primary,

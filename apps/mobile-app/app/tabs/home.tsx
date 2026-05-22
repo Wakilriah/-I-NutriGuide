@@ -1,12 +1,101 @@
+import { Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, AppButton, AppCard, EmptyState, FadeInSection, FilterChip, FoodCard, NutrientCard, SearchInput, SectionHeader, SkeletonCard, StatCard, SupplementCard } from "../../src/components/ui";
+import {
+  AnimatedSection,
+  AppButton,
+  AppCard,
+  AppTopBar,
+  Badge,
+  EmptyState,
+  ErrorState,
+  FoodCard,
+  NutrientCard,
+  SearchInput,
+  SectionHeader,
+  SkeletonCard,
+  StatCard,
+  SupplementCard,
+} from "../../src/components/ui";
 import { generateRecommendations, listRecommendationHistory } from "../../src/features/recommendations/api";
 import { listUserSupplements } from "../../src/features/supplements/api";
 import { useAuthStore } from "../../src/stores/auth-store";
-import { colors, spacing } from "../../src/theme/design";
+import { cards, colors, images, radii, spacing } from "../../src/theme/design";
+
+type IconName = ComponentProps<typeof Ionicons>["name"];
+
+type QuickActionProps = {
+  icon: IconName;
+  label: string;
+  onPress: () => void;
+  tone?: "green" | "orange" | "neutral";
+};
+
+function QuickAction({ icon, label, onPress, tone = "green" }: QuickActionProps) {
+  const palette = {
+    green: { backgroundColor: colors.primarySoft, color: colors.primary },
+    orange: { backgroundColor: colors.secondarySoft, color: colors.secondary },
+    neutral: { backgroundColor: colors.surfaceSoft, color: colors.muted },
+  }[tone];
+
+  return (
+    <TouchableOpacity
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={{
+        ...cards.default,
+        flex: 1,
+        minWidth: 102,
+        minHeight: 104,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing.xs,
+        paddingHorizontal: spacing.sm,
+      }}
+    >
+      <View style={{ width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: palette.backgroundColor }}>
+        <Ionicons color={palette.color} name={icon} size={21} />
+      </View>
+      <Text style={{ color: colors.text, fontSize: 13, fontWeight: "900", lineHeight: 18, textAlign: "center" }}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function HeroMetric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        minWidth: 96,
+        borderColor: "rgba(255,255,255,0.24)",
+        borderRadius: radii.md,
+        borderWidth: 1,
+        backgroundColor: "rgba(255,255,255,0.58)",
+        padding: spacing.sm,
+      }}
+    >
+      <Text style={{ color: colors.text, fontSize: 24, fontWeight: "900" }}>{value}</Text>
+      <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "900", marginTop: 2, textTransform: "uppercase" }}>{label}</Text>
+    </View>
+  );
+}
+
+function MiniPlanCard({ icon, label, title }: { icon: IconName; label: string; title: string }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, borderRadius: radii.lg, backgroundColor: colors.surfaceSoft, padding: spacing.sm }}>
+      <View style={{ width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
+        <Ionicons color={colors.primary} name={icon} size={19} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "900", textTransform: "uppercase" }}>{label}</Text>
+        <Text style={{ color: colors.text, fontSize: 15, fontWeight: "900", marginTop: 2 }}>{title}</Text>
+      </View>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   const user = useAuthStore((state) => state.user);
@@ -14,6 +103,8 @@ export default function HomeScreen() {
   const supplements = useQuery({ queryKey: ["user-supplements"], queryFn: listUserSupplements });
   const history = useQuery({ queryKey: ["recommendation-history"], queryFn: listRecommendationHistory });
   const latestRun = history.data?.[0];
+  const latestItem = latestRun?.items[0];
+  const activeSupplementCount = supplements.data?.filter((item) => item.active).length ?? 0;
   const generateMutation = useMutation({
     mutationFn: () => generateRecommendations(10),
     onSuccess: async (run) => {
@@ -22,40 +113,82 @@ export default function HomeScreen() {
     },
   });
 
+  const openLatestOrGenerate = () => {
+    if (latestRun) {
+      router.push(`/recommendations/${latestRun.run_id}` as never);
+      return;
+    }
+    generateMutation.mutate();
+  };
+
   return (
-    <Screen>
+    <Screen topBar={<AppTopBar onAvatarPress={() => router.push("/tabs/profile" as never)} />}>
       <View style={{ gap: spacing.lg }}>
         <AnimatedSection>
-          <AppCard style={{ gap: spacing.md, backgroundColor: colors.primary, overflow: "hidden" }}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm }}>
-              <View style={{ flex: 1, gap: spacing.xs }}>
-                <Text style={{ color: colors.surface, fontSize: 29, fontWeight: "900" }}>Hi {user?.name ?? "there"}</Text>
-                <Text style={{ color: colors.surfaceOnDark, fontSize: 15, lineHeight: 23 }}>
-                  Today's Recommendation is ready to pair supplements with colorful foods, clean nutrients, and your goals.
-                </Text>
-              </View>
-              <View style={{ width: 58, height: 58, alignItems: "center", justifyContent: "center", borderRadius: 18, backgroundColor: colors.surfaceOnDark }}>
-                <Text style={{ color: colors.primary, fontSize: 26, fontWeight: "900" }}>IG</Text>
+          <ImageBackground
+            imageStyle={{ borderRadius: radii.xl }}
+            source={{ uri: images.breakfast }}
+            style={{ minHeight: 280, justifyContent: "flex-end", overflow: "hidden", borderRadius: radii.xl }}
+          >
+            <View style={{ flex: 1, justifyContent: "flex-end", padding: spacing.md, backgroundColor: colors.overlaySoft }}>
+              <View
+                style={{
+                  gap: spacing.md,
+                  borderColor: "rgba(255,255,255,0.58)",
+                  borderRadius: radii.xl,
+                  borderWidth: 1,
+                  backgroundColor: "rgba(255,255,255,0.84)",
+                  padding: spacing.lg,
+                }}
+              >
+                <View style={{ gap: spacing.xs }}>
+                  <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "900" }}>Hi {user?.name ?? "there"}</Text>
+                  <Text style={{ color: colors.text, fontSize: 22, fontWeight: "900" }}>Good Morning, {user?.name ?? "there"}!</Text>
+                  <Text style={{ color: colors.muted, fontSize: 16, lineHeight: 23 }}>Ready for your Vitamin C boost?</Text>
+                </View>
+
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+                  <HeroMetric label="Active supplements" value={activeSupplementCount} />
+                  <HeroMetric label="Food matches" value={history.data?.length ?? 0} />
+                </View>
               </View>
             </View>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
-              <FilterChip active icon="sparkles" label="Smart match" />
-              <FilterChip active icon="shield-checkmark" label="Preference aware" />
-            </View>
-          </AppCard>
+          </ImageBackground>
+        </AnimatedSection>
+
+        <AnimatedSection delay={40}>
+          <AppButton
+            accessibilityLabel={latestRun ? "Open latest recommendation" : "Generate today's match"}
+            disabled={generateMutation.isPending}
+            icon="sparkles"
+            label={generateMutation.isPending ? "Generating" : latestRun ? "Open today's match" : "Generate today's match"}
+            onPress={openLatestOrGenerate}
+          />
         </AnimatedSection>
 
         <AnimatedSection delay={70}>
-          <SearchInput />
+          <SearchInput placeholder="Search foods, supplements, nutrients" />
         </AnimatedSection>
 
-        <AnimatedSection delay={120} style={{ flexDirection: "row", gap: spacing.sm }}>
-          <StatCard icon="nutrition" label="Supplements" value={supplements.data?.filter((item) => item.active).length ?? 0} />
+        {generateMutation.isError ? (
+          <AnimatedSection delay={90}>
+            <ErrorState message="Unable to generate recommendations. Please try again." />
+          </AnimatedSection>
+        ) : null}
+
+        <AnimatedSection delay={120} style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+          <QuickAction icon="add-circle" label="Add supplement" onPress={() => router.push("/supplements/new" as never)} />
+          <QuickAction icon="restaurant" label="Food matches" onPress={() => router.push("/tabs/recommendations" as never)} tone="orange" />
+          <QuickAction icon="analytics" label="Track today" onPress={() => router.push("/tabs/tracking" as never)} tone="neutral" />
+        </AnimatedSection>
+
+        <AnimatedSection delay={160} style={{ flexDirection: "row", gap: spacing.sm }}>
+          <StatCard icon="nutrition" label="Supplements" value={activeSupplementCount} />
           <StatCard icon="sparkles" label="Matches" tone="orange" value={history.data?.length ?? 0} />
         </AnimatedSection>
 
-        <AnimatedSection delay={170} style={{ gap: spacing.sm }}>
-          <SectionHeader title="Daily supplement" />
+        <AnimatedSection delay={200} style={{ gap: spacing.sm }}>
+          <SectionHeader title="Today's routine" />
           {supplements.isLoading ? <SkeletonCard lines={1} /> : null}
           {supplements.data?.slice(0, 2).map((item) => (
             <SupplementCard
@@ -72,69 +205,37 @@ export default function HomeScreen() {
           ) : null}
         </AnimatedSection>
 
-        <AnimatedSection delay={220} style={{ gap: spacing.sm }}>
-          <SectionHeader title="Recommended food cards" />
+        <AnimatedSection delay={240} style={{ gap: spacing.sm }}>
+          <SectionHeader title={latestItem ? "Best match now" : "Daily plan preview"} />
           {history.isLoading ? <SkeletonCard lines={2} /> : null}
-          {latestRun?.items.slice(0, 2).map((item) => (
+          {latestItem ? (
             <FoodCard
-              category={item.food.category}
-              key={item.id}
-              name={item.food.name}
-              nutrients={item.tags.length ? item.tags : item.matched_nutrients}
-              reason={`Helps absorption of ${item.matched_supplement?.name ?? "your supplement"}.`}
-              score={Number(item.score)}
+              category={latestItem.food.category}
+              name={latestItem.food.name}
+              nutrients={latestItem.tags.length ? latestItem.tags : latestItem.matched_nutrients}
+              reason={`Pairs with ${latestItem.matched_supplement?.name ?? "your supplement"} for a stronger nutrient routine.`}
+              score={Number(latestItem.score)}
             />
-          ))}
-          {!history.isLoading && !latestRun ? (
-            <EmptyState icon="restaurant" title="Generate your first match" message="I-NutriGuide will suggest foods that complement your supplements." />
+          ) : null}
+          {!history.isLoading && !latestItem ? (
+            <AppCard style={{ gap: spacing.sm }}>
+              <MiniPlanCard icon="sunny" label="Breakfast" title="Citrus yogurt bowl" />
+              <MiniPlanCard icon="leaf" label="Lunch" title="Leafy green protein bowl" />
+              <MiniPlanCard icon="restaurant" label="Dinner" title="Tomato chickpea plate" />
+            </AppCard>
           ) : null}
         </AnimatedSection>
 
-        <FadeInSection delay={260} style={{ gap: spacing.sm }}>
-          <SectionHeader title="Smart Daily Plan" />
-          <AppCard style={{ gap: spacing.sm }}>
-            <FoodCard
-              category="Breakfast"
-              name="Citrus yogurt bowl"
-              nutrients={["vitamin C", "protein", "calcium"]}
-              reason="Breakfast pairing for morning supplements. Vitamin C can support iron-focused routines."
-              score={0.88}
-            />
-            <FoodCard
-              category="Lunch"
-              name="Leafy green protein bowl"
-              nutrients={["iron", "folate", "magnesium"]}
-              reason="Lunch pairing with greens and protein for steady energy and micronutrient density."
-              score={0.91}
-            />
-            <FoodCard
-              category="Dinner"
-              name="Tomato chickpea plate"
-              nutrients={["fiber", "lycopene", "plant protein"]}
-              reason="Dinner pairing with warm proteins and tomato-rich vegetables for a balanced day."
-              score={0.84}
-            />
-          </AppCard>
-        </FadeInSection>
-
-        <AnimatedSection delay={300}>
-          <NutrientCard
-            description="Smart Food Match combines content-based filtering with association rules so leafy greens, fruits, proteins, and whole foods are ranked by supplement fit."
-            icon="flask"
-            title="Nutrient Synergy"
-          />
-        </AnimatedSection>
-        <AnimatedSection delay={340}>
+        <AnimatedSection delay={280}>
           <NutrientCard
             badge="Absorption Tip"
-            description="Vitamin C improves iron absorption, while calcium may reduce iron absorption when taken too close together."
+            description="Vitamin C can support iron absorption, while calcium may reduce iron absorption when taken too close together."
             icon="bulb"
             title="Why Timing Matters"
           />
         </AnimatedSection>
 
-        <AnimatedSection delay={380} style={{ gap: spacing.sm }}>
-          <AppButton icon="medical" label="Add supplement" onPress={() => router.push("/supplements/new" as never)} variant="secondary" />
+        <AnimatedSection delay={320} style={{ gap: spacing.sm }}>
           <AppButton
             accessibilityLabel="Generate recommendations"
             disabled={generateMutation.isPending}

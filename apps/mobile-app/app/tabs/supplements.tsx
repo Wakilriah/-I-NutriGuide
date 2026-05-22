@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, EmptyState, ErrorState, LoadingState, PageHeader, SupplementCard } from "../../src/components/ui";
+import { AppButton, AppTopBar, EmptyState, ErrorState, LoadingState, PageHeader, PremiumFeatureCard, SupplementCard } from "../../src/components/ui";
 import { listUserSupplements } from "../../src/features/supplements/api";
 import { spacing } from "../../src/theme/design";
 
@@ -13,9 +13,9 @@ export default function SupplementsScreen() {
   });
 
   return (
-    <Screen>
+    <Screen topBar={<AppTopBar />}>
       <View style={{ gap: spacing.lg }}>
-        <PageHeader eyebrow="Your routine" title="Supplements" subtitle="Track what you take so recommendations can pair foods with your routine." />
+        <PageHeader eyebrow="Your routine" title="Supplement Cabinet" subtitle="Track your daily intake and monitor synergies." />
 
         <AppButton icon="add-circle" label="Add supplement" onPress={() => router.push("/supplements/new" as never)} />
 
@@ -32,6 +32,13 @@ export default function SupplementsScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        <PremiumFeatureCard
+          badge="Personalized Insights"
+          description="Based on your recent routine, I-NutriGuide highlights supplement timing and food pairings that may improve absorption."
+          icon="sparkles"
+          title="Research-backed pairings"
+        />
       </View>
     </Screen>
   );

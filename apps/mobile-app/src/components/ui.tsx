@@ -1,24 +1,98 @@
 import { Ionicons } from "@expo/vector-icons";
-import type { ComponentProps, ReactNode } from "react";
-import { ActivityIndicator, ImageBackground, Text, TextInput, TouchableOpacity, View, type DimensionValue, type ImageSourcePropType, type TextInputProps, type ViewStyle } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { ActivityIndicator, Animated, Image, ImageBackground, Text, TextInput, TouchableOpacity, View, type DimensionValue, type ImageSourcePropType, type TextInputProps, type ViewStyle } from "react-native";
 import { cards, colors, iconSizes, images, radii, spacing, typography } from "../theme/design";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
 export function AnimatedSection({ children, delay = 0, style }: { children: ReactNode; delay?: number; style?: ViewStyle }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { delay, duration: 320, toValue: 1, useNativeDriver: true }),
+      Animated.timing(translateY, { delay, duration: 320, toValue: 0, useNativeDriver: true }),
+    ]).start();
+  }, [delay, opacity, translateY]);
+
   return (
-    <Animated.View entering={FadeInDown.delay(delay).duration(420).springify()} style={style}>
+    <Animated.View style={[style, { opacity, transform: [{ translateY }] }]}>
       {children}
     </Animated.View>
   );
 }
 
 export function FadeInSection({ children, delay = 0, style }: { children: ReactNode; delay?: number; style?: ViewStyle }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, { delay, duration: 320, toValue: 1, useNativeDriver: true }).start();
+  }, [delay, opacity]);
+
   return (
-    <Animated.View entering={FadeIn.delay(delay).duration(420)} style={style}>
+    <Animated.View style={[style, { opacity }]}>
       {children}
     </Animated.View>
+  );
+}
+
+export function AppTopBar({ onAvatarPress, subtitle, title = "I-NutriGuide" }: { onAvatarPress?: () => void; subtitle?: string; title?: string }) {
+  return (
+    <View
+      style={{
+        minHeight: 78,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottomColor: "rgba(191,202,186,0.46)",
+        borderBottomWidth: 1,
+        backgroundColor: "rgba(239,253,237,0.94)",
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.sm,
+      }}
+    >
+      <TouchableOpacity
+        accessibilityLabel="Open profile"
+        accessibilityRole="button"
+        activeOpacity={onAvatarPress ? 0.72 : 1}
+        disabled={!onAvatarPress}
+        hitSlop={{ bottom: 12, left: 12, right: 12, top: 12 }}
+        onPress={onAvatarPress}
+        style={{ minHeight: 52, flex: 1, flexDirection: "row", alignItems: "center", gap: spacing.sm }}
+      >
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderColor: colors.primaryFresh,
+            borderRadius: radii.pill,
+            borderWidth: 2,
+            overflow: "hidden",
+          }}
+        >
+          <Image source={{ uri: images.avatarWoman }} style={{ width: "100%", height: "100%" }} />
+        </View>
+        <View>
+          <Text style={{ color: colors.primary, fontSize: 26, fontWeight: "900", lineHeight: 31 }}>{title}</Text>
+          {subtitle ? <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "800", marginTop: 1 }}>{subtitle}</Text> : null}
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        accessibilityLabel="Notifications"
+        style={{
+          width: 42,
+          height: 42,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: radii.pill,
+          backgroundColor: "rgba(255,255,255,0.44)",
+        }}
+      >
+        <Ionicons color={colors.primary} name="notifications-outline" size={iconSizes.lg} />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -33,7 +107,7 @@ export function PageHeader({
 }) {
   return (
     <View style={{ gap: spacing.xs }}>
-      {eyebrow ? <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "900", textTransform: "uppercase" }}>{eyebrow}</Text> : null}
+      {eyebrow ? <Text style={{ color: colors.secondary, fontSize: 13, fontWeight: "900", letterSpacing: 0.4, textTransform: "uppercase" }}>{eyebrow}</Text> : null}
       <Text style={typography.title}>{title}</Text>
       {subtitle ? <Text style={typography.subtitle}>{subtitle}</Text> : null}
     </View>
@@ -57,8 +131,8 @@ export function AppButton({
 }) {
   const styleByVariant = {
     primary: { backgroundColor: colors.primary, borderColor: colors.primary },
-    secondary: { backgroundColor: colors.cream, borderColor: colors.secondarySoft },
-    ghost: { backgroundColor: colors.mint, borderColor: colors.border },
+    secondary: { backgroundColor: "rgba(255,255,255,0.62)", borderColor: colors.primary },
+    ghost: { backgroundColor: colors.surfaceContainerLow, borderColor: colors.borderSoft },
     danger: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerSoft },
   }[variant];
   const textColor = variant === "primary" ? colors.surface : variant === "danger" ? colors.danger : colors.primary;
@@ -69,7 +143,7 @@ export function AppButton({
       disabled={disabled}
       onPress={onPress}
       style={{
-        minHeight: 52,
+        minHeight: 58,
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "row",
@@ -79,6 +153,11 @@ export function AppButton({
         opacity: disabled ? 0.7 : 1,
         paddingHorizontal: spacing.md,
         ...styleByVariant,
+        shadowColor: variant === "primary" ? colors.primaryContainer : "transparent",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: variant === "primary" ? 0.18 : 0,
+        shadowRadius: 18,
+        elevation: variant === "primary" ? 3 : 0,
       }}
     >
       {icon ? <Ionicons color={textColor} name={icon} size={18} /> : null}
@@ -111,13 +190,15 @@ export function AppInput({
       <TextInput
         placeholderTextColor={colors.placeholder}
         style={{
-          minHeight: 50,
-          borderColor: error ? colors.danger : colors.border,
-          borderRadius: radii.md,
+          minHeight: 56,
+          borderColor: error ? colors.danger : "transparent",
+          borderRadius: radii.lg,
           borderWidth: 1,
-          backgroundColor: colors.surfaceSoft,
+          backgroundColor: colors.surfaceContainerLow,
           color: colors.text,
           paddingHorizontal: spacing.md,
+          fontSize: 16,
+          fontWeight: "700",
         }}
         {...props}
       />
@@ -159,10 +240,10 @@ export function OptionSelect({
                 justifyContent: "center",
                 flexDirection: "row",
                 gap: 7,
-                borderRadius: radii.md,
+                borderRadius: radii.lg,
                 borderWidth: 1,
                 borderColor: active ? colors.primary : error ? colors.danger : colors.border,
-                backgroundColor: active ? colors.primarySoft : colors.surfaceSoft,
+                backgroundColor: active ? colors.primarySoft : colors.surfaceContainerLow,
                 paddingHorizontal: spacing.sm,
               }}
             >
@@ -180,12 +261,12 @@ export function OptionSelect({
 export function Badge({ label, tone = "green" }: { label: string; tone?: "green" | "orange" | "red" | "neutral" }) {
   const palette = {
     green: { backgroundColor: colors.primarySoft, color: colors.primary },
-    orange: { backgroundColor: colors.secondary, color: colors.surface },
+    orange: { backgroundColor: colors.secondaryContainer, color: colors.surface },
     red: { backgroundColor: colors.dangerSoft, color: colors.danger },
-    neutral: { backgroundColor: colors.cream, color: colors.muted },
+    neutral: { backgroundColor: colors.surfaceContainerHigh, color: colors.muted },
   }[tone];
   return (
-    <View style={{ alignSelf: "flex-start", borderRadius: radii.pill, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: palette.backgroundColor }}>
+    <View style={{ alignSelf: "flex-start", borderRadius: radii.pill, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: palette.backgroundColor }}>
       <Text style={{ color: palette.color, fontSize: 12, fontWeight: "900" }}>{label}</Text>
     </View>
   );
@@ -193,14 +274,24 @@ export function Badge({ label, tone = "green" }: { label: string; tone?: "green"
 
 export function SearchInput({ placeholder = "Search foods, supplements, nutrients", value, onChangeText }: Pick<TextInputProps, "placeholder" | "value" | "onChangeText">) {
   return (
-    <View style={{ ...cards.default, minHeight: 52, flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: 0 }}>
-      <Ionicons color={colors.primary} name="search" size={iconSizes.md} />
+    <View
+      style={{
+        minHeight: 56,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: spacing.sm,
+        borderRadius: radii.lg,
+        backgroundColor: colors.surfaceContainer,
+        paddingHorizontal: spacing.md,
+      }}
+    >
+      <Ionicons color={colors.mutedSoft} name="search" size={iconSizes.md} />
       <TextInput
         accessibilityLabel="Search"
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.placeholder}
-        style={{ flex: 1, color: colors.text, fontSize: 15 }}
+        style={{ flex: 1, color: colors.text, fontSize: 15, fontWeight: "700" }}
         value={value}
       />
     </View>
@@ -220,12 +311,12 @@ export function FilterChip({ active, icon, label, onPress }: { active?: boolean;
         borderRadius: radii.pill,
         borderWidth: 1,
         borderColor: active ? colors.primary : colors.border,
-        backgroundColor: active ? colors.primarySoft : colors.surface,
+        backgroundColor: active ? colors.primaryContainer : "rgba(255,255,255,0.72)",
         paddingHorizontal: 13,
       }}
     >
-      {icon ? <Ionicons color={active ? colors.primary : colors.muted} name={icon} size={iconSizes.sm} /> : null}
-      <Text style={{ color: active ? colors.primary : colors.muted, fontSize: 13, fontWeight: "900" }}>{label}</Text>
+      {icon ? <Ionicons color={active ? colors.surface : colors.primary} name={icon} size={iconSizes.sm} /> : null}
+      <Text style={{ color: active ? colors.surface : colors.muted, fontSize: 13, fontWeight: "900" }}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -242,7 +333,7 @@ export function SectionHeader({ action, title }: { action?: ReactNode; title: st
 export function EmptyState({ icon = "leaf", message, title }: { icon?: IconName; message: string; title: string }) {
   return (
     <AppCard style={{ alignItems: "center", gap: spacing.sm, padding: spacing.lg }}>
-      <View style={{ width: 46, height: 46, alignItems: "center", justifyContent: "center", borderRadius: radii.pill, backgroundColor: colors.primarySoft }}>
+      <View style={{ width: 52, height: 52, alignItems: "center", justifyContent: "center", borderRadius: radii.pill, backgroundColor: colors.primarySoft }}>
         <Ionicons color={colors.primary} name={icon} size={iconSizes.lg} />
       </View>
       <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900", textAlign: "center" }}>{title}</Text>
@@ -337,24 +428,29 @@ export function FoodCard({
   score?: number;
 }) {
   return (
-    <AppCard style={{ gap: spacing.sm, padding: spacing.sm }}>
-      <ImageBackground imageStyle={{ borderRadius: radii.lg }} source={image} style={{ height: 132, justifyContent: "flex-end", overflow: "hidden", borderRadius: radii.lg }}>
-        <View style={{ padding: spacing.sm, backgroundColor: colors.overlay }}>
+    <AppCard style={{ ...cards.cream, gap: spacing.md, padding: spacing.sm }}>
+      <ImageBackground imageStyle={{ borderRadius: radii.xl }} source={image} style={{ height: 164, justifyContent: "flex-start", alignItems: "flex-end", overflow: "hidden", borderRadius: radii.xl }}>
+        <View style={{ padding: spacing.sm }}>
           {typeof score === "number" ? <Badge label={score >= 0.8 ? "High Match" : `${Math.round(score * 100)}% match`} tone="orange" /> : null}
         </View>
       </ImageBackground>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-        <View style={{ width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.sm }}>
+        <View style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
           <Ionicons color={colors.primary} name="restaurant" size={20} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900" }}>{name}</Text>
+          <Text style={{ color: colors.text, fontSize: 20, fontWeight: "900" }}>{name}</Text>
           {category ? <Text style={{ color: colors.muted, marginTop: 2 }}>{category}</Text> : null}
         </View>
       </View>
-      {reason ? <Text style={{ color: colors.text, lineHeight: 21 }}>{reason}</Text> : null}
+      {reason ? (
+        <View style={{ flexDirection: "row", gap: spacing.sm, borderRadius: radii.md, backgroundColor: colors.surfaceContainerLow, padding: spacing.md }}>
+          <Ionicons color={colors.primary} name="bulb-outline" size={iconSizes.md} />
+          <Text style={{ flex: 1, color: colors.text, lineHeight: 22 }}>{reason}</Text>
+        </View>
+      ) : null}
       {nutrients?.length ? (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
           {nutrients.slice(0, 3).map((tag) => (
             <Badge key={tag} label={tag} tone="neutral" />
           ))}
@@ -378,16 +474,29 @@ export function SupplementCard({
   timeOfDay?: string;
 }) {
   return (
-    <AppCard style={{ gap: spacing.sm }}>
+    <AppCard style={{ ...cards.cream, gap: spacing.sm }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-        <View style={{ width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.secondarySoft }}>
-          <Ionicons color={colors.secondary} name="nutrition" size={20} />
+        <View style={{ width: 54, height: 54, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: active ? colors.secondaryContainer : colors.surfaceContainerHigh }}>
+          <Ionicons color={active ? colors.surface : colors.muted} name="nutrition" size={22} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900" }}>{name}</Text>
+          <Text style={{ color: colors.text, fontSize: 18, fontWeight: "900" }}>{name}</Text>
           <Text style={{ color: colors.muted, marginTop: 2 }}>{[dose, frequency, timeOfDay].filter(Boolean).join(" - ")}</Text>
         </View>
-        <Badge label={active ? "Daily" : "Paused"} tone={active ? "orange" : "red"} />
+        <View
+          style={{
+            width: 42,
+            height: 42,
+            alignItems: "center",
+            justifyContent: "center",
+            borderColor: active ? colors.primary : colors.border,
+            borderRadius: radii.pill,
+            borderWidth: 1,
+            backgroundColor: active ? colors.primary : "transparent",
+          }}
+        >
+          <Ionicons color={active ? colors.surface : colors.mutedSoft} name={active ? "checkmark-circle" : "pause-circle"} size={iconSizes.md} />
+        </View>
       </View>
     </AppCard>
   );
@@ -395,26 +504,38 @@ export function SupplementCard({
 
 export function RecommendationCard({
   category,
+  confidenceLabel,
   explanation,
   foodName,
   nutrients,
+  onFeedback,
+  onSave,
   score,
+  scoreBreakdown,
   supplementName,
   warnings,
 }: {
   category?: string;
-  explanation: string;
+  confidenceLabel?: string;
+  explanation: string | { summary: string; reasons?: Array<{ type: string; title: string; message: string; confidence: number }> };
   foodName: string;
   nutrients?: string[];
+  onFeedback?: (feedbackType: "liked" | "disliked" | "saved" | "tried" | "not_interested") => void;
+  onSave?: () => void;
   score: number;
+  scoreBreakdown?: Record<string, number>;
   supplementName?: string;
-  warnings?: string[];
+  warnings?: Array<string | { level: "info" | "caution" | "warning"; type: string; title: string; message: string; related_items?: string[] }>;
 }) {
+  const details = typeof explanation === "string" ? { summary: explanation, reasons: [] } : { summary: explanation.summary, reasons: explanation.reasons ?? [] };
+  const warningItems = warnings ?? [];
+  const reasonTags = details.reasons.slice(0, 3).map((reason) => reason.title);
+  const chips = Array.from(new Set([...(nutrients ?? []), ...reasonTags])).slice(0, 6);
   return (
-    <AppCard style={{ gap: spacing.sm, padding: spacing.sm }}>
-      <ImageBackground imageStyle={{ borderRadius: radii.lg }} source={{ uri: images.greens }} style={{ height: 138, justifyContent: "flex-end", overflow: "hidden", borderRadius: radii.lg }}>
-        <View style={{ padding: spacing.sm, backgroundColor: colors.overlay }}>
-          <Badge label={score >= 0.82 ? "Best Pair" : "Absorption Boost"} tone="orange" />
+    <AppCard style={{ ...cards.cream, gap: spacing.md, padding: spacing.sm }}>
+      <ImageBackground imageStyle={{ borderRadius: radii.xl }} source={{ uri: images.avocado }} style={{ height: 172, alignItems: "flex-end", justifyContent: "flex-start", overflow: "hidden", borderRadius: radii.xl }}>
+        <View style={{ padding: spacing.sm }}>
+          <Badge label={confidenceLabel ? `${confidenceLabel} confidence` : score >= 0.82 ? "Best Pair" : "Good Pair"} tone="orange" />
         </View>
       </ImageBackground>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: spacing.sm }}>
@@ -422,19 +543,107 @@ export function RecommendationCard({
           <Text style={{ color: colors.text, fontSize: 19, fontWeight: "900" }}>{foodName}</Text>
           {category ? <Text style={{ color: colors.muted, marginTop: 2 }}>{category}</Text> : null}
         </View>
-        <Badge label={`${Math.round(score * 100)}% match`} tone="green" />
+        <Badge label={`${Math.round(score * 100)}%`} tone="green" />
       </View>
       {supplementName ? <Badge label={`With ${supplementName}`} tone="orange" /> : null}
-      <Text style={{ color: colors.text, lineHeight: 22 }}>Helps absorption of {supplementName ?? "your supplement"}: {explanation}</Text>
-      {nutrients?.length ? (
+      <View style={{ flexDirection: "row", gap: spacing.sm, borderRadius: radii.md, backgroundColor: colors.surfaceContainerLow, padding: spacing.md }}>
+        <Ionicons color={colors.primary} name="bulb-outline" size={iconSizes.md} />
+        <Text style={{ flex: 1, color: colors.text, lineHeight: 22 }}>{details.summary}</Text>
+      </View>
+      {chips.length ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-          {nutrients.map((tag) => (
+          {chips.map((tag) => (
             <Badge key={tag} label={tag} tone="neutral" />
           ))}
         </View>
       ) : null}
-      {warnings?.map((warning) => <Badge key={warning} label={warning} tone="red" />)}
+      {warningItems.length ? <WarningBadge warning={warningItems[0]} /> : null}
+      <ExplanationPanel explanation={details} />
+      {scoreBreakdown ? <ScoreBreakdown scores={scoreBreakdown} /> : null}
+      {onFeedback ? <FeedbackButtons onFeedback={onFeedback} onSave={onSave} /> : null}
     </AppCard>
+  );
+}
+
+export function WarningBadge({ warning }: { warning: string | { level: "info" | "caution" | "warning"; type: string; title: string; message: string; related_items?: string[] } }) {
+  const title = typeof warning === "string" ? warning : warning.title;
+  const message = typeof warning === "string" ? warning : warning.message;
+  const level = typeof warning === "string" ? "caution" : warning.level;
+  const palette = level === "warning" ? { bg: colors.dangerSoft, text: colors.danger, icon: "warning" as IconName } : level === "caution" ? { bg: colors.warningSoft, text: colors.warning, icon: "alert-circle" as IconName } : { bg: colors.primarySoft, text: colors.primary, icon: "information-circle" as IconName };
+  return (
+    <View style={{ flexDirection: "row", gap: spacing.sm, borderRadius: radii.md, backgroundColor: palette.bg, padding: spacing.md }}>
+      <Ionicons color={palette.text} name={palette.icon} size={iconSizes.md} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: palette.text, fontWeight: "900" }}>{title}</Text>
+        {message !== title ? <Text style={{ color: palette.text, lineHeight: 20, marginTop: 2 }}>{message}</Text> : null}
+      </View>
+    </View>
+  );
+}
+
+export function ExplanationPanel({ explanation }: { explanation: { summary: string; reasons?: Array<{ type: string; title: string; message: string; confidence: number }> } }) {
+  const [expanded, setExpanded] = useState(false);
+  const reasons = explanation.reasons ?? [];
+  return (
+    <View style={{ borderColor: colors.borderSoft, borderRadius: radii.md, borderWidth: 1, overflow: "hidden" }}>
+      <TouchableOpacity accessibilityLabel="Toggle recommendation explanation" onPress={() => setExpanded((value) => !value)} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: spacing.md }}>
+        <Text style={{ color: colors.text, fontWeight: "900" }}>Why this recommendation?</Text>
+        <Ionicons color={colors.primary} name={expanded ? "chevron-up" : "chevron-down"} size={iconSizes.md} />
+      </TouchableOpacity>
+      {expanded ? (
+        <View style={{ gap: spacing.sm, paddingHorizontal: spacing.md, paddingBottom: spacing.md }}>
+          {reasons.length ? reasons.map((reason) => (
+            <View key={`${reason.type}-${reason.title}`} style={{ gap: 3 }}>
+              <Text style={{ color: colors.text, fontWeight: "800" }}>{reason.title}</Text>
+              <Text style={{ color: colors.muted, lineHeight: 21 }}>{reason.message}</Text>
+              <Text style={{ color: colors.primary, fontWeight: "800" }}>{Math.round(reason.confidence * 100)}% reason strength</Text>
+            </View>
+          )) : <Text style={{ color: colors.muted, lineHeight: 21 }}>{explanation.summary}</Text>}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+export function ScoreBreakdown({ scores }: { scores: Record<string, number> }) {
+  const labels: Record<string, string> = {
+    content_based_score: "Nutrients",
+    association_rule_score: "Rules",
+    collaborative_score: "Similar users",
+    nutrient_synergy_score: "Synergy",
+    safety_score: "Safety",
+    profile_match_score: "Profile",
+    feedback_score: "Feedback",
+  };
+  return (
+    <View style={{ gap: spacing.sm }}>
+      {Object.entries(scores).map(([key, rawValue]) => {
+        const value = Math.max(0, Math.min(1, Number(rawValue) || 0));
+        return (
+          <View key={key} style={{ gap: 5 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Text style={{ color: colors.muted, fontWeight: "800" }}>{labels[key] ?? key}</Text>
+              <Text style={{ color: colors.text, fontWeight: "900" }}>{Math.round(value * 100)}%</Text>
+            </View>
+            <View style={{ height: 8, overflow: "hidden", borderRadius: radii.pill, backgroundColor: colors.surfaceContainerHigh }}>
+              <View style={{ width: `${value * 100}%` as DimensionValue, height: 8, borderRadius: radii.pill, backgroundColor: key === "safety_score" ? colors.primary : colors.secondaryContainer }} />
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+export function FeedbackButtons({ onFeedback, onSave }: { onFeedback: (feedbackType: "liked" | "disliked" | "saved" | "tried" | "not_interested") => void; onSave?: () => void }) {
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
+      <FilterChip icon="heart" label="Like" onPress={() => onFeedback("liked")} />
+      <FilterChip icon="close-circle" label="Dislike" onPress={() => onFeedback("disliked")} />
+      <FilterChip icon="bookmark" label="Save" onPress={() => { onFeedback("saved"); onSave?.(); }} />
+      <FilterChip icon="checkmark-done-circle" label="Tried" onPress={() => onFeedback("tried")} />
+      <FilterChip icon="remove-circle" label="Skip" onPress={() => onFeedback("not_interested")} />
+    </View>
   );
 }
 
@@ -446,8 +655,8 @@ export function StatCard({ icon, label, tone = "green", value }: { icon?: IconNa
   }[tone];
 
   return (
-    <AppCard style={{ flex: 1, gap: spacing.xs }}>
-      <View style={{ width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: palette.backgroundColor }}>
+    <AppCard style={{ flex: 1, minWidth: 140, gap: spacing.xs }}>
+      <View style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: palette.backgroundColor }}>
         {icon ? <Ionicons color={palette.color} name={icon} size={iconSizes.md} /> : null}
       </View>
       <Text style={{ color: colors.muted, fontWeight: "800" }}>{label}</Text>
@@ -468,7 +677,7 @@ export function NutrientCard({
   title: string;
 }) {
   return (
-    <AppCard style={{ gap: spacing.sm, backgroundColor: colors.cream }}>
+    <AppCard style={{ ...cards.cream, gap: spacing.sm }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
         <View style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
           <Ionicons color={colors.primary} name={icon} size={iconSizes.lg} />
@@ -558,17 +767,17 @@ export function PremiumFeatureCard({
   title: string;
 }) {
   return (
-    <AppCard style={{ gap: spacing.sm, backgroundColor: colors.surfaceSoft }}>
+    <AppCard style={{ gap: spacing.sm, backgroundColor: colors.primary }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
         <View style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.secondarySoft }}>
           <Ionicons color={colors.secondary} name={icon} size={iconSizes.lg} />
         </View>
         <View style={{ flex: 1 }}>
           <Badge label={badge} tone="orange" />
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: "900", marginTop: spacing.xs }}>{title}</Text>
+          <Text style={{ color: colors.surface, fontSize: 18, fontWeight: "900", marginTop: spacing.xs }}>{title}</Text>
         </View>
       </View>
-      <Text style={typography.body}>{description}</Text>
+      <Text style={{ color: colors.surfaceOnDark, fontSize: 16, lineHeight: 24 }}>{description}</Text>
     </AppCard>
   );
 }

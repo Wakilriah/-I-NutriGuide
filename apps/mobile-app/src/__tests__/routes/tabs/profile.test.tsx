@@ -33,6 +33,10 @@ jest.mock("../../../features/profile/api", () => ({
   updateProfile: jest.fn(async () => profile),
 }));
 
+jest.mock("../../../features/tracking/api", () => ({
+  listTrackingHistory: jest.fn(async () => []),
+}));
+
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseMutation = useMutation as jest.Mock;
 
@@ -41,6 +45,28 @@ describe("ProfileScreen", () => {
     mockUseQuery.mockImplementation(({ queryKey }) => {
       if (queryKey[0] === "profile") {
         return { data: profile, isError: false, isLoading: false };
+      }
+      if (queryKey[0] === "tracking") {
+        return {
+          data: [
+            {
+              date: "2026-05-15",
+              weight_kg: "62.50",
+              water_ml: 2000,
+              calories: 2100,
+              protein_g: "82.00",
+              fiber_g: "24.00",
+              steps: 7000,
+              supplements_taken: [],
+              goals_completed: false,
+              notes: "",
+              created_at: "2026-05-15T00:00:00Z",
+              updated_at: "2026-05-15T00:00:00Z",
+            },
+          ],
+          isError: false,
+          isLoading: false,
+        };
       }
       return {
         data: [{ id: 2, name: "Broccoli", slug: "broccoli", category: "Vegetables" }],
@@ -84,8 +110,13 @@ describe("ProfileScreen", () => {
     expect(screen.getByText("user@example.com")).toBeTruthy();
     expect(screen.getByDisplayValue("32")).toBeTruthy();
     expect(screen.getByDisplayValue("62.50")).toBeTruthy();
-    expect(screen.getByDisplayValue("peanuts")).toBeTruthy();
+    expect(screen.getByText("Peanuts")).toBeTruthy();
+    expect(screen.getByText("Halal")).toBeTruthy();
     expect(screen.getByText("mushrooms")).toBeTruthy();
+    expect(screen.getByText("Progress graphs")).toBeTruthy();
+    expect(screen.getByText("BMI")).toBeTruthy();
+    expect(screen.getByText("BMI trend")).toBeTruthy();
+    expect(screen.getByText("Calories")).toBeTruthy();
   });
 
   it("saves profile changes in place", async () => {

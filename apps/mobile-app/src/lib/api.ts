@@ -18,13 +18,13 @@ function getDefaultApiBaseUrl() {
     return `http://${window.location.hostname}:8000/api/v1`;
   }
 
-  if (process.env.EXPO_PUBLIC_API_BASE_URL) {
-    return process.env.EXPO_PUBLIC_API_BASE_URL;
-  }
-
   const expoHost = getExpoHost();
   if (expoHost) {
     return `http://${expoHost}:8000/api/v1`;
+  }
+
+  if (process.env.EXPO_PUBLIC_API_BASE_URL) {
+    return process.env.EXPO_PUBLIC_API_BASE_URL;
   }
 
   if (Platform.OS === "android") {

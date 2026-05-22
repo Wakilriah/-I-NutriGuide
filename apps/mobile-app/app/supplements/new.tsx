@@ -5,14 +5,14 @@ import { Controller, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, AppCard, AppInput, ErrorState, LoadingState, PageHeader, SupplementCard } from "../../src/components/ui";
+import { AppButton, AppCard, AppInput, AppTopBar, Badge, ErrorState, LoadingState, PageHeader, SupplementCard } from "../../src/components/ui";
 import { createUserSupplement, listSupplements } from "../../src/features/supplements/api";
 import { colors, radii, spacing } from "../../src/theme/design";
 
 const schema = z.object({
   supplement_id: z.string().regex(/^\d+$/, "Choose a supplement."),
   dose: z.string().min(1, "Dose is required."),
-  frequency: z.string().min(1, "Frequency is required."),
+  frequency: z.literal("daily"),
   time_of_day: z.string().min(1, "Time of day is required."),
 });
 
@@ -53,9 +53,9 @@ export default function AddSupplementScreen() {
   };
 
   return (
-    <Screen>
+    <Screen topBar={<AppTopBar />}>
       <View style={{ gap: spacing.lg }}>
-        <PageHeader eyebrow="Supplement setup" title="Add supplement" subtitle="Choose what you take, then tell I-NutriGuide how it fits into your routine." />
+        <PageHeader eyebrow="Supplement setup" title="Add supplement" subtitle="Choose what you take. Supplements are matched as part of a daily routine." />
         {catalog.isLoading ? <LoadingState message="Loading catalog..." /> : null}
         {catalog.isError ? <ErrorState message="Unable to load supplement catalog." /> : null}
 
@@ -78,7 +78,7 @@ export default function AddSupplementScreen() {
         </View>
 
         <AppCard style={{ gap: spacing.md }}>
-          {(["dose", "frequency", "time_of_day"] as const).map((fieldName) => (
+          {(["dose", "time_of_day"] as const).map((fieldName) => (
             <Controller
               control={control}
               key={fieldName}
@@ -94,6 +94,11 @@ export default function AddSupplementScreen() {
               )}
             />
           ))}
+
+          <View style={{ minHeight: 58, justifyContent: "center", gap: spacing.xs }}>
+            <Text style={{ color: colors.text, fontSize: 13, fontWeight: "800" }}>frequency</Text>
+            <Badge label="Daily" tone="green" />
+          </View>
 
           {mutation.isError ? <ErrorState message="Unable to save supplement. Please try again." /> : null}
           <AppButton accessibilityLabel="Create user supplement" disabled={mutation.isPending} icon="checkmark-circle" label={mutation.isPending ? "Saving" : "Save supplement"} onPress={onSubmit} />

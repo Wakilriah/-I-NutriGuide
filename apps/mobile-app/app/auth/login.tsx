@@ -1,8 +1,9 @@
+import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { login } from "../../src/features/auth/api";
 import { getAuthErrorMessage } from "../../src/features/auth/errors";
 import { loginSchema, type LoginValues } from "../../src/features/auth/schemas";
@@ -45,9 +46,16 @@ export default function LoginScreen() {
   return (
     <Screen>
       <View style={{ flex: 1, justifyContent: "center", gap: spacing.lg }}>
+        <View style={{ alignItems: "center", gap: spacing.sm }}>
+          <View style={{ width: 64, height: 64, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: colors.primary }}>
+            <Ionicons color={colors.surface} name="nutrition" size={32} />
+          </View>
+          <Text style={{ color: colors.primary, fontSize: 28, fontWeight: "900" }}>I-NutriGuide</Text>
+        </View>
+
         <PageHeader eyebrow="Welcome back" title="Sign in" subtitle="Use your I-NutriGuide account to continue your food and supplement plan." />
 
-        <AppCard style={{ gap: spacing.md }}>
+        <AppCard style={{ gap: spacing.md, borderRadius: 32, padding: spacing.xl }}>
           <Controller
             control={control}
             name="email"

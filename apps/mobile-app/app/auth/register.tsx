@@ -1,8 +1,9 @@
+import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppInput, PageHeader } from "../../src/components/ui";
 import { register } from "../../src/features/auth/api";
@@ -50,8 +51,14 @@ export default function RegisterScreen() {
   return (
     <Screen>
       <View style={{ flex: 1, justifyContent: "center", gap: spacing.lg }}>
+        <View style={{ alignItems: "center", gap: spacing.sm }}>
+          <View style={{ width: 64, height: 64, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: colors.primary }}>
+            <Ionicons color={colors.surface} name="nutrition" size={32} />
+          </View>
+          <Text style={{ color: colors.primary, fontSize: 28, fontWeight: "900" }}>I-NutriGuide</Text>
+        </View>
         <PageHeader eyebrow="Start healthy" title="Create account" subtitle="Set up your nutrition profile and get supplement-aware food recommendations." />
-        <AppCard style={{ gap: spacing.md }}>
+        <AppCard style={{ gap: spacing.md, borderRadius: 32, padding: spacing.xl }}>
           <Controller
             control={control}
             name="name"

@@ -39,7 +39,6 @@ describe("AddSupplementScreen", () => {
     await act(async () => {
       fireEvent.press(screen.getByLabelText("Choose Vitamin D"));
     });
-    fireEvent.changeText(screen.getByLabelText("frequency"), "daily");
     fireEvent.changeText(screen.getByLabelText("time_of_day"), "morning");
     fireEvent.press(screen.getByLabelText("Create user supplement"));
 

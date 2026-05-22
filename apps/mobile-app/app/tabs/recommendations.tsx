@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, AppCard, Badge, EmptyState, ErrorState, FilterChip, LoadingState, PageHeader } from "../../src/components/ui";
+import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, LoadingState, PageHeader } from "../../src/components/ui";
 import { generateRecommendations, listRecommendationHistory } from "../../src/features/recommendations/api";
-import { colors, spacing } from "../../src/theme/design";
+import { colors, images, radii, spacing } from "../../src/theme/design";
 
 export default function RecommendationsScreen() {
   const queryClient = useQueryClient();
@@ -18,16 +18,9 @@ export default function RecommendationsScreen() {
   });
 
   return (
-    <Screen>
+    <Screen topBar={<AppTopBar />}>
       <View style={{ gap: spacing.lg }}>
-        <PageHeader eyebrow="Smart Food Match" title="Today's Recommendation" subtitle="Pick food pairings for your active supplements with allergy, diet, goal, and calorie filters." />
-
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
-          <FilterChip active icon="shield-checkmark" label="Allergies" />
-          <FilterChip icon="leaf" label="Vegetarian" />
-          <FilterChip icon="barbell" label="Muscle" />
-          <FilterChip icon="flame" label="Calories" />
-        </View>
+        <PageHeader eyebrow="Smart Food Match" title="Recommendations Hub" subtitle="AI-curated nutrition plans based on your recent biometric goals." />
 
         <AppButton
           accessibilityLabel="Generate recommendations"
@@ -47,7 +40,7 @@ export default function RecommendationsScreen() {
         <View style={{ gap: spacing.md }}>
           {history.data?.map((run) => (
             <TouchableOpacity accessibilityLabel={`Open recommendation run ${run.run_id}`} key={run.run_id} onPress={() => router.push(`/recommendations/${run.run_id}` as never)}>
-              <AppCard style={{ gap: spacing.sm }}>
+              <AppCard style={{ gap: spacing.md }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", gap: spacing.sm }}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900" }}>{run.items.length} food recommendations</Text>
@@ -56,18 +49,26 @@ export default function RecommendationsScreen() {
                   <Text style={{ color: colors.primary, fontWeight: "900" }}>View</Text>
                 </View>
                 {run.items[0]?.food ? (
-                  <View style={{ gap: spacing.sm }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                    <ImageBackground
+                      imageStyle={{ borderRadius: radii.xl }}
+                      source={{ uri: images.salmonBowl }}
+                      style={{
+                        width: 112,
+                        height: 112,
+                        borderRadius: radii.xl,
+                        overflow: "hidden",
+                        backgroundColor: colors.surfaceContainerHigh,
+                      }}
+                    />
+                    <View style={{ flex: 1, gap: spacing.xs }}>
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: colors.text, fontSize: 16, fontWeight: "900" }}>{run.items[0].food.name}</Text>
                         <Text style={{ color: colors.muted, marginTop: 2 }}>{run.items[0].food.category}</Text>
                       </View>
                       <Badge label={`${Math.round(Number(run.items[0].score) * 100)}% match`} tone="green" />
+                      {run.items[0].matched_supplement ? <Badge label={`With ${run.items[0].matched_supplement.name}`} tone="orange" /> : null}
                     </View>
-                    <Text style={{ color: colors.text, lineHeight: 22 }}>
-                      Helps absorption of {run.items[0].matched_supplement?.name ?? "your supplement"}: {run.items[0].explanation}
-                    </Text>
-                    {run.items[0].matched_supplement ? <Badge label={`With ${run.items[0].matched_supplement.name}`} tone="orange" /> : null}
                   </View>
                 ) : null}
               </AppCard>

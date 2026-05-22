@@ -1,9 +1,10 @@
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import ChatScreen from "../../../../app/tabs/chat";
-import { listChatSessions, sendChatMessage } from "../../../features/chat/api";
+import { clearChatSessions, listChatSessions, sendChatMessage } from "../../../features/chat/api";
 import { renderWithClient } from "../../../test/render";
 
 jest.mock("../../../features/chat/api", () => ({
+  clearChatSessions: jest.fn(),
   listChatSessions: jest.fn(),
   sendChatMessage: jest.fn(),
 }));
@@ -45,11 +46,16 @@ const userMessage = {
 
 const mockListChatSessions = listChatSessions as jest.Mock;
 const mockSendChatMessage = sendChatMessage as jest.Mock;
+const mockClearChatSessions = clearChatSessions as jest.Mock;
 
 describe("ChatScreen", () => {
   afterEach(() => {
     cleanup();
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    mockClearChatSessions.mockResolvedValue(undefined);
   });
 
   it("shows persisted chat history with cited recommendation cards", async () => {
@@ -113,6 +119,24 @@ describe("ChatScreen", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Try orange with your iron supplement.")).toBeTruthy();
+    });
+  });
+
+  it("clears persisted chat history", async () => {
+    mockListChatSessions.mockResolvedValue([{ id: "session-1", title: "Iron", messages: [userMessage, assistantMessage] }]);
+
+    renderWithClient(<ChatScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Try orange with your iron supplement.")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByLabelText("Clear chat history"));
+
+    await waitFor(() => {
+      expect(mockClearChatSessions).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText("Try orange with your iron supplement.")).toBeNull();
+      expect(screen.getByText("Hi, I am your nutrition assistant. Ask about food pairings, supplement timing, allergies, or recommendation ideas.")).toBeTruthy();
     });
   });
 });

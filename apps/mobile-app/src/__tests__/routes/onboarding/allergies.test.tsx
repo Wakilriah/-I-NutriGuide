@@ -19,8 +19,10 @@ describe("AllergyOnboardingScreen", () => {
     const { updateProfile } = require("../../../features/profile/api");
     render(<AllergyOnboardingScreen />);
 
-    fireEvent.changeText(screen.getByLabelText("Allergies"), "peanuts, shellfish");
-    fireEvent.changeText(screen.getByLabelText("Dietary restrictions"), "halal, lactose_free");
+    fireEvent.press(screen.getByLabelText("Peanuts"));
+    fireEvent.press(screen.getByLabelText("Shellfish"));
+    fireEvent.press(screen.getByLabelText("Halal"));
+    fireEvent.press(screen.getByLabelText("Lactose free"));
     fireEvent.press(screen.getByLabelText("Save allergy details"));
 
     await waitFor(() => {
@@ -40,7 +42,8 @@ describe("AllergyOnboardingScreen", () => {
 
     render(<AllergyOnboardingScreen />);
 
-    expect(await screen.findByDisplayValue("peanuts, shellfish")).toBeTruthy();
-    expect(screen.getByDisplayValue("halal")).toBeTruthy();
+    expect(await screen.findByText("Peanuts")).toBeTruthy();
+    expect(screen.getByText("Shellfish")).toBeTruthy();
+    expect(screen.getByText("Halal")).toBeTruthy();
   });
 });
