@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { InteractionsPage } from "./InteractionsPage";
 import { NutrientsPage } from "./NutrientsPage";
 import { SupplementsPage } from "./SupplementsPage";
 
-type KnowledgeTab = "nutrients" | "supplements";
+type KnowledgeTab = "nutrients" | "supplements" | "interactions";
 
 export function KnowledgeBasePage() {
   const [activeTab, setActiveTab] = useState<KnowledgeTab>("nutrients");
@@ -35,10 +36,20 @@ export function KnowledgeBasePage() {
         >
           Supplements
         </button>
+        <button
+          aria-selected={activeTab === "interactions"}
+          className={activeTab === "interactions" ? "tab-button tab-button-active" : "tab-button"}
+          onClick={() => setActiveTab("interactions")}
+          role="tab"
+          type="button"
+        >
+          Interactions
+        </button>
       </div>
 
       {activeTab === "nutrients" ? <NutrientsPage /> : null}
       {activeTab === "supplements" ? <SupplementsPage /> : null}
+      {activeTab === "interactions" ? <InteractionsPage /> : null}
     </section>
   );
 }

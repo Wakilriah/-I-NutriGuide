@@ -2,10 +2,22 @@ import { apiClient } from "./client";
 
 export type DashboardMetrics = {
   total_users: number;
+  active_users: number;
+  admin_users: number;
+  survey_users: number;
   total_foods: number;
+  active_foods: number;
+  ciqual_foods: number;
+  total_nutrients: number;
   total_supplements: number;
+  active_supplements: number;
+  user_supplement_entries: number;
   total_recommendations: number;
+  total_recommendation_items: number;
+  average_recommendation_score: number;
   average_feedback_rating: number;
+  total_feedback: number;
+  helpful_feedback: number;
   total_saved_foods: number;
   total_association_rules: number;
   active_association_rules: number;

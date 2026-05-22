@@ -7,10 +7,22 @@ import { useAuthStore } from "../store/auth-store";
 vi.mock("../api/dashboard", () => ({
   fetchDashboardMetrics: vi.fn(async () => ({
     total_users: 4,
+    active_users: 3,
+    admin_users: 1,
+    survey_users: 2,
     total_foods: 21,
+    active_foods: 20,
+    ciqual_foods: 10,
+    total_nutrients: 8,
     total_supplements: 10,
+    active_supplements: 9,
+    user_supplement_entries: 14,
     total_recommendations: 7,
+    total_recommendation_items: 20,
+    average_recommendation_score: 0.82,
     average_feedback_rating: 4.5,
+    total_feedback: 4,
+    helpful_feedback: 3,
     total_saved_foods: 3,
     total_association_rules: 2,
     active_association_rules: 1,
@@ -465,6 +477,79 @@ const feedbackApi = vi.hoisted(() => ({
 
 vi.mock("../api/feedback", () => feedbackApi);
 
+const chatsApi = vi.hoisted(() => ({
+  clearAdminUserChatSessions: vi.fn(async () => undefined),
+  fetchPaginatedAdminChatUsers: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 2,
+        email: "user@example.com",
+        name: "Demo User",
+        chat_session_count: 1,
+        chat_message_count: 2,
+        latest_chat_at: "2026-05-08T17:41:00Z",
+      },
+    ],
+  })),
+  fetchPaginatedAdminChatSessions: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: "chat-1",
+        user: { id: 2, email: "user@example.com", name: "Demo User" },
+        title: "Recommend food",
+        created_at: "2026-05-08T17:40:00Z",
+        updated_at: "2026-05-08T17:41:00Z",
+        messages: [
+          {
+            id: 1,
+            role: "user",
+            content: "What should I eat with iron?",
+            metadata: {},
+            recommendation_run_id: null,
+            groq_model: "",
+            token_usage: {},
+            error_code: "",
+            created_at: "2026-05-08T17:40:00Z",
+          },
+          {
+            id: 2,
+            role: "assistant",
+            content: "Try orange with your iron supplement.",
+            metadata: {
+              intent: "recommendation",
+              cited_items: [
+                {
+                  id: 11,
+                  rank: 1,
+                  food: { id: 1, name: "Orange", slug: "orange", category: "Fruits" },
+                  score: 0.91,
+                  matched_nutrients: ["vitamin-c"],
+                  matched_rules: [{ antecedent: "supplement:iron" }],
+                  warnings: [],
+                  explanation: "Vitamin C-rich foods may support iron absorption.",
+                },
+              ],
+            },
+            recommendation_run_id: "1f3a6e0a-1f1e-4f8a-b5ef-9044668aa000",
+            groq_model: "test-model",
+            token_usage: {},
+            error_code: "",
+            created_at: "2026-05-08T17:41:00Z",
+          },
+        ],
+      },
+    ],
+  })),
+}));
+
+vi.mock("../api/chats", () => chatsApi);
+
 const usersApi = vi.hoisted(() => ({
   createAdminUser: vi.fn(async (payload) => ({
     id: 3,
@@ -885,6 +970,33 @@ describe("App", () => {
     fireEvent.change(screen.getByLabelText(/search feedback/i), { target: { value: "orange" } });
 
     expect(await screen.findByText("Orange")).toBeInTheDocument();
+  });
+
+  it("renders and filters user chats", async () => {
+    useAuthStore.getState().setSession(adminSession);
+
+    render(<App />);
+    fireEvent.click(screen.getByRole("link", { name: /chats/i }));
+
+    expect(await screen.findByRole("heading", { name: /chat users/i })).toBeInTheDocument();
+    expect(await screen.findByText("Demo User")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /see chats/i }));
+
+    expect(await screen.findByText("Try orange with your iron supplement.")).toBeInTheDocument();
+    expect(screen.getByText("What should I eat with iron?")).toBeInTheDocument();
+    expect(screen.getByText("Vitamin C-rich foods may support iron absorption.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/search this user's chats/i), { target: { value: "orange" } });
+
+    await waitFor(() => {
+      expect(chatsApi.fetchPaginatedAdminChatSessions).toHaveBeenCalledWith(expect.objectContaining({ search: "orange", user_id: 2 }));
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /clear chats/i }));
+    await waitFor(() => {
+      expect(chatsApi.clearAdminUserChatSessions).toHaveBeenCalledWith(2);
+    });
   });
 
   it("renders and filters users", async () => {

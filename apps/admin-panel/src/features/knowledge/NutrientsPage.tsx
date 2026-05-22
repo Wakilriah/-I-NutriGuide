@@ -21,6 +21,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
+import { invalidateDashboard } from "../../lib/query-keys";
 
 const PAGE_SIZE = 10;
 
@@ -87,7 +88,7 @@ export function NutrientsPage() {
   };
 
   const refreshNutrients = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["nutrients"] });
+    await Promise.all([queryClient.invalidateQueries({ queryKey: ["nutrients"] }), invalidateDashboard(queryClient)]);
   };
 
   const saveMutation = useMutation({

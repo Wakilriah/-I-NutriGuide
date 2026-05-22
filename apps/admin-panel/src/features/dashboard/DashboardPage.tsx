@@ -1,166 +1,248 @@
-import { Activity, Apple, Bookmark, MessageSquare, Network, Pill, ShieldCheck, Users } from "lucide-react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Activity,
+  Apple,
+  Database,
+  MessageSquare,
+  Pill,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { fetchDashboardMetrics } from "../../api/dashboard";
+import { fetchDashboardMetrics, type DashboardMetrics } from "../../api/dashboard";
 import { ChartSkeleton, MetricSkeletonGrid } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
-
-const fallbackMetrics = {
-  total_users: 0,
-  total_foods: 0,
-  total_supplements: 0,
-  total_recommendations: 0,
-  average_feedback_rating: 0,
-  total_saved_foods: 0,
-  total_association_rules: 0,
-  active_association_rules: 0,
-  recommendation_items_with_rules: 0,
-  average_rule_score: 0,
-  most_used_supplements: [],
-  most_recommended_foods: [],
-  most_saved_foods: [],
-  food_category_counts: [],
-  food_source_counts: [],
-  rule_usage: [],
-};
+import { queryKeys } from "../../lib/query-keys";
 
 export function DashboardPage() {
-  const { data = fallbackMetrics, isError, isLoading } = useQuery({
-    queryKey: ["admin-dashboard"],
+  const { data, dataUpdatedAt, isError, isFetching, isLoading, refetch } = useQuery({
+    queryKey: queryKeys.dashboard,
     queryFn: fetchDashboardMetrics,
+    placeholderData: (previousData) => previousData,
+    refetchInterval: 60_000,
   });
+
+  const isInitialLoading = isLoading && !data;
+  const dashboard = data;
+  const lastSynced = dataUpdatedAt ? formatDateTime(dataUpdatedAt) : "Not synced yet";
+
+  const readiness = useMemo(() => buildReadinessRows(dashboard), [dashboard]);
+  const accountMix = useMemo(() => buildAccountRows(dashboard), [dashboard]);
 
   return (
     <section className="dashboard-view" aria-labelledby="dashboard-title">
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Wellness intelligence</p>
-          <h1 id="dashboard-title">Smart Food Match Dashboard</h1>
+      <div className="dashboard-hero">
+        <div className="dashboard-hero-copy">
+          <p className="eyebrow">Operations</p>
+          <h1 id="dashboard-title">Dashboard</h1>
+          <p>Monitor data quality, recommendation activity, rule coverage, and user growth from one synced view.</p>
         </div>
-        <span className={isError ? "status-pill status-pill-error" : "status-pill"}>
-          {isLoading ? "Loading" : isError ? "API unavailable" : "Live"}
-        </span>
+        <div className="dashboard-actions">
+          <Badge variant={isError ? "destructive" : isFetching ? "outline" : "secondary"}>
+            {isError ? "API unavailable" : isFetching ? "Syncing" : "Live"}
+          </Badge>
+          <Button disabled={isFetching} onClick={() => void refetch()} type="button" variant="outline">
+            <RefreshCw aria-hidden="true" size={16} />
+            Refresh
+          </Button>
+        </div>
+        <div className="dashboard-hero-metrics">
+          <HeroMetric label="Last Sync" loading={isInitialLoading} value={lastSynced} />
+          <HeroMetric label="Survey Users" loading={isInitialLoading} value={formatNumber(dashboard?.survey_users ?? 0)} />
+          <HeroMetric label="Avg Match" loading={isInitialLoading} value={formatPercent(dashboard?.average_recommendation_score ?? 0)} />
+        </div>
       </div>
 
-      {isLoading ? (
+      {isError && !dashboard ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Dashboard could not load</CardTitle>
+            <CardDescription>The API did not return metrics. Retry once the backend is reachable.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => void refetch()} type="button">
+              <RefreshCw aria-hidden="true" size={16} />
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {isInitialLoading ? (
         <MetricSkeletonGrid count={8} />
-      ) : (
-        <div className="metric-grid">
-          <StatCard icon={Users} label="Users" value={data.total_users} />
-          <StatCard icon={Apple} label="Foods" value={data.total_foods} />
-          <StatCard icon={Pill} label="Supplements" value={data.total_supplements} />
-          <StatCard icon={Activity} label="Recommendation Runs" value={data.total_recommendations} />
-          <StatCard icon={Bookmark} label="Saved Foods" value={data.total_saved_foods} />
-          <StatCard icon={MessageSquare} label="Avg Feedback" value={data.average_feedback_rating.toFixed(1)} />
-          <StatCard icon={ShieldCheck} label="Active Rules" value={data.active_association_rules} helper={`${data.total_association_rules} total`} />
+      ) : dashboard ? (
+        <div className="metric-grid dashboard-metric-grid">
+          <StatCard icon={Users} label="Users" value={formatNumber(dashboard.total_users)} helper={`${formatNumber(dashboard.active_users)} active`} />
+          <StatCard icon={Database} label="Foods" value={formatNumber(dashboard.total_foods)} helper={`${formatNumber(dashboard.active_foods)} active`} />
+          <StatCard icon={Apple} label="Nutrients" value={formatNumber(dashboard.total_nutrients)} helper={`${formatNumber(dashboard.ciqual_foods)} CIQUAL foods`} />
           <StatCard
-            icon={Network}
-            label="Rule Matches"
-            value={data.recommendation_items_with_rules}
-            helper={`${Math.round(data.average_rule_score * 100)}% avg signal`}
+            icon={Pill}
+            label="Supplements"
+            value={formatNumber(dashboard.total_supplements)}
+            helper={`${formatNumber(dashboard.user_supplement_entries)} user links`}
+          />
+          <StatCard
+            icon={Activity}
+            label="Recommendation Runs"
+            value={formatNumber(dashboard.total_recommendations)}
+            helper={`${formatNumber(dashboard.total_recommendation_items)} items`}
+          />
+          <StatCard icon={TrendingUp} label="Avg Match" value={formatPercent(dashboard.average_recommendation_score)} />
+          <StatCard icon={MessageSquare} label="Feedback" value={formatNumber(dashboard.total_feedback)} helper={`${formatPercent(ratio(dashboard.helpful_feedback, dashboard.total_feedback))} helpful`} />
+          <StatCard
+            icon={ShieldCheck}
+            label="Active Rules"
+            value={formatNumber(dashboard.active_association_rules)}
+            helper={`${formatNumber(dashboard.total_association_rules)} total`}
           />
         </div>
-      )}
+      ) : null}
 
-      <div className="dashboard-columns">
-        <ChartPanel
-          data={data.food_category_counts.map((item) => ({
-            label: item.category__name || "Uncategorized",
-            count: item.count,
-          }))}
-          emptyLabel="No food categories yet."
-          isLoading={isLoading}
-          title="Food Coverage"
-        />
-
-        <ChartPanel
-          data={data.rule_usage.map((item) => ({
-            label: item.label,
-            count: item.count,
-          }))}
-          emptyLabel="Rules have not matched recommendations yet."
-          isLoading={isLoading}
-          title="Association Rule Usage"
-        />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Supplement Signals</CardTitle>
-          </CardHeader>
-          <CardContent>
-          <DataList
-            emptyLabel="No supplement usage yet."
-            isLoading={isLoading}
-            items={data.most_used_supplements.map((item) => ({
-              label: item.supplement__name,
-              value: item.count,
+      {dashboard ? (
+        <div className="dashboard-main-grid">
+          <ChartPanel
+            data={dashboard.food_category_counts.map((item) => ({
+              label: item.category__name || "Uncategorized",
+              count: item.count,
             }))}
+            emptyLabel="No food categories yet."
+            isLoading={isInitialLoading}
+            title="Food Coverage"
           />
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Healthy Food Pairings</CardTitle>
-          </CardHeader>
-          <CardContent>
-          <DataList
-            emptyLabel="No recommendation history yet."
-            isLoading={isLoading}
-            items={data.most_recommended_foods.map((item) => ({
-              label: item.food__name,
-              value: item.count,
-            }))}
-          />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Operational Readiness</CardTitle>
+              <CardDescription>Coverage checks from the latest dashboard query.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProgressList items={readiness} />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Most Saved Foods</CardTitle>
-          </CardHeader>
-          <CardContent>
-          <DataList
-            emptyLabel="No saved foods yet."
-            isLoading={isLoading}
-            items={data.most_saved_foods.map((item) => ({
-              label: item.recommendation_item__food__name,
-              value: item.count,
+          <ChartPanel
+            data={dashboard.rule_usage.map((item) => ({
+              label: item.label,
+              count: item.count,
             }))}
+            emptyLabel="Rules have not matched recommendations yet."
+            isLoading={isInitialLoading}
+            title="Association Rule Usage"
           />
-          </CardContent>
-        </Card>
-      </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>User Mix</CardTitle>
+              <CardDescription>Account health and survey import coverage.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProgressList items={accountMix} />
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
+      {dashboard ? (
+        <div className="dashboard-list-grid">
+          <Card>
+            <CardHeader>
+              <CardTitle>Supplement Demand</CardTitle>
+              <CardDescription>Most common supplements users added.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataList
+                emptyLabel="No supplement usage yet."
+                items={dashboard.most_used_supplements.map((item) => ({
+                  label: item.supplement__name,
+                  value: item.count,
+                }))}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recommended Foods</CardTitle>
+              <CardDescription>Foods appearing most often in generated runs.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataList
+                emptyLabel="No recommendation history yet."
+                items={dashboard.most_recommended_foods.map((item) => ({
+                  label: item.food__name,
+                  value: item.count,
+                }))}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Saved Foods</CardTitle>
+              <CardDescription>Foods users decided to keep.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataList
+                emptyLabel="No saved foods yet."
+                items={dashboard.most_saved_foods.map((item) => ({
+                  label: item.recommendation_item__food__name,
+                  value: item.count,
+                }))}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-function DataList({ emptyLabel, isLoading, items }: { emptyLabel: string; isLoading?: boolean; items: Array<{ label: string; value: number }> }) {
-  if (isLoading) {
-    return (
-      <div className="data-list">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div className="flex min-h-[38px] items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2" key={index}>
-            <Skeleton className="h-4 w-36" />
-            <Skeleton className="h-5 w-8" />
-          </div>
-        ))}
-      </div>
-    );
-  }
+function HeroMetric({ label, loading, value }: { label: string; loading: boolean; value: string }) {
+  return (
+    <div className="dashboard-hero-metric">
+      <span>{label}</span>
+      {loading ? <Skeleton className="mt-2 h-5 w-24" /> : <strong>{value}</strong>}
+    </div>
+  );
+}
 
+function DataList({ emptyLabel, items }: { emptyLabel: string; items: Array<{ label: string; value: number }> }) {
   if (items.length === 0) {
     return <p className="empty-line">{emptyLabel}</p>;
   }
 
   return (
-    <ul className="data-list">
+    <ul className="data-list dashboard-data-list">
       {items.map((item) => (
         <li key={item.label}>
-          <span>{item.label}</span>
-          <strong>{item.value}</strong>
+          <span>{item.label || "Unknown"}</span>
+          <strong>{formatNumber(item.value)}</strong>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ProgressList({ items }: { items: Array<{ label: string; value: number; detail: string }> }) {
+  return (
+    <ul className="dashboard-progress-list">
+      {items.map((item) => (
+        <li key={item.label}>
+          <div>
+            <span>{item.label}</span>
+            <strong>{formatPercent(item.value)}</strong>
+          </div>
+          <div className="dashboard-progress-track" aria-hidden="true">
+            <span style={{ width: `${Math.round(item.value * 100)}%` }} />
+          </div>
+          <p>{item.detail}</p>
         </li>
       ))}
     </ul>
@@ -182,7 +264,7 @@ function ChartPanel({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>Counts from the admin analytics endpoint.</CardDescription>
+        <CardDescription>Counts from the live admin analytics endpoint.</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -191,13 +273,13 @@ function ChartPanel({
           <p className="empty-line">{emptyLabel}</p>
         ) : (
           <div className="chart-frame">
-            <ResponsiveContainer height={240} width="100%">
-              <BarChart data={data} margin={{ bottom: 8, left: -24, right: 8, top: 8 }}>
+            <ResponsiveContainer height={250} width="100%">
+              <BarChart data={data} margin={{ bottom: 8, left: -18, right: 8, top: 8 }}>
                 <CartesianGrid stroke="#e5e7eb" vertical={false} />
-                <XAxis dataKey="label" interval={0} tick={{ fontSize: 11 }} tickFormatter={(value) => String(value).slice(0, 14)} />
+                <XAxis dataKey="label" interval={0} tick={{ fontSize: 11 }} tickFormatter={(value) => truncate(String(value), 16)} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#2f6b52" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#2f7d32" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -205,4 +287,88 @@ function ChartPanel({
       </CardContent>
     </Card>
   );
+}
+
+function buildReadinessRows(metrics?: DashboardMetrics) {
+  if (!metrics) {
+    return [];
+  }
+  return [
+    {
+      label: "Active Foods",
+      value: ratio(metrics.active_foods, metrics.total_foods),
+      detail: `${formatNumber(metrics.active_foods)} of ${formatNumber(metrics.total_foods)} foods are enabled`,
+    },
+    {
+      label: "CIQUAL Coverage",
+      value: ratio(metrics.ciqual_foods, metrics.total_foods),
+      detail: `${formatNumber(metrics.ciqual_foods)} foods imported from CIQUAL`,
+    },
+    {
+      label: "Active Supplements",
+      value: ratio(metrics.active_supplements, metrics.total_supplements),
+      detail: `${formatNumber(metrics.active_supplements)} of ${formatNumber(metrics.total_supplements)} supplements are enabled`,
+    },
+    {
+      label: "Rule Coverage",
+      value: ratio(metrics.recommendation_items_with_rules, metrics.total_recommendation_items),
+      detail: `${formatNumber(metrics.recommendation_items_with_rules)} recommendation items matched rules`,
+    },
+  ];
+}
+
+function buildAccountRows(metrics?: DashboardMetrics) {
+  if (!metrics) {
+    return [];
+  }
+  return [
+    {
+      label: "Active Accounts",
+      value: ratio(metrics.active_users, metrics.total_users),
+      detail: `${formatNumber(metrics.active_users)} active users`,
+    },
+    {
+      label: "Survey Dataset",
+      value: ratio(metrics.survey_users, metrics.total_users),
+      detail: `${formatNumber(metrics.survey_users)} anonymized survey users`,
+    },
+    {
+      label: "Admins",
+      value: ratio(metrics.admin_users, metrics.total_users),
+      detail: `${formatNumber(metrics.admin_users)} admin accounts`,
+    },
+    {
+      label: "Helpful Feedback",
+      value: ratio(metrics.helpful_feedback, metrics.total_feedback),
+      detail: `${formatNumber(metrics.helpful_feedback)} helpful responses`,
+    },
+  ];
+}
+
+function ratio(value: number, total: number) {
+  if (!total) {
+    return 0;
+  }
+  return Math.max(0, Math.min(1, value / total));
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat().format(value);
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function formatDateTime(value: number) {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
+function truncate(value: string, length: number) {
+  return value.length > length ? `${value.slice(0, length - 1)}...` : value;
 }

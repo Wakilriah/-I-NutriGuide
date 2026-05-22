@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type AdminRouteId = "dashboard" | "foods" | "food-form" | "knowledge" | "rules" | "recommendations" | "feedback" | "users";
+export type AdminRouteId = "dashboard" | "foods" | "food-form" | "knowledge" | "rules" | "recommendations" | "feedback" | "chats" | "users";
 
 export const adminRoutes = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -20,5 +20,6 @@ export const adminRoutes = [
   { id: "rules", label: "Rules", icon: ShieldCheck, path: "/rules" },
   { id: "recommendations", label: "Recommendations", icon: Activity, path: "/recommendations" },
   { id: "feedback", label: "Feedback", icon: MessageSquare, path: "/feedback" },
+  { id: "chats", label: "Chats", icon: MessageSquare, path: "/chats" },
   { id: "users", label: "Users", icon: Users, path: "/users" },
 ] as const satisfies ReadonlyArray<{ id: AdminRouteId; label: string; icon: LucideIcon; path: string }>;

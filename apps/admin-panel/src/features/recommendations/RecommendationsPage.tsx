@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Activity, ArrowLeft, Network, Search, Target, Utensils } from "lucide-react";
 import { useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { fetchAdminRecommendationRun, fetchPaginatedAdminRecommendationRuns, type AdminRecommendationRun } from "../../api/recommendations";
+import { fetchAdminRecommendationRun, fetchPaginatedAdminRecommendationRuns, type AdminRecommendationRun, type RecommendationItem } from "../../api/recommendations";
 import { AdminPagination } from "../../components/admin/AdminPagination";
 import { ListSkeleton, MetricSkeletonGrid } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
@@ -48,7 +48,7 @@ export function RecommendationsPage() {
   const totalRuns = data?.count ?? 0;
   const pageCount = Math.max(1, Math.ceil(totalRuns / PAGE_SIZE));
   const allItems = runs.flatMap((run) => run.items);
-  const averageScore = average(allItems.map((item) => item.score));
+  const averageScore = average(allItems.map((item) => item.confidence_score ?? item.score));
   const averageRuleScore = average(allItems.map((item) => item.rule_score));
   const ruleMatchedItems = allItems.filter((item) => item.matched_rules.length > 0 || item.rule_score > 0).length;
 
@@ -157,7 +157,7 @@ export function RecommendationDetailPage() {
   });
 
   const items = run?.items ?? [];
-  const averageScore = average(items.map((item) => item.score));
+  const averageScore = average(items.map((item) => item.confidence_score ?? item.score));
   const averageRuleScore = average(items.map((item) => item.rule_score));
 
   return (
@@ -199,14 +199,33 @@ export function RecommendationDetailPage() {
                         <h3>#{item.rank} {item.food.name}</h3>
                         <p>{item.food.category}</p>
                       </div>
-                      <Badge variant="secondary">{Math.round(item.score * 100)}%</Badge>
+                      <Badge variant="secondary">{item.confidence_label ?? "Confidence"} {Math.round((item.confidence_score ?? item.score) * 100)}%</Badge>
                     </div>
-                    <p>{item.explanation}</p>
+                    <p>{explanationSummary(item.explanation)}</p>
+                    {item.warnings.length ? (
+                      <div className="alert-stack">
+                        {item.warnings.map((warning, index) => (
+                          <p className="empty-line" key={`${warningTitle(warning)}-${index}`}>{warningTitle(warning)}: {warningMessage(warning)}</p>
+                        ))}
+                      </div>
+                    ) : null}
                     <div className="rule-metric-stack">
-                      <ScoreMetric label="Nutrient" value={item.nutrient_score} />
-                      <ScoreMetric label="Rules" value={item.rule_score} />
-                      <ScoreMetric label="Preference" value={item.preference_score} />
+                      {Object.entries(item.score_breakdown ?? {
+                        nutrient_score: item.nutrient_score,
+                        rule_score: item.rule_score,
+                        preference_score: item.preference_score,
+                      }).map(([label, value]) => (
+                        <ScoreMetric key={label} label={scoreLabel(label)} value={Number(value)} />
+                      ))}
                     </div>
+                    {typeof item.explanation !== "string" && item.explanation.reasons?.length ? (
+                      <div className="tag-list">
+                        {item.explanation.reasons.slice(0, 4).map((reason) => (
+                          <Badge key={`${reason.type}-${reason.title}`} variant="outline">{reason.title}</Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                    {item.feedback?.user_feedback ? <p>Feedback: {item.feedback.user_feedback.feedback_type}</p> : null}
                     <p>{item.matched_rules.length ? `${item.matched_rules.length} matched rules` : "No rule match"}</p>
                   </article>
                 ))}
@@ -253,6 +272,26 @@ function ScoreMetric({ label, value }: { label: string; value: number }) {
       </div>
     </div>
   );
+}
+
+function explanationSummary(value: RecommendationItem["explanation"]) {
+  return typeof value === "string" ? value : value.summary;
+}
+
+function warningTitle(value: RecommendationItem["warnings"][number]) {
+  return typeof value === "string" ? "Warning" : value.title;
+}
+
+function warningMessage(value: RecommendationItem["warnings"][number]) {
+  return typeof value === "string" ? value : value.message;
+}
+
+function scoreLabel(value: string) {
+  return value
+    .replace(/_score$/u, "")
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function average(values: number[]) {

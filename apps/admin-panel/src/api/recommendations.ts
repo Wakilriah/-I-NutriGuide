@@ -9,6 +9,7 @@ export type RecommendationItem = {
     name: string;
     slug: string;
     category: string;
+    nutrients?: string[];
   };
   matched_supplement: null | {
     id: number;
@@ -16,6 +17,9 @@ export type RecommendationItem = {
     slug: string;
   };
   score: number;
+  confidence_score?: number;
+  confidence_label?: string;
+  score_breakdown?: Record<string, number>;
   nutrient_score: number;
   rule_score: number;
   preference_score: number;
@@ -27,8 +31,31 @@ export type RecommendationItem = {
     explanation?: string;
   }>;
   tags: string[];
-  warnings: string[];
-  explanation: string;
+  warnings: Array<string | {
+    level: "info" | "caution" | "warning";
+    type: string;
+    title: string;
+    message: string;
+    related_items?: string[];
+  }>;
+  explanation: string | {
+    summary: string;
+    reasons?: Array<{
+      type: string;
+      title: string;
+      message: string;
+      confidence: number;
+    }>;
+  };
+  feedback?: {
+    user_feedback: null | {
+      id: number;
+      feedback_type: string;
+      rating?: number | null;
+      comment?: string;
+    };
+    available_actions: string[];
+  };
 };
 
 export type AdminRecommendationRun = {

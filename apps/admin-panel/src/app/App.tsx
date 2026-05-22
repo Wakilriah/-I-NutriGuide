@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { LoginPage } from "../features/auth/LoginPage";
+import { ChatsPage, UserChatsPage } from "../features/chats/ChatsPage";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { FeedbackPage } from "../features/feedback/FeedbackPage";
 import { FoodFormPage, FoodsPage } from "../features/knowledge/FoodsPage";
@@ -42,6 +43,8 @@ function AppRoutes() {
         <Route path="recommendations" element={<RecommendationsPage />} />
         <Route path="recommendations/:runId" element={<RecommendationDetailPage />} />
         <Route path="feedback" element={<FeedbackPage />} />
+        <Route path="chats" element={<ChatsPage />} />
+        <Route path="chats/:userId" element={<UserChatsPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:userId" element={<UserDetailPage />} />
       </Route>

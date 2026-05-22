@@ -11,6 +11,11 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    watch: {
+      ignored: ["**/dist/**", "**/node_modules/**"],
+      interval: 1000,
+      usePolling: true,
+    },
   },
   test: {
     environment: "jsdom",

@@ -33,6 +33,7 @@ import {
 } from "../../components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Textarea } from "../../components/ui/textarea";
+import { invalidateDashboard } from "../../lib/query-keys";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
@@ -171,7 +172,7 @@ export function FoodsPage() {
     mutationKey: ["foods", "delete"],
     mutationFn: deleteFood,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["foods"] });
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ["foods"] }), invalidateDashboard(queryClient)]);
     },
   });
 
@@ -470,7 +471,7 @@ export function FoodFormPage() {
     onError: () => setFormError("Unable to save this food."),
     onSuccess: async () => {
       setFormError(null);
-      await queryClient.invalidateQueries({ queryKey: ["foods"] });
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ["foods"] }), invalidateDashboard(queryClient)]);
       onDone();
     },
   });

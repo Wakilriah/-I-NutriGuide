@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { invalidateDashboard } from "../../lib/query-keys";
 import { useAuthStore } from "../../store/auth-store";
 
 const PAGE_SIZE = 10;
@@ -156,7 +157,7 @@ export function UsersPage() {
   };
 
   const refreshUsers = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    await Promise.all([queryClient.invalidateQueries({ queryKey: ["admin-users"] }), invalidateDashboard(queryClient)]);
   };
 
   const saveMutation = useMutation({

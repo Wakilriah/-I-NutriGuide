@@ -23,6 +23,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
+import { invalidateDashboard } from "../../lib/query-keys";
 
 const PAGE_SIZE = 10;
 const entityTypes: EntityType[] = ["supplement", "nutrient", "food", "category"];
@@ -124,7 +125,7 @@ export function RulesPage() {
   };
 
   const refreshRules = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["association-rules"] });
+    await Promise.all([queryClient.invalidateQueries({ queryKey: ["association-rules"] }), invalidateDashboard(queryClient)]);
   };
 
   const saveMutation = useMutation({
