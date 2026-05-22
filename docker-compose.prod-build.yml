@@ -20,3 +20,12 @@ services:
       cache_from:
         - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-admin-panel:${CACHE_TAG:-latest}
     platform: ${DOCKER_PLATFORM:-linux/amd64}
+
+  landing_page:
+    image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-landing-page:${IMAGE_TAG:-latest}
+    build:
+      context: ./apps/landing-page
+      target: production
+      cache_from:
+        - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-landing-page:${CACHE_TAG:-latest}
+    platform: ${DOCKER_PLATFORM:-linux/amd64}

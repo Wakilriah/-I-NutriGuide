@@ -14,6 +14,7 @@ db.sqlite3
 media/
 staticfiles/
 node_modules/
+.next/
 dist/
 build/
 .expo/

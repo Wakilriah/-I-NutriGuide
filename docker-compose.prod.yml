@@ -107,6 +107,23 @@ services:
       backend:
         condition: service_healthy
 
+  landing_page:
+    image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-landing-page:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - public
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-landing-http.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-landing-http.entrypoints=web
+      - traefik.http.routers.inutriguide-landing-http.middlewares=redirect-to-https@file
+      - traefik.http.routers.inutriguide-landing.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-landing.entrypoints=websecure
+      - traefik.http.routers.inutriguide-landing.tls.certresolver=letsencrypt
+      - traefik.http.routers.inutriguide-landing.middlewares=secure-headers@file
+      - traefik.http.services.inutriguide-landing.loadbalancer.server.port=3000
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
