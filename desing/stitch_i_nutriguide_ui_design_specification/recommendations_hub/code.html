@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Recommendations Hub - I-NutriGuide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#707a6c",
+                    "on-surface-variant": "#40493d",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#deecdc",
+                    "inverse-surface": "#273328",
+                    "primary-fixed": "#a3f69c",
+                    "inverse-on-surface": "#e7f5e4",
+                    "outline-variant": "#bfcaba",
+                    "secondary-fixed": "#ffdcc3",
+                    "on-primary-container": "#ccffc2",
+                    "secondary": "#914d00",
+                    "surface": "#effded",
+                    "tertiary-container": "#c44022",
+                    "surface-container-low": "#e9f8e7",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#2f7d32",
+                    "on-tertiary-fixed-variant": "#8b1a00",
+                    "tertiary": "#a2280b",
+                    "on-secondary": "#ffffff",
+                    "primary": "#0f631b",
+                    "on-secondary-fixed-variant": "#6e3900",
+                    "tertiary-fixed": "#ffdad2",
+                    "secondary-container": "#fc9430",
+                    "surface-container": "#e4f2e1",
+                    "tertiary-fixed-dim": "#ffb4a3",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#1d6d24",
+                    "on-tertiary-container": "#ffeeea",
+                    "on-surface": "#131e14",
+                    "on-primary-fixed": "#002203",
+                    "on-secondary-fixed": "#2f1500",
+                    "secondary-fixed-dim": "#ffb77d",
+                    "inverse-primary": "#88d982",
+                    "surface-bright": "#effded",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d8e6d6",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#663500",
+                    "surface-container-highest": "#d8e6d6",
+                    "surface-dim": "#d0dece",
+                    "on-background": "#131e14",
+                    "on-tertiary-fixed": "#3d0600",
+                    "primary-fixed-dim": "#88d982",
+                    "background": "#effded",
+                    "on-primary-fixed-variant": "#005311"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "16px",
+                    "unit": "4px",
+                    "gutter": "12px",
+                    "section-gap": "32px",
+                    "container-padding": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Manrope"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px 0 rgba(47, 125, 50, 0.08);
+        }
+        .ambient-glow {
+            box-shadow: 0 20px 40px -12px rgba(47, 125, 50, 0.15);
+        }
+        .bottom-sheet {
+            border-radius: 32px 32px 0 0;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-container-padding py-4 w-full max-w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden ring-2 ring-primary/10">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up professional headshot of a radiant, smiling woman with a healthy complexion, set against a soft-focus interior background with natural light. The lighting is warm and airy, reflecting a premium wellness aesthetic. The overall mood is vibrant, encouraging, and clean, perfectly matching a modern health-focused lifestyle brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC-u4jBczfsEDo4na_vW7ABvqU7-bLY_jPqKm0lvGtzFpKEhDj5Jhul-V406X3pKY1S7LBJFcPNrBSy5keyPeEW5YQIbeRrXSQCBnAfMBNSUOC3F2dc8QvzSUixaPAXuhYLtS8YHTRKuhk5-U7HS0T3e0Ci5WwQQLjabPc-lcdn7XGzkFuOmNUIk0ZzEBXdU9AXBFzbiFB9tMKyZyxjZdpVQDpZ8I4iLPM5G__P0bgBDPffsbfljyDnuSt9k7JcM6vnRhR7q7X0rUq"/>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed tracking-tight">I-NutriGuide</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-primary hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-24 px-container-padding space-y-section-gap">
+<!-- Page Header -->
+<section class="space-y-1">
+<span class="text-secondary font-label-md text-label-md tracking-wider uppercase">Smart Food Match</span>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Recommendations Hub</h2>
+<p class="text-on-surface-variant text-body-md max-w-xs">AI-curated nutrition plans based on your recent biometric goals.</p>
+</section>
+<!-- Bento Grid / Primary Summary -->
+<section class="grid grid-cols-2 gap-4">
+<div class="col-span-2 glass-card p-6 rounded-[24px] flex items-center justify-between ambient-glow">
+<div class="space-y-2">
+<p class="text-label-md font-label-md text-primary">Next Update</p>
+<p class="text-headline-md font-headline-md">In 4 hours</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="timer">timer</span>
+</div>
+</div>
+</section>
+<!-- History Feed -->
+<section class="space-y-stack-gap">
+<h3 class="font-headline-md text-headline-md text-on-surface px-1">Recent Recommendations</h3>
+<div class="space-y-4">
+<!-- AppCard Item 1 -->
+<div class="glass-card overflow-hidden rounded-[24px] transition-transform active:scale-95 duration-200">
+<div class="flex p-4 gap-4">
+<div class="w-24 h-24 rounded-[16px] overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A vibrant, fresh salad bowl featuring grilled salmon, avocado slices, quinoa, and bright citrus segments, shot from a top-down editorial angle. The food is styled perfectly on a ceramic plate, emphasizing textures and freshness. The lighting is bright and natural, creating an appetizing, high-end wellness atmosphere with soft shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnxiIgsQLTNQ-qhtvk3jJAi_NSxzQX9Fc2TaMX4ldLjTF6JdU9r8Va2ipoL9Ns8mj1CbhmTWta6ypLCLrXvK-TkcgZkhLrBJJUUIiAYdSr9U5_sW3eoocKdenN7ghQl1I8B426XiBC_cNnUggFvnmnZCU8zODavFyNHuNzZ0B19LSlbQ50oZe0_9FDlcAUVU9wJcHdN88i9mqwfluIpN9QQouelFE_sD2-c_Ven0K7i8r_3xutw2dM8VSaFTj3QHKiPePfi18DJcQn"/>
+</div>
+<div class="flex-grow flex flex-col justify-between py-1">
+<div>
+<h4 class="font-headline-md text-label-md text-on-surface">10 food recommendations</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Generated June 12, 08:45 AM</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm">98% Match</span>
+<span class="text-on-surface-variant text-label-sm font-label-sm">High Protein</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AppCard Item 2 -->
+<div class="glass-card overflow-hidden rounded-[24px] transition-transform active:scale-95 duration-200">
+<div class="flex p-4 gap-4">
+<div class="w-24 h-24 rounded-[16px] overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A beautifully layered smoothie bowl with vibrant acai base, topped with organized rows of sliced strawberries, granola, and chia seeds. The shot is bright and airy with a minimalist aesthetic, highlighting the organic textures of the ingredients. The soft morning light enhances the natural, healthy, and premium feel of the nutrition guide." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWhCofkrKu66QDpcBc2upObkqTFHGzduVmUrCl40i_16vwng3tf1g0_qLzrgbQjT_P5HgxxqAbt0Cn69xFNXIAZqMOW97u7UTaQFG7aJDdFB8ieU9Ulisd4ztbxuJugK7c5vjBRMieTjBHGIHLP3o4O0Il6JhuyU_A-qc3YzdgzvT_vyYjwtIiwWxOyimdtEpjdYQmkn2HQ8ARODnwdVB47xixlbM2GIh0W7llQSwW4xZJP17Dk9KWRPOnKiLkAgX7UhJvoyBIgmQP"/>
+</div>
+<div class="flex-grow flex flex-col justify-between py-1">
+<div>
+<h4 class="font-headline-md text-label-md text-on-surface">8 breakfast matches</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Generated June 10, 07:20 AM</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-label-sm">92% Match</span>
+<span class="text-on-surface-variant text-label-sm font-label-sm">Low Carb</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AppCard Item 3 -->
+<div class="glass-card overflow-hidden rounded-[24px] transition-transform active:scale-95 duration-200">
+<div class="flex p-4 gap-4">
+<div class="w-24 h-24 rounded-[16px] overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Glistening pan-seared sea bass served with asparagus and a light lemon butter sauce on a minimalist white plate. The lighting is professional and clean, capturing the delicate texture of the fish and the vibrant green of the vegetables. The scene conveys a sense of premium culinary quality and scientific nutritional balance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWN8xZD2B-khs3cZTaGW6g9oxuRFjOa-s-YoreDRTJiZMOy3WCBVfcx2ua0QqITapPzLQWY6g20cWfWool6zLqLixIUyz3K78kU_ox6WGWjos46YdGiymIz33y4X5ljGTCd5O6LfMcDUY7nqYKYvg3w-w_PUigXEGeqR_uJp_56wRnatyrURKmtFbc0k3PtYd962ahDixkSAIFFeBboeY-dTup8jnKD57Xg-fcLQ91wlwdyAfL-bsZiPTIZ1JAAurJK_eYeS1F2S3j"/>
+</div>
+<div class="flex-grow flex flex-col justify-between py-1">
+<div>
+<h4 class="font-headline-md text-label-md text-on-surface">12 dinner selections</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Generated June 08, 06:15 PM</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm">95% Match</span>
+<span class="text-on-surface-variant text-label-sm font-label-sm">Heart Healthy</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Draggable Filter Bottom Sheet (Static Visual Representation) -->
+<section class="fixed bottom-0 left-0 w-full z-[60]">
+<!-- Backdrop handle simulation -->
+<div class="bottom-sheet bg-surface p-6 pb-24 border-t border-outline-variant/30">
+<div class="w-12 h-1.5 bg-outline-variant rounded-full mx-auto mb-6"></div>
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface">Preferences</h3>
+<button class="text-primary font-label-md text-label-md">Clear All</button>
+</div>
+<div class="space-y-6">
+<!-- Calories Slider Simulation -->
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface">Max Calories</span>
+<span class="text-primary font-bold">850 kcal</span>
+</div>
+<div class="relative w-full h-1.5 bg-surface-container-highest rounded-full">
+<div class="absolute top-0 left-0 h-full w-[65%] bg-primary rounded-full"></div>
+<div class="absolute top-1/2 left-[65%] -translate-y-1/2 w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md"></div>
+</div>
+</div>
+<!-- Cooking Time Checkboxes -->
+<div class="space-y-3">
+<span class="font-label-md text-label-md text-on-surface">Cooking Time</span>
+<div class="flex flex-wrap gap-2">
+<div class="px-4 py-2 rounded-full bg-primary-container text-on-primary-container text-label-sm font-label-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            Under 15 min
+                        </div>
+<div class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm">
+                            15 - 30 min
+                        </div>
+<div class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm">
+                            30+ min
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FAB: Generate New Recommendations -->
+<button class="fixed bottom-24 right-6 z-50 bg-primary-container text-on-primary-container flex items-center gap-3 px-6 py-4 rounded-[28px] shadow-lg hover:shadow-xl transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md">Generate New</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface/90 dark:bg-surface-container-highest/90 backdrop-blur-2xl flex justify-around items-center px-4 pb-6 pt-2 rounded-t-xl shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">AI Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 scale-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-sm text-label-sm">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

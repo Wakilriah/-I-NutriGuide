@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .backdrop-blur-glass {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#c44022",
+                      "outline": "#707a6c",
+                      "surface-container-high": "#deecdc",
+                      "surface-container": "#e4f2e1",
+                      "on-tertiary-fixed": "#3d0600",
+                      "surface-container-highest": "#d8e6d6",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed-variant": "#005311",
+                      "on-secondary-fixed": "#2f1500",
+                      "surface-container-low": "#e9f8e7",
+                      "on-surface": "#131e14",
+                      "secondary": "#914d00",
+                      "on-secondary-fixed-variant": "#6e3900",
+                      "surface-dim": "#d0dece",
+                      "secondary-fixed": "#ffdcc3",
+                      "primary-fixed-dim": "#88d982",
+                      "on-surface-variant": "#40493d",
+                      "surface-tint": "#1d6d24",
+                      "background": "#effded",
+                      "on-primary-fixed": "#002203",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#ffeeea",
+                      "on-tertiary": "#ffffff",
+                      "surface-variant": "#d8e6d6",
+                      "primary-container": "#2f7d32",
+                      "on-secondary-container": "#663500",
+                      "inverse-on-surface": "#e7f5e4",
+                      "secondary-container": "#fc9430",
+                      "on-primary": "#ffffff",
+                      "primary-fixed": "#a3f69c",
+                      "surface-bright": "#effded",
+                      "on-tertiary-fixed-variant": "#8b1a00",
+                      "on-primary-container": "#ccffc2",
+                      "tertiary-fixed": "#ffdad2",
+                      "secondary-fixed-dim": "#ffb77d",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#88d982",
+                      "on-background": "#131e14",
+                      "surface": "#effded",
+                      "outline-variant": "#bfcaba",
+                      "tertiary-fixed-dim": "#ffb4a3",
+                      "primary": "#0f631b",
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "tertiary": "#a2280b",
+                      "inverse-surface": "#273328"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "32px",
+                      "stack-gap": "16px",
+                      "unit": "4px",
+                      "gutter": "12px",
+                      "container-padding": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Manrope"],
+                      "body-md": ["Be Vietnam Pro"],
+                      "label-sm": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Be Vietnam Pro"],
+                      "headline-lg": ["Manrope"],
+                      "label-md": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen overflow-x-hidden">
+<!-- Splash/Login Container -->
+<main class="relative h-screen w-full flex items-end md:items-center justify-center bg-cover bg-center overflow-hidden" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBr0adH1DwlHYyPkhvCT4Pew8ABcQgTXxkkQWOjo6EhD2bVdGukh8uRLdY1QRGOFZVf-TJDd6cIX7AHnDL2EEdogwuzO1JXpaida1ErsqpNr-97BWN83kkxqMqt4Y0B5F5q_COSb60F6V03r6GkHUBbY7kI6FLK8TmitDAGbOe24DmDE2Damtor0SQ9R3Y8bFolCHngwVEPMc1OJW79rna-T7Q3Kk8IaWf9OxkfOSKDVs8XaMYkW61-eltXkYTBDlqXx85eHC8cch2c')">
+<!-- Gradient Overlay for Legibility -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none"></div>
+<!-- Glassmorphic Content Card -->
+<div class="relative z-10 w-full max-w-lg mx-gutter mb-6 md:mb-0 backdrop-blur-glass bg-white/70 dark:bg-surface-dim/70 rounded-[32px] p-container-padding shadow-[0_20px_50px_rgba(15,99,27,0.15)] border border-white/40 flex flex-col items-center text-center animate-fade-in">
+<!-- Branding Header (TopAppBar Influence) -->
+<header class="flex flex-col items-center mb-stack-gap">
+<div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-on-primary text-[32px]" data-weight="fill">nutrition</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">I-NutriGuide</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Smart Nutrition, Personalized for You.</p>
+</header>
+<!-- Hero Text -->
+<div class="mb-section-gap">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight px-4">Eat Smarter, <br/><span class="text-primary">Live Better.</span></h2>
+</div>
+<!-- Interaction Section -->
+<div class="w-full flex flex-col gap-stack-gap">
+<!-- Primary Action -->
+<button class="w-full py-4 bg-primary text-on-primary rounded-full font-label-md text-label-md shadow-[0_4px_12px_rgba(47,125,50,0.3)] hover:opacity-90 active:scale-[0.98] transition-all">
+                    Get Started
+                </button>
+<!-- Secondary Action -->
+<button class="w-full py-4 bg-white/50 border-2 border-primary text-primary rounded-full font-label-md text-label-md hover:bg-primary/5 active:scale-[0.98] transition-all">
+                    Login to Account
+                </button>
+</div>
+<!-- Divider -->
+<div class="w-full flex items-center gap-4 my-section-gap">
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-widest">Or continue with</span>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<!-- Social Logins -->
+<div class="w-full grid grid-cols-2 gap-stack-gap mb-4">
+<button class="flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-lowest border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors active:scale-95">
+<img alt="Google" class="w-5 h-5" data-alt="The official multi-colored Google 'G' logo rendered as a clean vector graphic on a white background. The logo uses the signature blue, red, yellow, and green brand colors in a minimalist, modern circular composition. Perfect for a UI login button with high-key lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh2k3hL9DiaccZX_CSHqhbqcXDSVeVnly6WEpMKskOGgd1fBtVHJ58bDjnubMMwCMPlvWiXuvJd5L7fyMluOWkaPyI1Gx5SjEJFo_R4J1Zt9o5FBy2dgDZw41JY_abR-SPR6yv88lsP661Xv-bz811Z5-MCRu49Sn57DrAZV1pD1p9qPnBboDvWY6UCgvwGXfV9LK1JLlpCRpnUqhAgNnlKw3TPveI8UF1_82VdjMezzf_lhu48TX_eOmveAkOZNyR4btVYeBKsbr0"/>
+<span class="font-label-md text-label-md text-on-surface">Google</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-4 bg-on-surface text-surface rounded-xl hover:opacity-90 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-lg" data-weight="fill">File</span>
+<span class="font-label-md text-label-md">Apple</span>
+</button>
+</div>
+<!-- Footer Link -->
+<footer class="mt-4">
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+                    Don't have an account? <a class="text-primary font-bold hover:underline" href="#">Join the community</a>
+</p>
+</footer>
+</div>
+</main>
+<!-- Content Sections (Mocked to show design language) -->
+<section class="bg-surface py-section-gap px-container-padding">
+<div class="max-w-7xl mx-auto">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-section-gap text-center">Why I-NutriGuide?</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-section-gap">
+<!-- Bento Card 1 -->
+<div class="bg-surface-container-low p-stack-gap rounded-[24px] border border-white/60 shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<div class="w-12 h-12 bg-secondary-container/20 text-on-secondary-container rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">AI Precision</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Advanced algorithms analyze your metabolism and lifestyle for perfect meal plans.</p>
+</div>
+<!-- Bento Card 2 -->
+<div class="bg-surface-container-low p-stack-gap rounded-[24px] border border-white/60 shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<div class="w-12 h-12 bg-primary-container/20 text-primary rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">camera</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Visual Tracking</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Snap a photo of your food and let our AI identify nutrients instantly.</p>
+</div>
+<!-- Bento Card 3 -->
+<div class="bg-surface-container-low p-stack-gap rounded-[24px] border border-white/60 shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<div class="w-12 h-12 bg-tertiary-container/20 text-on-tertiary-fixed-variant rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Health First</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Focus on long-term wellness rather than just calorie counting.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Navigation (Shared Component Integration - Suppressed for Login context as per rules, but included as a reference if it were a dashboard) -->
+<!-- The "Destination" Rule: Navigation suppressed for login screen to prioritize focus journey -->
+</body></html>

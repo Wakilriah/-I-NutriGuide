@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#707a6c",
+                    "on-surface-variant": "#40493d",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#deecdc",
+                    "inverse-surface": "#273328",
+                    "primary-fixed": "#a3f69c",
+                    "inverse-on-surface": "#e7f5e4",
+                    "outline-variant": "#bfcaba",
+                    "secondary-fixed": "#ffdcc3",
+                    "on-primary-container": "#ccffc2",
+                    "secondary": "#914d00",
+                    "surface": "#effded",
+                    "tertiary-container": "#c44022",
+                    "surface-container-low": "#e9f8e7",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#2f7d32",
+                    "on-tertiary-fixed-variant": "#8b1a00",
+                    "tertiary": "#a2280b",
+                    "on-secondary": "#ffffff",
+                    "primary": "#0f631b",
+                    "on-secondary-fixed-variant": "#6e3900",
+                    "tertiary-fixed": "#ffdad2",
+                    "secondary-container": "#fc9430",
+                    "surface-container": "#e4f2e1",
+                    "tertiary-fixed-dim": "#ffb4a3",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#1d6d24",
+                    "on-tertiary-container": "#ffeeea",
+                    "on-surface": "#131e14",
+                    "on-primary-fixed": "#002203",
+                    "on-secondary-fixed": "#2f1500",
+                    "secondary-fixed-dim": "#ffb77d",
+                    "inverse-primary": "#88d982",
+                    "surface-bright": "#effded",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d8e6d6",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#663500",
+                    "surface-container-highest": "#d8e6d6",
+                    "surface-dim": "#d0dece",
+                    "on-background": "#131e14",
+                    "on-tertiary-fixed": "#3d0600",
+                    "primary-fixed-dim": "#88d982",
+                    "background": "#effded",
+                    "on-primary-fixed-variant": "#005311"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "12px",
+                    "2xl": "24px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "16px",
+                    "unit": "4px",
+                    "gutter": "12px",
+                    "section-gap": "32px",
+                    "container-padding": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Manrope"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #effded; } /* Mint Background mapping to surface */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .cream-card {
+            background-color: #FFF8ED;
+            border-radius: 24px;
+        }
+        .ambient-glow {
+            box-shadow: 0 20px 40px -10px rgba(47, 125, 50, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-container-padding py-4 w-full max-w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
+<img class="w-full h-full object-cover" data-alt="A professional and friendly portrait of a young woman with a clean-cut look, set against a soft minimalist studio background. The lighting is bright and even, reflecting a premium wellness aesthetic. She has a gentle smile, conveying confidence and health. The image style is editorial and high-quality, fitting a modern health-conscious mobile application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgKDRArx3eWqHJFg2c8oDGmG7bGD8cJjmxm4BihQkvroeGnIJwtY1VWhDp-g1S_d88IDpRGXUyDLFd-hHjZWSNPjJni4n1l-7SS310OXD4IJQUQ_1OHfABJH8Q1CKMM_4W15vKCUXcDgpmDslR3wMsnjQ3xpDtnscTL4JNZVboXLxIzX8KWM8hbs6wXkb_GiM07-sZaiqtgDZzBYB8mrMKsSCru0x_I6yB_H_JR2VjIOfNkRLZICln-GOgF8YONKutSV2LUr-Iezrd"/>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed tracking-tight">I-NutriGuide</h1>
+</div>
+<button class="text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-[72px] pb-32">
+<!-- Hero Section -->
+<section class="px-container-padding pt-6">
+<div class="relative h-[280px] w-full rounded-2xl overflow-hidden shadow-lg">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A vibrant, top-down view of a gourmet breakfast bowl featuring fresh dragon fruit, berries, granola, and mint leaves. The lighting is soft morning sunlight, emphasizing textures and freshness. The scene is set on a light marble surface with organic shadows. The overall aesthetic is clean, premium, and healthy, aligning with a modern wellness brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMepuuIONV_mbZFg-xm15lIGuV93stvuUEj-dsePlNe3stxRhX9KIdBt5DidoobV556D2sRsLx2jPjh993WywK32Qx_cxCp2bdzoWbXLi5VoQFNKKie0GV7dc9_duOrGxfMv0aSqYW8e7TW69ruwzHos9zIqgTzWlw0H5gAd_VuNZxUuHtdsj06cZQr0qssvAJmC_IVWTPJx2CBprBMtfOkv3EFlk2XQWOWRJ6EqeQoWPsFgCOS_3gsPJnGouKaKN8875-L6ejbUYn"/>
+<!-- Glassmorphic Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/40 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 p-6 glass-card rounded-2xl">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-1">Good Morning, Alex!</h2>
+<p class="font-body-md text-on-surface-variant mb-4">Ready for your Vitamin C boost?</p>
+<div class="flex gap-3">
+<div class="flex-1 bg-surface-container-lowest/60 p-3 rounded-xl border border-white/40">
+<span class="block font-label-sm text-label-sm text-primary uppercase">Active</span>
+<span class="font-headline-md text-headline-md text-on-surface">3 Supps</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest/60 p-3 rounded-xl border border-white/40">
+<span class="block font-label-sm text-label-sm text-primary uppercase">Today's</span>
+<span class="font-headline-md text-headline-md text-on-surface">12 Matches</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA & Search Section -->
+<section class="px-container-padding mt-8">
+<button class="w-full py-4 bg-primary text-on-primary font-headline-md text-headline-md rounded-2xl flex items-center justify-center gap-2 ambient-glow hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-weight="fill">auto_awesome</span>
+                Generate Today's Match
+            </button>
+<div class="mt-section-gap">
+<div class="relative flex items-center">
+<span class="absolute left-4 text-outline material-symbols-outlined">search</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container rounded-2xl border-none focus:ring-2 focus:ring-primary font-body-md" placeholder="Search foods or nutrients..." type="text"/>
+</div>
+<div class="flex gap-4 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+<button class="flex-none flex items-center gap-2 px-5 py-3 bg-white rounded-full border border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-primary">add_circle</span>
+<span class="font-label-md text-label-md">Add Supplement</span>
+</button>
+<button class="flex-none flex items-center gap-2 px-5 py-3 bg-white rounded-full border border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-primary">restaurant_menu</span>
+<span class="font-label-md text-label-md">Food Matches</span>
+</button>
+<button class="flex-none flex items-center gap-2 px-5 py-3 bg-white rounded-full border border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-primary">bookmark</span>
+<span class="font-label-md text-label-md">Saved Foods</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Today's Routine -->
+<section class="mt-section-gap">
+<div class="px-container-padding flex justify-between items-end mb-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Today's Routine</h3>
+<span class="font-label-md text-label-md text-primary">View All</span>
+</div>
+<div class="flex flex-col gap-3 px-container-padding">
+<!-- Supplement Card 1 -->
+<div class="flex items-center p-4 cream-card ambient-glow border border-secondary-container/10">
+<div class="w-12 h-12 bg-secondary-container rounded-xl flex items-center justify-center text-on-secondary-container mr-4">
+<span class="material-symbols-outlined">pill</span>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-label-md text-on-surface">Vitamin D3</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">2000 IU • Take with meal</p>
+</div>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">check</span>
+</button>
+</div>
+<!-- Supplement Card 2 -->
+<div class="flex items-center p-4 cream-card ambient-glow border border-secondary-container/10">
+<div class="w-12 h-12 bg-tertiary-container rounded-xl flex items-center justify-center text-on-tertiary-container mr-4">
+<span class="material-symbols-outlined">medication</span>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-label-md text-on-surface">Magnesium Glycinate</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">400mg • After dinner</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined" data-weight="fill">check_circle</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Best Match Section -->
+<section class="mt-section-gap px-container-padding">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">#1 Smart Match</h3>
+<div class="relative cream-card overflow-hidden ambient-glow">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover" data-alt="A delicious Zesty Avocado Salad in a ceramic bowl, topped with radishes, seeds, and microgreens. The lighting is soft and natural, emphasizing the vibrant green of the avocado and the fresh textures of the vegetables. The background is a clean, neutral wood table, maintaining a high-end wellness vibe. The colors are fresh greens and bright earthy tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9yrZL6wRaRgB4ryv1ulQcv2IaZOJVoFKc6vOZ_9Mt101VKCy3vvH-cbX0iLhms94vXuw9HR3SE34VyYifJEOz3zOyrcK1lg4nGTMmuTjuWTDqoKbEyOx77SH_JWBTUTk_qjT0JaK_JypYTZe-HrMBMaJUsqLtxZIM0h818ut1N3ddZ5-ydlbpa_MolbwsrTJMNWGRWUmfzZgIoe9H1vfD_u1h05mEsoFIQE-OAQih3KVGRMPTTbCd2sXSpIoP92Eqf2mP7rWabX5I"/>
+<div class="absolute top-4 right-4 bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">bolt</span> 98% Synergy
+                    </div>
+</div>
+<div class="p-5">
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Zesty Avocado Salad</h4>
+<div class="flex items-start gap-3 p-3 bg-surface-container-low rounded-xl">
+<span class="material-symbols-outlined text-primary mt-0.5">lightbulb</span>
+<p class="font-body-md text-on-surface-variant text-sm">
+                            The <span class="font-bold text-primary">Vitamin E</span> in Avocado matches your Vitamin D routine for optimal fat-soluble absorption.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Education Component -->
+<section class="mt-section-gap px-container-padding pb-8">
+<div class="bg-primary text-on-primary p-6 rounded-2xl flex items-center gap-4">
+<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary">info</span>
+</div>
+<div>
+<h5 class="font-label-md text-label-md">Absorption Tip</h5>
+<p class="font-body-md text-sm opacity-90">Vitamin C increases the absorption of Iron from plant-based sources like spinach or lentils.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-2 bg-surface/90 dark:bg-surface-container-highest/90 backdrop-blur-2xl shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 scale-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-weight="fill">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-opacity" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-sm text-label-sm">AI Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-opacity" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-sm text-label-sm">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-opacity" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

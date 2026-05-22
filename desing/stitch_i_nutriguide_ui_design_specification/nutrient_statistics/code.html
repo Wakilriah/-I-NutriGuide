@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#c44022",
+                    "outline": "#707a6c",
+                    "surface-container-high": "#deecdc",
+                    "surface-container": "#e4f2e1",
+                    "on-tertiary-fixed": "#3d0600",
+                    "surface-container-highest": "#d8e6d6",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#005311",
+                    "on-secondary-fixed": "#2f1500",
+                    "surface-container-low": "#e9f8e7",
+                    "on-surface": "#131e14",
+                    "secondary": "#914d00",
+                    "on-secondary-fixed-variant": "#6e3900",
+                    "surface-dim": "#d0dece",
+                    "secondary-fixed": "#ffdcc3",
+                    "primary-fixed-dim": "#88d982",
+                    "on-surface-variant": "#40493d",
+                    "surface-tint": "#1d6d24",
+                    "background": "#effded",
+                    "on-primary-fixed": "#002203",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#ffeeea",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#d8e6d6",
+                    "primary-container": "#2f7d32",
+                    "on-secondary-container": "#663500",
+                    "inverse-on-surface": "#e7f5e4",
+                    "secondary-container": "#fc9430",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#a3f69c",
+                    "surface-bright": "#effded",
+                    "on-tertiary-fixed-variant": "#8b1a00",
+                    "on-primary-container": "#ccffc2",
+                    "tertiary-fixed": "#ffdad2",
+                    "secondary-fixed-dim": "#ffb77d",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#88d982",
+                    "on-background": "#131e14",
+                    "surface": "#effded",
+                    "outline-variant": "#bfcaba",
+                    "tertiary-fixed-dim": "#ffb4a3",
+                    "primary": "#0f631b",
+                    "on-error": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#a2280b",
+                    "inverse-surface": "#273328"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "stack-gap": "16px",
+                    "unit": "4px",
+                    "gutter": "12px",
+                    "container-padding": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Manrope"],
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-sm": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "headline-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 20px 0 rgba(15, 99, 27, 0.08);
+        }
+        .orange-glow-card {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 30px 0 rgba(252, 148, 48, 0.15);
+            border: 1px solid rgba(252, 148, 48, 0.2);
+        }
+        .custom-chart-gradient {
+            background: linear-gradient(180deg, rgba(15, 99, 27, 0.1) 0%, rgba(15, 99, 27, 0) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-[0_4px_20px_0_rgba(15,99,27,0.08)]">
+<div class="flex justify-between items-center w-full px-container-padding py-stack-gap">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A clean, professional headshot of a healthy-looking man with a friendly smile, set against a soft, blurred natural background. The lighting is bright and warm, reflecting a premium wellness aesthetic. The style is modern and editorial, with soft depth of field and vibrant skin tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA21l3zp5nSxjGEj0lUY_wT4IEKfp1GH2OyVrEKOsVTiebwlbbk0fO8MaxlkgLmgPS-k-zAEGIMb7p9Ex6ItOuB3UI4DEAqLjFWarNCZlC48b_2ApNzZGzOYAlO1k2gU9G4oAL3SIfeFHamlFC1cOPBCQweNyt9SsQ8Zbmth1jG-BIIeXkqD-TAt0KgFHFsaeUO51rB8W26kpczmTj2C-iJgll5KDT5qJsh4S_OTjlGWzKY8XNVzfJ_wjKRZ7K35D8NRl2f6aV99RBT"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Health Insights</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity active:scale-95 duration-200" data-icon="notifications">notifications</span>
+</div>
+</div>
+</header>
+<main class="px-container-padding pt-stack-gap space-y-section-gap">
+<!-- Daily Streak Counter -->
+<section class="flex items-center justify-between glass-card p-6 rounded-[24px] overflow-hidden relative">
+<div class="z-10">
+<p class="font-label-md text-label-md text-outline mb-1">Consistency Streak</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-primary">12</span>
+<span class="font-headline-md text-headline-md text-on-surface">Days</span>
+</div>
+<p class="font-label-sm text-label-sm text-secondary font-bold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="local_fire_department" data-weight="fill">local_fire_department</span>
+                    Keep it up, Alex!
+                </p>
+</div>
+<div class="absolute right-0 top-0 bottom-0 w-1/3 bg-primary-container/5 rounded-l-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[64px] text-primary/20" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</section>
+<!-- Weekly Synergy Score Line Chart -->
+<section class="space-y-stack-gap">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-md text-headline-md text-on-surface">Weekly Synergy Score</h2>
+<span class="font-label-md text-label-md text-primary font-bold">88% Peak</span>
+</div>
+<div class="glass-card p-6 rounded-[24px] h-64 flex flex-col justify-between">
+<!-- Simple Vector-based CSS Chart Representation -->
+<div class="flex-1 flex items-end justify-between gap-2 px-2 relative">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between opacity-5 pointer-events-none">
+<div class="border-b border-on-surface w-full"></div>
+<div class="border-b border-on-surface w-full"></div>
+<div class="border-b border-on-surface w-full"></div>
+<div class="border-b border-on-surface w-full"></div>
+</div>
+<!-- Data Points & Fake Line -->
+<div class="w-full h-full relative">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 100 40">
+<path class="text-primary" d="M0,35 Q15,30 25,15 T50,10 T75,20 T100,5" fill="none" stroke="currentColor" stroke-width="2"></path>
+<path class="text-primary/10" d="M0,35 Q15,30 25,15 T50,10 T75,20 T100,5 V40 H0 Z" fill="currentColor"></path>
+</svg>
+<!-- Interactive Dots -->
+<div class="absolute bottom-[90%] left-[50%] -translate-x-1/2 w-3 h-3 bg-primary rounded-full ring-4 ring-primary/20"></div>
+</div>
+</div>
+<div class="flex justify-between mt-4">
+<span class="font-label-sm text-label-sm text-outline">Mon</span>
+<span class="font-label-sm text-label-sm text-outline">Tue</span>
+<span class="font-label-sm text-label-sm text-outline">Wed</span>
+<span class="font-label-sm text-label-sm text-outline">Thu</span>
+<span class="font-label-sm text-label-sm text-outline">Fri</span>
+<span class="font-label-sm text-label-sm text-outline">Sat</span>
+<span class="font-label-sm text-label-sm text-outline font-bold text-primary">Sun</span>
+</div>
+</div>
+</section>
+<!-- Absorption Efficiency & Nutrient Pulse Bento -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap">
+<!-- Nutrient Pulse Grid -->
+<section class="glass-card p-6 rounded-[24px] space-y-6 order-2 md:order-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="vital_signs">vital_signs</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Nutrient Pulse</h3>
+</div>
+<div class="space-y-5">
+<!-- Vitamin D -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface">Vitamin D</span>
+<span class="font-label-sm text-label-sm text-primary">72%</span>
+</div>
+<div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 72%"></div>
+</div>
+</div>
+<!-- Iron -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface">Iron</span>
+<span class="font-label-sm text-label-sm text-tertiary">45%</span>
+</div>
+<div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 45%"></div>
+</div>
+</div>
+<!-- Magnesium -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface">Magnesium</span>
+<span class="font-label-sm text-label-sm text-primary">91%</span>
+</div>
+<div class="h-3 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 91%"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Absorption Efficiency Card -->
+<section class="orange-glow-card p-6 rounded-[24px] flex flex-col justify-between order-1 md:order-2 min-h-[220px]">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 bg-secondary-container/20 rounded-xl flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[28px]" data-icon="bolt">bolt</span>
+</div>
+<div class="text-right">
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-full">Optimal</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Absorption Efficiency</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-tight">Your body is currently processing micronutrients 15% better than last week.</p>
+</div>
+<div class="mt-4 pt-4 border-t border-secondary-container/10 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline font-medium">Daily Average</span>
+<span class="font-label-md text-label-md text-secondary font-bold">94.2%</span>
+</div>
+</section>
+</div>
+<!-- Call to Action Card -->
+<section class="relative rounded-[24px] overflow-hidden h-48 group">
+<img alt="Healthy Bowl" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A lush, close-up photograph of a vibrant Mediterranean Buddha bowl with avocado slices, roasted chickpeas, kale, and lemon. The lighting is soft morning sunlight creating organic textures. The color palette is rich in forest greens, earthy oranges, and bright yellows, perfectly aligning with a premium wellness brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIx7L4FqU6lxXQg9-sQkmNhOQuGUuyoerIJ4rIXqujbwR-EDAqWrHlz5aowzbvpUSCd8rmuRotiV3uTeJ9gR9_0Qy3qrvklH3ZoqYcexaIfeMGo1D_g_6-Qvq3dYShzg-DKbuUTGYpqQXyV6hs2WY6aAf25Aws0dCkPSYax9Y-g6KFpcqpARPmRJtA9keXwcup3VTBtftVhpzaVtpoWO1wqaIH7xmELESXlL8brNz2AEWV2i4WCU-hcdfu4bnD_prA2k50XLVzBxoG"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent p-6 flex flex-col justify-end">
+<h4 class="font-headline-md text-headline-md text-white mb-1">Boost Your Iron Intake</h4>
+<p class="text-on-primary-container font-body-md text-[14px]">View 12 recommended recipes for dinner.</p>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-t border-white/20 shadow-[0_-4px_20px_0_rgba(15,99,27,0.08)] flex justify-around items-center px-gutter py-unit pb-6 z-50 rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm">AI Chat</span>
+</div>
+<!-- Active Tab: Recs (closest match for Health Insights/Stats) -->
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed text-on-primary-container dark:text-on-primary-fixed rounded-full px-4 py-1 active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-sm text-label-sm">Recs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</div>
+</nav>
+</body></html>

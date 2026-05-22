@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Nutritionist - I-NutriGuide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#707a6c",
+                    "on-surface-variant": "#40493d",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#deecdc",
+                    "inverse-surface": "#273328",
+                    "primary-fixed": "#a3f69c",
+                    "inverse-on-surface": "#e7f5e4",
+                    "outline-variant": "#bfcaba",
+                    "secondary-fixed": "#ffdcc3",
+                    "on-primary-container": "#ccffc2",
+                    "secondary": "#914d00",
+                    "surface": "#effded",
+                    "tertiary-container": "#c44022",
+                    "surface-container-low": "#e9f8e7",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#2f7d32",
+                    "on-tertiary-fixed-variant": "#8b1a00",
+                    "tertiary": "#a2280b",
+                    "on-secondary": "#ffffff",
+                    "primary": "#0f631b",
+                    "on-secondary-fixed-variant": "#6e3900",
+                    "tertiary-fixed": "#ffdad2",
+                    "secondary-container": "#fc9430",
+                    "surface-container": "#e4f2e1",
+                    "tertiary-fixed-dim": "#ffb4a3",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#1d6d24",
+                    "on-tertiary-container": "#ffeeea",
+                    "on-surface": "#131e14",
+                    "on-primary-fixed": "#002203",
+                    "on-secondary-fixed": "#2f1500",
+                    "secondary-fixed-dim": "#ffb77d",
+                    "inverse-primary": "#88d982",
+                    "surface-bright": "#effded",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d8e6d6",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#663500",
+                    "surface-container-highest": "#d8e6d6",
+                    "surface-dim": "#d0dece",
+                    "on-background": "#131e14",
+                    "on-tertiary-fixed": "#3d0600",
+                    "primary-fixed-dim": "#88d982",
+                    "background": "#effded",
+                    "on-primary-fixed-variant": "#005311"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "16px",
+                    "unit": "4px",
+                    "gutter": "12px",
+                    "section-gap": "32px",
+                    "container-padding": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Manrope"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .message-shadow {
+            box-shadow: 0 4px 20px 0 rgba(47, 125, 50, 0.08);
+        }
+        body {
+            background-color: #effded;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-container-padding py-4 w-full max-w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional studio portrait of a woman in her early 30s with a warm, healthy glow, set against a clean, minimalist mint-colored background. The lighting is soft and diffused, highlighting natural skin textures and a confident, friendly expression. The overall aesthetic is high-end wellness and personal care, matching a premium health-tech application's visual language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqMkzBacVSBZiURfUFcI4IvtXoEniO6AWvupYp0z3wuGBIzodADy_NDEFWV3KgJaJqr7fBM5qdqEbxsh4c7G9DrJ0KlTVLGmEEi5LRzdDG0KEaT5g6rNzArN9cHjZJlDSu2pnVe4Z1_7hD4IJGBR2-CVm2-c80YEbuLOWsTEtT6xkwPXbKaUf1aQQzNK3dP7Pvd7_MpodPHnUXPBFda9seSKM-3un0Wltj4YG52fpfbf4y5BJAjDCXHONntzicoHD9TX7vrtVXShPE"/>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed tracking-tight">I-NutriGuide</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity cursor-pointer">notifications</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area (Messenger-style) -->
+<main class="pt-24 pb-32 min-h-screen max-w-3xl mx-auto px-container-padding">
+<!-- Chat History -->
+<div class="flex flex-col space-y-stack-gap">
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="max-w-[85%] bg-primary-container text-on-primary-container px-4 py-3 rounded-2xl rounded-tr-none message-shadow">
+<p class="font-body-md text-label-md">I've been feeling a bit sluggish lately. How can I improve my Vitamin D absorption through food?</p>
+</div>
+</div>
+<!-- AI Response -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 mb-1 px-2">
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Verified by Science</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-variant px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">hub</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Knowledge Graph Verified</span>
+</div>
+</div>
+<div class="max-w-[90%] glass-panel px-5 py-4 rounded-3xl rounded-tl-none message-shadow border-l-4 border-primary">
+<p class="font-body-md text-on-surface mb-4 leading-relaxed">
+                        To optimize your **Vitamin D** levels, we need to focus on **biological synergy**. Vitamin D is fat-soluble, meaning it requires healthy fats for maximum absorption.
+                    </p>
+<!-- Synergy Visualization / Rich Content -->
+<div class="bg-surface-container-low rounded-2xl p-4 mb-4 border border-outline-variant/30">
+<div class="flex items-center justify-between gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<div class="flex flex-col items-center min-w-[60px]">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined">person</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline uppercase">User</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+<div class="flex flex-col items-center min-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary mb-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sunny</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline uppercase text-center leading-tight">Vitamin D3</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">link</span>
+<div class="flex flex-col items-center min-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary mb-1">
+<span class="material-symbols-outlined">opacity</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline uppercase text-center leading-tight">Fat Absorption</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+<div class="flex flex-col items-center min-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-1 overflow-hidden">
+<img alt="Fatty Fish" class="w-full h-full object-cover" data-alt="A close-up, high-end culinary photograph of a perfectly grilled salmon fillet resting on a bed of fresh herbs. The lighting is bright and airy, emphasizing the oily, vibrant texture of the fish and the vibrant green of the garnishes. The style is editorial food photography with a shallow depth of field, reflecting a premium health-focused aesthetic and emphasizing nutrient density." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4vvhtZMWNBdwh0gQFe2C83obIDEsQgtbnB_9tEbxWDEpIojrRG4FX-b8vFn7RXMXJ_x5i1WCT0GwlPRUR8iU3HNHKEIqAwq0jhWRJkdSQQm_goHlS7u7CTXZdcdWKsnaHl_ZBQACWOKnQ3SlvAFfyjoX86va3i_CWSt9BqZPiSR9aPRhlAC6slIKyrP1YdBgdS7XKTiIJaGAmBIdqgb6AMMQUqIPjNS44-r5ZPoOWLrLee_k6q4MeuMM_OzY2gIOBNIlGJRryC7o1"/>
+</div>
+<span class="font-label-sm text-[10px] text-outline uppercase text-center leading-tight">Fatty Fish</span>
+</div>
+</div>
+</div>
+<p class="font-body-md text-on-surface mb-4">
+                        Based on your profile, I recommend pairing your morning intake with <button class="bg-surface-container px-2 py-0.5 rounded-lg border border-primary/20 text-primary font-semibold hover:bg-primary/10 transition-colors">Fatty Fish</button> or <button class="bg-surface-container px-2 py-0.5 rounded-lg border border-primary/20 text-primary font-semibold hover:bg-primary/10 transition-colors">Avocados</button> to trigger the biliary response needed for transport.
+                    </p>
+<div class="flex flex-wrap gap-2">
+<div class="flex items-center gap-1.5 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px] text-primary">restaurant_menu</span>
+<span class="font-label-md text-label-md text-primary">Recipe: Salmon Bowl</span>
+</div>
+<div class="flex items-center gap-1.5 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px] text-primary">science</span>
+<span class="font-label-md text-label-md text-primary">View Synergy Map</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Suggested Prompts -->
+<div class="flex gap-2 overflow-x-auto py-2 no-scrollbar">
+<button class="whitespace-nowrap bg-surface-container-lowest border border-outline-variant px-4 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:border-primary transition-colors">Tell me more about fats</button>
+<button class="whitespace-nowrap bg-surface-container-lowest border border-outline-variant px-4 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:border-primary transition-colors">Check my current levels</button>
+<button class="whitespace-nowrap bg-surface-container-lowest border border-outline-variant px-4 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:border-primary transition-colors">Alternative foods?</button>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar / Input Area -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface/90 dark:bg-surface-container-highest/90 backdrop-blur-2xl rounded-t-3xl shadow-[0_-4px_20px_0_rgba(47,125,50,0.08)]">
+<div class="max-w-3xl mx-auto px-4 pt-4 pb-6">
+<div class="flex items-center gap-3 bg-surface-container-low p-1.5 pl-4 rounded-full border border-outline-variant/30 glass-panel">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[24px]">photo_camera</span>
+</button>
+<input class="flex-grow bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline-variant font-body-md py-2" placeholder="Ask your nutritionist..." type="text"/>
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<!-- BottomNavBar (The Footer Shell) -->
+<nav class="flex justify-around items-center pt-4 w-full">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-opacity" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="font-label-sm text-label-sm">AI Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-opacity" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-sm text-label-sm">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary transition-opacity" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</div>
+</div>
+</body></html>
