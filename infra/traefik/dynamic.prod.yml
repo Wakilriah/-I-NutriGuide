@@ -1,5 +1,9 @@
 http:
   middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
     secure-headers:
       headers:
         browserXssFilter: true
@@ -9,7 +13,3 @@ http:
         stsSeconds: 31536000
         stsIncludeSubdomains: true
         stsPreload: false
-    dozzle-auth:
-      basicAuth:
-        users:
-          - "${DOZZLE_BASIC_AUTH:-admin:$$apr1$$replace$$with-real-htpasswd-hash}"

@@ -2,7 +2,7 @@ name: inutriguide-prod
 
 x-app-env: &app-env
   env_file:
-    - ${ENV_FILE:-.env.production.example}
+    - ${ENV_FILE:-.env}
   restart: unless-stopped
   networks:
     - public
@@ -13,10 +13,10 @@ x-backend-image: &backend-image
 
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3
     restart: unless-stopped
     env_file:
-      - ${ENV_FILE:-.env.production.example}
+      - ${ENV_FILE:-.env}
     command:
       - --configFile=/etc/traefik/traefik.yml
     ports:
@@ -44,6 +44,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-api-http.rule=Host(`${API_HOST:-api.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-api-http.entrypoints=web
+      - traefik.http.routers.inutriguide-api-http.middlewares=redirect-to-https@file
       - traefik.http.routers.inutriguide-api.rule=Host(`${API_HOST:-api.matchcesoir.pro}`)
       - traefik.http.routers.inutriguide-api.entrypoints=websecure
       - traefik.http.routers.inutriguide-api.tls.certresolver=letsencrypt
@@ -89,6 +92,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-admin-http.rule=Host(`${ADMIN_HOST:-admin.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-admin-http.entrypoints=web
+      - traefik.http.routers.inutriguide-admin-http.middlewares=redirect-to-https@file
       - traefik.http.routers.inutriguide-admin.rule=Host(`${ADMIN_HOST:-admin.matchcesoir.pro}`)
       - traefik.http.routers.inutriguide-admin.entrypoints=websecure
       - traefik.http.routers.inutriguide-admin.tls.certresolver=letsencrypt
@@ -103,7 +109,7 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     env_file:
-      - ${ENV_FILE:-.env.production.example}
+      - ${ENV_FILE:-.env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -131,8 +137,6 @@ services:
   neo4j:
     image: neo4j:5
     restart: unless-stopped
-    env_file:
-      - ${ENV_FILE:-.env.production.example}
     environment:
       NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-change_me}
       NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP_INITIAL:-512m}
@@ -146,10 +150,13 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-neo4j-http.rule=Host(`${NEO4J_HOST:-neo4j.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-neo4j-http.entrypoints=web
+      - traefik.http.routers.inutriguide-neo4j-http.middlewares=redirect-to-https@file
       - traefik.http.routers.inutriguide-neo4j.rule=Host(`${NEO4J_HOST:-neo4j.matchcesoir.pro}`)
       - traefik.http.routers.inutriguide-neo4j.entrypoints=websecure
       - traefik.http.routers.inutriguide-neo4j.tls.certresolver=letsencrypt
-      - traefik.http.routers.inutriguide-neo4j.middlewares=dozzle-auth@file,secure-headers@file
+      - traefik.http.routers.inutriguide-neo4j.middlewares=ops-auth@docker,secure-headers@file
       - traefik.http.services.inutriguide-neo4j.loadbalancer.server.port=7474
       - traefik.tcp.routers.inutriguide-neo4j-bolt.rule=HostSNI(`*`)
       - traefik.tcp.routers.inutriguide-neo4j-bolt.entrypoints=bolt
@@ -169,10 +176,14 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
-      - traefik.http.routers.inutriguide-logs.rule=Host(`${DOZZLE_HOST:-dozzle.matchcesoir.pro}`)
+      - traefik.http.middlewares.ops-auth.basicauth.users=${DOZZLE_BASIC_AUTH:?Set DOZZLE_BASIC_AUTH in .env with an htpasswd hash}
+      - traefik.http.routers.inutriguide-logs-http.rule=Host(`${DOZZLE_HOST:-dozzle.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-logs-http.entrypoints=web
+      - traefik.http.routers.inutriguide-logs-http.middlewares=redirect-to-https@file
+      - traefik.http.routers.inutriguide-logs.rule=Host(`${DOZZLE_HOST:-logs.matchcesoir.pro}`)
       - traefik.http.routers.inutriguide-logs.entrypoints=websecure
       - traefik.http.routers.inutriguide-logs.tls.certresolver=letsencrypt
-      - traefik.http.routers.inutriguide-logs.middlewares=dozzle-auth@file,secure-headers@file
+      - traefik.http.routers.inutriguide-logs.middlewares=ops-auth@docker,secure-headers@file
       - traefik.http.services.inutriguide-logs.loadbalancer.server.port=8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
