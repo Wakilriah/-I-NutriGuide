@@ -15,7 +15,7 @@ Or run it with the Docker dev stack from the repository root:
 docker compose -f docker-compose.dev.yml up mobile_app
 ```
 
-The Expo web app is published on `http://localhost:8081`. If you use Expo Go from a physical phone, set the LAN IP variables below so the QR code points at your host machine instead of the Docker container IP.
+The Expo web app is published on `http://localhost:8081`. Production API calls should use the API subdomain, not a raw IP address.
 
 The app includes:
 
@@ -33,18 +33,16 @@ The app includes:
 - React Query provider
 - NativeWind configuration
 
-By default, the app tries to infer the Expo dev-server host and call the backend on port `8000`.
-If your phone cannot reach the API, set the API URL explicitly with your computer's LAN IP:
+By default, the app uses the production API domain when `EXPO_PUBLIC_API_BASE_URL` is not set. For deployed builds, keep the API URL on the backend subdomain:
 
 ```txt
-EXPO_PUBLIC_API_BASE_URL=http://YOUR_LOCAL_IP:8000/api/v1
-REACT_NATIVE_PACKAGER_HOSTNAME=YOUR_LOCAL_IP
+EXPO_PUBLIC_API_BASE_URL=https://api.matchcesoir.pro/api/v1
 ```
 
-For Android emulator, use:
+For local development, prefer a local DNS name that resolves to your machine instead of a hard-coded IP:
 
 ```txt
-EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8000/api/v1
+EXPO_PUBLIC_API_BASE_URL=http://api.localhost:8000/api/v1
 ```
 
 Run checks:

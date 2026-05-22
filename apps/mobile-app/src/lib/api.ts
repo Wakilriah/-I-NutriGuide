@@ -1,37 +1,12 @@
 import axios from "axios";
-import Constants from "expo-constants";
-import { Platform } from "react-native";
 import { useAuthStore } from "../stores/auth-store";
 
-function getExpoHost() {
-  const configHost = (Constants.expoConfig as { hostUri?: string } | null)?.hostUri;
-  const legacyConstants = Constants as unknown as {
-    manifest?: { debuggerHost?: string };
-    manifest2?: { extra?: { expoClient?: { hostUri?: string } } };
-  };
-  const hostUri = configHost ?? legacyConstants.manifest2?.extra?.expoClient?.hostUri ?? legacyConstants.manifest?.debuggerHost;
-  return hostUri?.split(":")[0];
-}
-
 function getDefaultApiBaseUrl() {
-  if (Platform.OS === "web" && typeof window !== "undefined") {
-    return `http://${window.location.hostname}:8000/api/v1`;
-  }
-
-  const expoHost = getExpoHost();
-  if (expoHost) {
-    return `http://${expoHost}:8000/api/v1`;
-  }
-
   if (process.env.EXPO_PUBLIC_API_BASE_URL) {
     return process.env.EXPO_PUBLIC_API_BASE_URL;
   }
 
-  if (Platform.OS === "android") {
-    return "http://10.0.2.2:8000/api/v1";
-  }
-
-  return "http://127.0.0.1:8000/api/v1";
+  return "https://api.matchcesoir.pro/api/v1";
 }
 
 export const API_BASE_URL = getDefaultApiBaseUrl();

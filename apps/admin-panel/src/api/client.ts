@@ -1,7 +1,7 @@
 import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "../store/auth-store";
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://api.matchcesoir.pro/api/v1";
 const AUTH_STORAGE_KEY = "inutriguide-admin-auth";
 const DEBUG_AUTH_REFRESH = import.meta.env.VITE_DEBUG_AUTH_REFRESH === "true";
 
