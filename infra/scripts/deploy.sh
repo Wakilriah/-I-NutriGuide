@@ -6,6 +6,6 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-docker compose --env-file .env -f docker-compose.prod.yml pull
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+ENV_FILE=.env docker compose --env-file .env -f docker-compose.prod.yml pull
+ENV_FILE=.env docker compose --env-file .env -f docker-compose.prod.yml up -d
 infra/scripts/post-deploy.sh

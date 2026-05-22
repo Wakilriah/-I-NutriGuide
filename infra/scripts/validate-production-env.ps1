@@ -33,12 +33,13 @@ $required = @(
     "DJANGO_ALLOWED_HOSTS",
     "CORS_ALLOWED_ORIGINS",
     "CSRF_TRUSTED_ORIGINS",
-    "API_DOMAIN",
-    "ADMIN_DOMAIN",
-    "LOGS_DOMAIN",
+    "PUBLIC_HOST",
+    "LOGS_HOST",
     "VITE_API_BASE_URL",
     "EXPO_PUBLIC_API_BASE_URL",
     "TRAEFIK_ACME_EMAIL",
+    "DOCKER_IMAGE_NAMESPACE",
+    "IMAGE_TAG",
     "ADMIN_EMAIL",
     "ADMIN_NAME",
     "ADMIN_PASSWORD",
@@ -63,14 +64,24 @@ foreach ($key in $required) {
 if ($values["DJANGO_DEBUG"] -ne "False") {
     throw "DJANGO_DEBUG must be False in production."
 }
-if ($values["DJANGO_SECURE_SSL_REDIRECT"] -ne "True") {
-    throw "DJANGO_SECURE_SSL_REDIRECT must be True in production."
-}
-if ([int]$values["DJANGO_SECURE_HSTS_SECONDS"] -lt 31536000) {
-    throw "DJANGO_SECURE_HSTS_SECONDS must be at least 31536000 in production."
-}
-if ($values["DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS"] -ne "True") {
-    throw "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS must be True in production."
+if ($values["VITE_API_BASE_URL"] -like "https://*") {
+    $expectedScheme = "https"
+    if ($values["DJANGO_SECURE_SSL_REDIRECT"] -ne "True") {
+        throw "DJANGO_SECURE_SSL_REDIRECT must be True when using HTTPS."
+    }
+    if ([int]$values["DJANGO_SECURE_HSTS_SECONDS"] -lt 31536000) {
+        throw "DJANGO_SECURE_HSTS_SECONDS must be at least 31536000 when using HTTPS."
+    }
+    if ($values["DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS"] -ne "True") {
+        throw "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS must be True when using HTTPS."
+    }
+} elseif ($values["VITE_API_BASE_URL"] -like "http://*") {
+    $expectedScheme = "http"
+    if ($values["DJANGO_SECURE_SSL_REDIRECT"] -ne "False") {
+        throw "DJANGO_SECURE_SSL_REDIRECT must be False when serving by bare IP over HTTP."
+    }
+} else {
+    throw "VITE_API_BASE_URL must start with http:// or https://."
 }
 if ($values["DJANGO_SECRET_KEY"].Length -lt 50 -or (($values["DJANGO_SECRET_KEY"].ToCharArray() | Select-Object -Unique).Count -lt 20)) {
     throw "DJANGO_SECRET_KEY must be at least 50 characters with high entropy."
@@ -80,7 +91,7 @@ if ($values["TRAEFIK_ACME_EMAIL"] -notmatch "^[^@\s]+@[^@\s]+\.[^@\s]+$") {
     throw "TRAEFIK_ACME_EMAIL must be a valid email address for Let's Encrypt notices."
 }
 
-$expectedApiBase = "https://$($values["API_DOMAIN"])/api/v1"
+$expectedApiBase = "$expectedScheme://$($values["PUBLIC_HOST"])/api/v1"
 if ($values["VITE_API_BASE_URL"].TrimEnd("/") -ne $expectedApiBase) {
     throw "VITE_API_BASE_URL must be $expectedApiBase."
 }
@@ -88,11 +99,11 @@ if ($values["EXPO_PUBLIC_API_BASE_URL"].TrimEnd("/") -ne $expectedApiBase) {
     throw "EXPO_PUBLIC_API_BASE_URL must be $expectedApiBase."
 }
 
-if ($values["CORS_ALLOWED_ORIGINS"] -notlike "*https://$($values["ADMIN_DOMAIN"])*") {
-    throw "CORS_ALLOWED_ORIGINS must include https://$($values["ADMIN_DOMAIN"])."
+if ($values["CORS_ALLOWED_ORIGINS"] -notlike "*$expectedScheme://$($values["PUBLIC_HOST"])*") {
+    throw "CORS_ALLOWED_ORIGINS must include $expectedScheme://$($values["PUBLIC_HOST"])."
 }
-if ($values["CSRF_TRUSTED_ORIGINS"] -notlike "*https://$($values["API_DOMAIN"])*" -or $values["CSRF_TRUSTED_ORIGINS"] -notlike "*https://$($values["ADMIN_DOMAIN"])*") {
-    throw "CSRF_TRUSTED_ORIGINS must include API and admin HTTPS origins."
+if ($values["CSRF_TRUSTED_ORIGINS"] -notlike "*$expectedScheme://$($values["PUBLIC_HOST"])*") {
+    throw "CSRF_TRUSTED_ORIGINS must include $expectedScheme://$($values["PUBLIC_HOST"])."
 }
 
 Write-Host "Production env validation passed: $EnvFile"

@@ -6,9 +6,9 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py migrate
-docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py seed_all
-docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py ensure_superuser
-docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
+ENV_FILE=.env docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py migrate
+ENV_FILE=.env docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py seed_all
+ENV_FILE=.env docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py ensure_superuser
+ENV_FILE=.env docker compose --env-file .env -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
 
 echo "Post-deploy tasks completed: migrations, seed data, superuser, collectstatic."

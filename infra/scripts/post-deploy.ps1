@@ -7,6 +7,7 @@ if (-not (Test-Path $envFile)) {
     throw "Missing .env. Copy .env.production.example to .env and fill production secrets first."
 }
 
+$env:ENV_FILE = ".env"
 docker compose --env-file $envFile -f $composeFile exec backend python manage.py migrate
 docker compose --env-file $envFile -f $composeFile exec backend python manage.py seed_all
 docker compose --env-file $envFile -f $composeFile exec backend python manage.py ensure_superuser

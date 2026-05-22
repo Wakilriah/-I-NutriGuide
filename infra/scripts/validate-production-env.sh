@@ -26,12 +26,13 @@ DJANGO_SECURE_HSTS_PRELOAD
 DJANGO_ALLOWED_HOSTS
 CORS_ALLOWED_ORIGINS
 CSRF_TRUSTED_ORIGINS
-API_DOMAIN
-ADMIN_DOMAIN
-LOGS_DOMAIN
+PUBLIC_HOST
+LOGS_HOST
 VITE_API_BASE_URL
 EXPO_PUBLIC_API_BASE_URL
 TRAEFIK_ACME_EMAIL
+DOCKER_IMAGE_NAMESPACE
+IMAGE_TAG
 ADMIN_EMAIL
 ADMIN_NAME
 ADMIN_PASSWORD
@@ -56,18 +57,34 @@ if [ "${DJANGO_DEBUG:-}" != "False" ]; then
   echo "DJANGO_DEBUG must be False in production." >&2
   exit 1
 fi
-if [ "${DJANGO_SECURE_SSL_REDIRECT:-}" != "True" ]; then
-  echo "DJANGO_SECURE_SSL_REDIRECT must be True in production." >&2
-  exit 1
-fi
-if [ "${DJANGO_SECURE_HSTS_SECONDS:-0}" -lt 31536000 ]; then
-  echo "DJANGO_SECURE_HSTS_SECONDS must be at least 31536000 in production." >&2
-  exit 1
-fi
-if [ "${DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS:-}" != "True" ]; then
-  echo "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS must be True in production." >&2
-  exit 1
-fi
+case "$VITE_API_BASE_URL" in
+  https://*)
+    if [ "${DJANGO_SECURE_SSL_REDIRECT:-}" != "True" ]; then
+      echo "DJANGO_SECURE_SSL_REDIRECT must be True when using HTTPS." >&2
+      exit 1
+    fi
+    if [ "${DJANGO_SECURE_HSTS_SECONDS:-0}" -lt 31536000 ]; then
+      echo "DJANGO_SECURE_HSTS_SECONDS must be at least 31536000 when using HTTPS." >&2
+      exit 1
+    fi
+    if [ "${DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS:-}" != "True" ]; then
+      echo "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS must be True when using HTTPS." >&2
+      exit 1
+    fi
+    expected_scheme="https"
+    ;;
+  http://*)
+    expected_scheme="http"
+    if [ "${DJANGO_SECURE_SSL_REDIRECT:-}" != "False" ]; then
+      echo "DJANGO_SECURE_SSL_REDIRECT must be False when serving by bare IP over HTTP." >&2
+      exit 1
+    fi
+    ;;
+  *)
+    echo "VITE_API_BASE_URL must start with http:// or https://." >&2
+    exit 1
+    ;;
+esac
 
 secret_unique_chars="$(printf '%s' "$DJANGO_SECRET_KEY" | fold -w1 | sort -u | wc -l | tr -d ' ')"
 if [ "${#DJANGO_SECRET_KEY}" -lt 50 ] || [ "$secret_unique_chars" -lt 20 ]; then
@@ -80,7 +97,7 @@ case "$TRAEFIK_ACME_EMAIL" in
   *) echo "TRAEFIK_ACME_EMAIL must be a valid email address for Let's Encrypt notices." >&2; exit 1 ;;
 esac
 
-expected_api_base="https://${API_DOMAIN}/api/v1"
+expected_api_base="${expected_scheme}://${PUBLIC_HOST}/api/v1"
 if [ "${VITE_API_BASE_URL%/}" != "$expected_api_base" ]; then
   echo "VITE_API_BASE_URL must be $expected_api_base." >&2
   exit 1
@@ -91,13 +108,13 @@ if [ "${EXPO_PUBLIC_API_BASE_URL%/}" != "$expected_api_base" ]; then
 fi
 
 case "$CORS_ALLOWED_ORIGINS" in
-  *"https://${ADMIN_DOMAIN}"*) ;;
-  *) echo "CORS_ALLOWED_ORIGINS must include https://${ADMIN_DOMAIN}." >&2; exit 1 ;;
+  *"${expected_scheme}://${PUBLIC_HOST}"*) ;;
+  *) echo "CORS_ALLOWED_ORIGINS must include ${expected_scheme}://${PUBLIC_HOST}." >&2; exit 1 ;;
 esac
 
 case "$CSRF_TRUSTED_ORIGINS" in
-  *"https://${API_DOMAIN}"*"https://${ADMIN_DOMAIN}"*|*"https://${ADMIN_DOMAIN}"*"https://${API_DOMAIN}"*) ;;
-  *) echo "CSRF_TRUSTED_ORIGINS must include API and admin HTTPS origins." >&2; exit 1 ;;
+  *"${expected_scheme}://${PUBLIC_HOST}"*) ;;
+  *) echo "CSRF_TRUSTED_ORIGINS must include ${expected_scheme}://${PUBLIC_HOST}." >&2; exit 1 ;;
 esac
 
 echo "Production env validation passed: $env_file"

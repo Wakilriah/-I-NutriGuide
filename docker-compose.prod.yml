@@ -1,51 +1,68 @@
+name: inutriguide-prod
+
+x-app-env: &app-env
+  env_file:
+    - ${ENV_FILE:-.env.production.example}
+  restart: unless-stopped
+  networks:
+    - public
+    - private
+
+x-backend-image: &backend-image
+  image: ${DOCKER_IMAGE_NAMESPACE:-wakilriah}/inutriguide-backend:${IMAGE_TAG:-latest}
+
 services:
   traefik:
     image: traefik:v3.1
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE:-.env.production.example}
     command:
       - --configFile=/etc/traefik/traefik.yml
-      - --certificatesResolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:-ops@example.com}
-      - --certificatesResolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-      - --certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./infra/traefik/traefik.prod.yml:/etc/traefik/traefik.yml:ro
+      - ./infra/traefik/dynamic.prod.yml:/etc/traefik/dynamic.yml:ro
       - traefik_letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - public
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   backend:
-    build:
-      context: ./apps/backend
-      target: production
-    env_file:
-      - ${ENV_FILE:-.env.production.example}
+    <<: [*app-env, *backend-image]
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS:-3} --timeout $${GUNICORN_TIMEOUT:-60}"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.inutriguide-api.rule=Host(`${API_DOMAIN:-api.yourdomain.com}`)
-      - traefik.http.routers.inutriguide-api.entrypoints=websecure
-      - traefik.http.routers.inutriguide-api.tls.certresolver=letsencrypt
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-api.rule=Host(`${PUBLIC_HOST:-34.155.56.156}`) && PathPrefix(`/api`)
+      - traefik.http.routers.inutriguide-api.entrypoints=web
+      - traefik.http.routers.inutriguide-api.middlewares=secure-headers@file
       - traefik.http.services.inutriguide-api.loadbalancer.server.port=8000
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/v1/health/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      neo4j:
+        condition: service_healthy
 
   celery_worker:
-    build:
-      context: ./apps/backend
-      target: production
-    env_file:
-      - ${ENV_FILE:-.env.production.example}
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.prod
+    <<: [*app-env, *backend-image]
     command: celery -A config worker -l info
     depends_on:
       backend:
@@ -54,13 +71,7 @@ services:
         condition: service_healthy
 
   celery_beat:
-    build:
-      context: ./apps/backend
-      target: production
-    env_file:
-      - ${ENV_FILE:-.env.production.example}
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.prod
+    <<: [*app-env, *backend-image]
     command: celery -A config beat -l info
     depends_on:
       backend:
@@ -69,24 +80,31 @@ services:
         condition: service_healthy
 
   admin_panel:
-    build:
-      context: ./apps/admin-panel
-      target: production
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.yourdomain.com/api/v1}
+    image: ${DOCKER_IMAGE_NAMESPACE:-wakilriah}/inutriguide-admin-panel:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - public
     labels:
       - traefik.enable=true
-      - traefik.http.routers.inutriguide-admin.rule=Host(`${ADMIN_DOMAIN:-admin.yourdomain.com}`)
-      - traefik.http.routers.inutriguide-admin.entrypoints=websecure
-      - traefik.http.routers.inutriguide-admin.tls.certresolver=letsencrypt
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-admin.rule=Host(`${PUBLIC_HOST:-34.155.56.156}`)
+      - traefik.http.routers.inutriguide-admin.entrypoints=web
+      - traefik.http.routers.inutriguide-admin.priority=1
+      - traefik.http.routers.inutriguide-admin.middlewares=secure-headers@file
       - traefik.http.services.inutriguide-admin.loadbalancer.server.port=80
+    depends_on:
+      backend:
+        condition: service_healthy
 
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     env_file:
       - ${ENV_FILE:-.env.production.example}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - private
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-inutriguide} -d $${POSTGRES_DB:-inutriguide}"]
       interval: 10s
@@ -95,40 +113,62 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
+    networks:
+      - private
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  neo4j:
+    image: neo4j:5
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE:-.env.production.example}
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-change_me}
+      NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP_INITIAL:-512m}
+      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP_MAX:-1G}
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 45s
+
   dozzle:
     image: amir20/dozzle:latest
+    restart: unless-stopped
+    networks:
+      - public
     labels:
       - traefik.enable=true
-      - traefik.http.routers.inutriguide-logs.rule=Host(`${LOGS_DOMAIN:-logs.yourdomain.com}`)
-      - traefik.http.routers.inutriguide-logs.entrypoints=websecure
-      - traefik.http.routers.inutriguide-logs.tls.certresolver=letsencrypt
-      - traefik.http.routers.inutriguide-logs.middlewares=dozzle-auth
-      - traefik.http.middlewares.dozzle-auth.basicauth.users=${DOZZLE_BASIC_AUTH:-admin:$$apr1$$replace$$with-real-htpasswd-hash}
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-logs.rule=Host(`${LOGS_HOST:-logs.34.155.56.156.nip.io}`)
+      - traefik.http.routers.inutriguide-logs.entrypoints=web
+      - traefik.http.routers.inutriguide-logs.middlewares=dozzle-auth@file,secure-headers@file
       - traefik.http.services.inutriguide-logs.loadbalancer.server.port=8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
+networks:
+  public:
+  private:
+    internal: true
 
 volumes:
   postgres_data:
   redis_data:
   neo4j_data:
-  traefik_letsencrypt:
-dis_data:
-  traefik_letsencrypt:
-d-hash}
-      - traefik.http.services.inutriguide-logs.loadbalancer.server.port=8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-volumes:
-  postgres_data:
-  redis_data:
+  neo4j_logs:
   traefik_letsencrypt:
