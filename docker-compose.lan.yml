@@ -1,3 +1,14 @@
+# Local Wi-Fi testing stack.
+#
+# This file defaults to the current Windows Wi-Fi IPv4 address:
+#   10.12.241.116
+#
+# If your Wi-Fi IP changes, override it with:
+#   $env:WINDOWS_HOST_IP="YOUR_WIFI_IPV4"
+#   docker compose -f docker-compose.lan.yml up --build
+#
+# Then open the Expo QR code with your phone on the same Wi-Fi network.
+
 services:
   postgres:
     extends:
@@ -22,12 +33,15 @@ services:
       - apps/backend/.env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
-    command: sh -c "pip install -r requirements/dev.txt && python manage.py runserver 0.0.0.0:8000 --noreload"
-    restart: unless-stopped
+      WINDOWS_HOST_IP: "${WINDOWS_HOST_IP:-10.12.241.116}"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,${WINDOWS_HOST_IP:-10.12.241.116}"
+      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-10.12.241.116}:5173,http://${WINDOWS_HOST_IP:-10.12.241.116}:8081"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-10.12.241.116}:5173,http://${WINDOWS_HOST_IP:-10.12.241.116}:8081"
+    command: sh -c "pip install -r requirements/dev.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./apps/backend:/app
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "0.0.0.0:${BACKEND_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,36 +50,6 @@ services:
       neo4j:
         condition: service_healthy
 
-  celery_worker:
-    build:
-      context: ./apps/backend
-      target: development
-    env_file:
-      - apps/backend/.env
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
-    command: sh -c "pip install -r requirements/dev.txt && celery -A config worker -l info"
-    volumes:
-      - ./apps/backend:/app
-    depends_on:
-      - backend
-      - redis
-
-  celery_beat:
-    build:
-      context: ./apps/backend
-      target: development
-    env_file:
-      - apps/backend/.env
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
-    command: sh -c "pip install -r requirements/dev.txt && celery -A config beat -l info"
-    volumes:
-      - ./apps/backend:/app
-    depends_on:
-      - backend
-      - redis
-
   admin_panel:
     build:
       context: ./apps/admin-panel
@@ -73,16 +57,15 @@ services:
     env_file:
       - apps/admin-panel/.env
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      VITE_API_BASE_URL: "http://${WINDOWS_HOST_IP:-10.12.241.116}:8000/api/v1"
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    restart: unless-stopped
     volumes:
       - ./apps/admin-panel:/app
       - admin_node_modules:/app/node_modules
     ports:
-      - "${ADMIN_PANEL_PORT:-5173}:5173"
+      - "0.0.0.0:${ADMIN_PANEL_PORT:-5173}:5173"
     depends_on:
       - backend
 
@@ -93,18 +76,18 @@ services:
       BROWSER: none
       CHOKIDAR_USEPOLLING: "true"
       EXPO_NO_TELEMETRY: "1"
-      EXPO_PUBLIC_API_BASE_URL: ${EXPO_PUBLIC_API_BASE_URL:-http://localhost:8000/api/v1}
-      REACT_NATIVE_PACKAGER_HOSTNAME: ${REACT_NATIVE_PACKAGER_HOSTNAME:-}
+      EXPO_PUBLIC_API_BASE_URL: "http://${WINDOWS_HOST_IP:-10.12.241.116}:8000/api/v1"
+      REACT_NATIVE_PACKAGER_HOSTNAME: "${WINDOWS_HOST_IP:-10.12.241.116}"
       WATCHPACK_POLLING: "true"
-    command: sh -c "npm install && npx expo start --web --host lan --port 8081 --clear"
+    command: sh -c "npm install && npx expo start --host lan --port 8081 --clear"
     volumes:
       - ./apps/mobile-app:/app
       - mobile_node_modules:/app/node_modules
     ports:
-      - "${EXPO_PORT:-8081}:8081"
-      - "${EXPO_DEVTOOLS_PORT:-19000}:19000"
-      - "${EXPO_METRO_PORT:-19001}:19001"
-      - "${EXPO_TUNNEL_PORT:-19002}:19002"
+      - "0.0.0.0:${EXPO_PORT:-8081}:8081"
+      - "0.0.0.0:${EXPO_DEVTOOLS_PORT:-19000}:19000"
+      - "0.0.0.0:${EXPO_METRO_PORT:-19001}:19001"
+      - "0.0.0.0:${EXPO_TUNNEL_PORT:-19002}:19002"
     stdin_open: true
     tty: true
     depends_on:
@@ -113,7 +96,7 @@ services:
   dozzle:
     image: amir20/dozzle:latest
     ports:
-      - "${DOZZLE_PORT:-9999}:8080"
+      - "0.0.0.0:${DOZZLE_PORT:-9999}:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 

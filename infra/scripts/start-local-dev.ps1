@@ -44,6 +44,16 @@ for ($i = 0; $i -lt 20; $i++) {
     try {
         $health = Invoke-WebRequest -UseBasicParsing "http://localhost:8000/api/v1/health/"
         if ($health.StatusCode -eq 200) {
+            docker compose -f docker-compose.dev.yml exec -T backend python manage.py migrate --noinput
+            if ($LASTEXITCODE -ne 0) {
+                throw "Database migrations failed. Run: docker compose -f docker-compose.dev.yml logs backend"
+            }
+
+            docker compose -f docker-compose.dev.yml exec -T -e "ADMIN_EMAIL=riahwakil@gmail.com" -e "ADMIN_PASSWORD=NutriGuide!2026-Riah" -e "ADMIN_NAME=Riah Wakil" backend python manage.py ensure_superuser
+            if ($LASTEXITCODE -ne 0) {
+                throw "Local admin account setup failed. Run: docker compose -f docker-compose.dev.yml logs backend"
+            }
+
             Write-Host "Backend healthy: http://localhost:8000"
             Write-Host "Admin panel: http://localhost:5173"
             if ($WithMobile) {
