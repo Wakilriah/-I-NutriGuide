@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">I-NutriGuide System Architecture</title>
+  <desc id="desc">System design diagram showing mobile app, admin panel, Traefik reverse proxy, Django backend, PostgreSQL, Redis, Neo4j, Celery, Groq API, Dozzle, and Docker Compose boundaries.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f9fb; }
+      .docker { fill: #eef6ff; stroke: #1d4ed8; stroke-width: 3; }
+      .section-title { font: 700 24px Arial, sans-serif; fill: #0f172a; }
+      .label { font: 700 18px Arial, sans-serif; fill: #111827; }
+      .small { font: 14px Arial, sans-serif; fill: #374151; }
+      .tiny { font: 12px Arial, sans-serif; fill: #4b5563; }
+      .client { fill: #ecfdf5; stroke: #059669; stroke-width: 2; }
+      .proxy { fill: #fff7ed; stroke: #ea580c; stroke-width: 3; }
+      .api { fill: #fef2f2; stroke: #dc2626; stroke-width: 2; }
+      .db { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; }
+      .cache { fill: #fff1f2; stroke: #e11d48; stroke-width: 2; }
+      .graph { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+      .worker { fill: #f0fdfa; stroke: #0f766e; stroke-width: 2; }
+      .logs { fill: #f8fafc; stroke: #64748b; stroke-width: 2; }
+      .external { fill: #fdf4ff; stroke: #c026d3; stroke-width: 2; stroke-dasharray: 8 5; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-light { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrowhead-light); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#334155"/>
+    </marker>
+    <marker id="arrowhead-light" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="820"/>
+  <text class="section-title" x="60" y="52">I-NutriGuide System Architecture</text>
+  <text class="small" x="60" y="78">Client apps communicate with the Django API through the Traefik reverse proxy. Docker Compose runs the main services.</text>
+
+  <rect class="docker" x="40" y="110" width="1030" height="660" rx="18"/>
+  <text class="label" x="65" y="145">Docker / Docker Compose</text>
+  <text class="small" x="65" y="168">Runs backend, frontend, databases, cache, graph database, workers, and logs service.</text>
+
+  <rect class="client" x="90" y="215" width="210" height="100" rx="12"/>
+  <text class="label" x="125" y="250">Mobile App</text>
+  <text class="small" x="122" y="275">Expo + React Native</text>
+  <text class="tiny" x="128" y="297">User recommendations</text>
+
+  <rect class="client" x="90" y="385" width="210" height="100" rx="12"/>
+  <text class="label" x="126" y="420">Admin Panel</text>
+  <text class="small" x="140" y="445">React + Vite</text>
+  <text class="tiny" x="120" y="467">Knowledge base + analytics</text>
+
+  <rect class="proxy" x="390" y="300" width="210" height="110" rx="12"/>
+  <text class="label" x="435" y="334">Traefik</text>
+  <text class="small" x="420" y="360">Reverse Proxy</text>
+  <text class="tiny" x="414" y="382">Routes API, admin, logs</text>
+
+  <rect class="api" x="690" y="290" width="230" height="130" rx="12"/>
+  <text class="label" x="735" y="326">Backend API</text>
+  <text class="small" x="730" y="352">Django + DRF</text>
+  <text class="tiny" x="724" y="376">Auth, business logic,</text>
+  <text class="tiny" x="724" y="394">recommendations, chat</text>
+
+  <rect class="db" x="685" y="520" width="210" height="95" rx="12"/>
+  <text class="label" x="730" y="555">PostgreSQL</text>
+  <text class="small" x="713" y="580">Main application data</text>
+  <text class="tiny" x="713" y="600">Users, foods, feedback</text>
+
+  <rect class="cache" x="440" y="535" width="190" height="90" rx="12"/>
+  <text class="label" x="505" y="570">Redis</text>
+  <text class="small" x="474" y="594">Cache + broker</text>
+
+  <rect class="graph" x="930" y="520" width="190" height="95" rx="12"/>
+  <text class="label" x="990" y="555">Neo4j</text>
+  <text class="small" x="960" y="580">Knowledge graph</text>
+  <text class="tiny" x="962" y="600">Nutrient relations</text>
+
+  <rect class="worker" x="425" y="665" width="220" height="70" rx="12"/>
+  <text class="label" x="470" y="696">Celery</text>
+  <text class="small" x="455" y="718">Worker + scheduler</text>
+
+  <rect class="logs" x="165" y="620" width="170" height="75" rx="12"/>
+  <text class="label" x="217" y="652">Dozzle</text>
+  <text class="small" x="198" y="675">Docker logs UI</text>
+
+  <rect class="external" x="1110" y="310" width="130" height="100" rx="12"/>
+  <text class="label" x="1152" y="345">Groq</text>
+  <text class="small" x="1135" y="370">External AI</text>
+  <text class="tiny" x="1136" y="392">Chat answers</text>
+
+  <path class="arrow" d="M300 265 C335 265 350 330 390 340"/>
+  <text class="tiny" x="305" y="250">REST / HTTPS</text>
+
+  <path class="arrow" d="M300 435 C340 435 355 385 390 370"/>
+  <text class="tiny" x="305" y="460">REST / HTTPS</text>
+
+  <path class="arrow" d="M600 355 L690 355"/>
+  <text class="tiny" x="615" y="338">route</text>
+
+  <path class="arrow" d="M790 420 L790 520"/>
+  <text class="tiny" x="805" y="475">ORM</text>
+
+  <path class="arrow" d="M690 395 C625 440 575 490 545 535"/>
+  <text class="tiny" x="585" y="470">cache</text>
+
+  <path class="arrow" d="M915 395 C960 430 1015 465 1025 520"/>
+  <text class="tiny" x="975" y="465">Cypher</text>
+
+  <path class="arrow-light" d="M535 665 L535 625"/>
+  <text class="tiny" x="548" y="650">broker</text>
+
+  <path class="arrow-light" d="M645 700 C760 700 800 615 805 420"/>
+  <text class="tiny" x="735" y="685">background tasks</text>
+
+  <path class="arrow-light" d="M920 350 L1110 360"/>
+  <text class="tiny" x="965" y="335">chat API call</text>
+
+  <path class="arrow-light" d="M335 657 C370 657 385 625 440 590"/>
+  <text class="tiny" x="350" y="642">logs from containers</text>
+
+  <rect x="60" y="785" width="1160" height="1" fill="#cbd5e1"/>
+  <text class="tiny" x="60" y="807">Main idea: frontends use REST API; Traefik routes traffic; Django controls logic; PostgreSQL stores data; Redis caches; Neo4j powers graph recommendations; Docker Compose runs services.</text>
+</svg>

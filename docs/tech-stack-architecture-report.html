@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>I-NutriGuide Tech Stack and Architecture Summary</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm;
+    }
+
+    body {
+      margin: 0;
+      color: #111827;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.45;
+      background: white;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 24pt;
+      line-height: 1.1;
+    }
+
+    h2 {
+      margin: 22px 0 8px;
+      color: #1d4ed8;
+      font-size: 15pt;
+      border-bottom: 1px solid #bfdbfe;
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      margin: 16px 0 6px;
+      color: #0f172a;
+      font-size: 12pt;
+    }
+
+    p {
+      margin: 0 0 8px;
+    }
+
+    ul, ol {
+      margin: 6px 0 10px 22px;
+      padding: 0;
+    }
+
+    li {
+      margin: 3px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 9.2pt;
+    }
+
+    th {
+      background: #e0f2fe;
+      color: #0f172a;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 7px;
+      vertical-align: top;
+    }
+
+    code, pre {
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    pre {
+      margin: 8px 0 12px;
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 9pt;
+    }
+
+    .subtitle {
+      color: #475569;
+      font-size: 11pt;
+      margin-bottom: 14px;
+    }
+
+    .callout {
+      margin: 10px 0 14px;
+      padding: 10px 12px;
+      background: #f0f9ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+    }
+
+    .diagram {
+      width: 100%;
+      margin: 10px 0 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .box {
+      border: 1px solid #dbeafe;
+      background: #f8fbff;
+      border-radius: 8px;
+      padding: 9px 10px;
+    }
+
+    .box h3 {
+      margin-top: 0;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+  <h1>I-NutriGuide Tech Stack and Architecture Summary</h1>
+  <p class="subtitle">Short technical report for final project documentation</p>
+
+  <h2>1. Project Overview</h2>
+  <p>I-NutriGuide is an AI-powered nutrition recommendation system. It recommends foods that complement a user's supplements while respecting allergies, disliked foods, dietary restrictions, goals, and safety rules.</p>
+  <p>The project is organized as a monorepo with three main applications: the Django backend API, the Expo React Native mobile app, and the React Vite admin dashboard.</p>
+
+  <pre>apps/
+  backend/       Django REST API
+  mobile-app/    Expo React Native app
+  admin-panel/   React Vite dashboard
+packages/
+  shared-types/  Shared TypeScript contracts
+infra/
+  traefik/       Reverse proxy configuration
+  scripts/       Deployment and maintenance scripts
+docs/            Documentation</pre>
+
+  <h2>2. Global System Architecture</h2>
+  <img class="diagram" src="system-architecture-diagram.svg" alt="I-NutriGuide system architecture diagram">
+  <div class="callout">
+    The mobile app and admin panel never access databases directly. They communicate with the Django API, and the backend manages authentication, business logic, recommendations, persistence, caching, and external integrations.
+  </div>
+
+  <h2>3. Main Tech Stack</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Technology</th>
+        <th>Why We Used It</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Mobile app</td><td>Expo + React Native</td><td>Build a mobile app for users with one React-based codebase.</td></tr>
+      <tr><td>Admin panel</td><td>React + Vite</td><td>Build a fast web dashboard for admins.</td></tr>
+      <tr><td>Frontend language</td><td>TypeScript</td><td>Reduce errors and make API data easier to manage.</td></tr>
+      <tr><td>API client</td><td>Axios</td><td>Send HTTP requests and automatically attach JWT tokens.</td></tr>
+      <tr><td>Server state</td><td>React Query</td><td>Manage API loading, caching, errors, and refetching.</td></tr>
+      <tr><td>Local state</td><td>Zustand</td><td>Store authentication/session state simply.</td></tr>
+      <tr><td>Backend</td><td>Django</td><td>Provide models, routing, settings, admin tools, and business structure.</td></tr>
+      <tr><td>API framework</td><td>Django REST Framework</td><td>Expose backend features as REST endpoints.</td></tr>
+      <tr><td>Authentication</td><td>Simple JWT</td><td>Secure mobile and admin requests with access/refresh tokens.</td></tr>
+      <tr><td>Main database</td><td>PostgreSQL</td><td>Store users, profiles, foods, supplements, recommendations, feedback, and chats.</td></tr>
+      <tr><td>Cache / broker</td><td>Redis</td><td>Cache recommendations, rate-limit chat, and support Celery.</td></tr>
+      <tr><td>Background jobs</td><td>Celery</td><td>Run asynchronous or scheduled backend tasks.</td></tr>
+      <tr><td>Graph database</td><td>Neo4j</td><td>Model relations between users, foods, supplements, nutrients, allergies, and restrictions.</td></tr>
+      <tr><td>AI chat provider</td><td>Groq API</td><td>Generate conversational nutrition answers from backend-controlled context.</td></tr>
+      <tr><td>Reverse proxy</td><td>Traefik</td><td>Route production traffic to backend, admin, and logs services.</td></tr>
+      <tr><td>Containers</td><td>Docker Compose</td><td>Run the whole system locally and in deployment with repeatable services.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. Backend Architecture</h2>
+  <p>The backend is built with Django and Django REST Framework. It is divided into domain apps:</p>
+  <div class="two-col">
+    <div class="box">
+      <h3>Core Apps</h3>
+      <ul>
+        <li><strong>accounts:</strong> users, profiles, allergies, restrictions, tracking.</li>
+        <li><strong>foods:</strong> foods, categories, CIQUAL food data.</li>
+        <li><strong>nutrients:</strong> nutrients and interactions.</li>
+        <li><strong>supplements:</strong> supplements and user supplement intake.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Business Apps</h3>
+      <ul>
+        <li><strong>recommendations:</strong> generation, history, saved foods.</li>
+        <li><strong>feedback:</strong> user feedback on recommendations.</li>
+        <li><strong>analytics:</strong> admin dashboard statistics.</li>
+        <li><strong>chat:</strong> AI chat sessions and messages.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Important API examples:</p>
+  <pre>POST /api/v1/auth/login/
+POST /api/v1/auth/refresh/
+GET  /api/v1/profile/
+POST /api/v1/recommendations/generate/
+GET  /api/v1/recommendations/history/
+GET  /api/v1/admin/recommendations/
+POST /api/v1/chat/messages/</pre>
+
+  <h2>5. Communication Flow</h2>
+  <ol>
+    <li>User requests recommendations from the mobile app.</li>
+    <li>The mobile app sends <code>POST /api/v1/recommendations/generate/</code> with a JWT token.</li>
+    <li>The backend checks Redis for a cached recommendation.</li>
+    <li>If there is no cache hit, Django loads the user profile, supplements, allergies, and foods from PostgreSQL.</li>
+    <li>The recommender queries Neo4j for graph-based food matches.</li>
+    <li>The backend saves the recommendation run in PostgreSQL and caches the response in Redis.</li>
+    <li>The mobile app displays ranked foods with explanations, warnings, and the safety disclaimer.</li>
+  </ol>
+
+  <pre>Mobile App -> Traefik -> Django API -> Redis cache
+                                    -> PostgreSQL data
+                                    -> Neo4j graph
+                                    -> response back to app</pre>
+
+  <h2>6. Recommendation System Design</h2>
+  <p>The active recommender mainly uses Neo4j graph traversal. It searches relationships such as:</p>
+  <pre>User -> TAKES_SUPPLEMENT -> Supplement
+Supplement -> CONTAINS_NUTRIENT -> Nutrient
+Food -> CONTAINS_NUTRIENT -> Nutrient
+Food -> BELONGS_TO -> Category
+User -> DISLIKES -> Food</pre>
+
+  <p>This graph structure helps the system understand supplement-food relationships. For example, if a user takes a supplement connected to a nutrient, Neo4j can find foods connected to the same or useful related nutrients. If Neo4j does not return results, the backend falls back to PostgreSQL and returns active foods while excluding known allergies or disliked foods.</p>
+
+  <h2>7. Authentication and Security</h2>
+  <ul>
+    <li>JWT protects mobile and admin API requests.</li>
+    <li>Admin endpoints require admin permissions.</li>
+    <li>CORS controls allowed frontend origins.</li>
+    <li>Environment variables store secrets and service URLs.</li>
+    <li>Recommendation and chat responses include educational safety disclaimers.</li>
+  </ul>
+
+  <pre>1. Client sends email and password to /auth/login/.
+2. Backend returns access token and refresh token.
+3. Client sends protected requests with Authorization: Bearer token.
+4. Client calls /auth/refresh/ when the access token expires.</pre>
+
+  <h2>8. Docker and Deployment View</h2>
+  <p>Docker Compose is important because it starts all required services together. The backend depends on PostgreSQL, Redis, and Neo4j. The admin panel and mobile app depend on the backend API.</p>
+  <pre>Backend API:  http://localhost:8000
+Admin panel:  http://localhost:5173
+Expo app:     http://localhost:8081
+PostgreSQL:   localhost:5432
+Redis:        localhost:6379
+Neo4j:        localhost:7474 / 7687
+Dozzle:       http://localhost:9999</pre>
+
+  <h2>9. Short Conclusion</h2>
+  <p>I-NutriGuide uses a modern full-stack architecture. The mobile app and admin dashboard communicate with a Django REST API. PostgreSQL stores the main data, Redis improves performance and supports background processing, Neo4j powers graph-based nutrition recommendations, and Groq provides AI chat explanations. Docker Compose runs the complete system, while Traefik handles reverse-proxy routing for deployment.</p>
+  <p>This architecture is suitable because it separates responsibilities clearly: frontend clients handle user interaction, Django controls business logic and security, databases store specialized data, and the recommendation engine combines user profile, supplements, foods, graph relationships, and safety rules to produce explainable food recommendations.</p>
+</body>
+</html>
