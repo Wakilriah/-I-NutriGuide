@@ -124,6 +124,7 @@ The active recommendation engine is the Django hybrid recommender:
 - CBF safety/relevance scoring for goals, medical profile, supplements, calories, allergies, and excluded foods.
 - Association-rule scoring from database rules and trained user/profile/food transactions.
 - User-based collaborative scoring from real recommendation and feedback interactions. It does not use random food matrices.
+- Nutrient interaction scoring, warning generation, confidence scoring, and educational explanations for every returned food.
 
 Train or refresh the recommender artifacts after importing foods, seeding rules, or collecting new feedback:
 
@@ -151,5 +152,13 @@ POST /api/v1/recommendations/preview/
 ```
 
 The existing mobile-compatible endpoint `POST /api/v1/recommendations/generate/` now stores history using the same hybrid engine.
+
+Seed the nutrient interaction knowledge graph used by explanations and warnings:
+
+```sh
+docker compose -f docker-compose.dev.yml exec backend python manage.py seed_interactions
+```
+
+Explainable recommendation responses include `confidence_score`, `confidence_label`, `score_breakdown`, `explanation`, `warnings`, and `feedback.available_actions`. Allergy conflicts remove foods completely; caution and warning messages stay educational and do not replace medical advice.
 
 The project is being built sprint by sprint according to `docs/logical-build-plan.md`. Checklist status is tracked in `docs/feature-checklist.md`.

@@ -44,16 +44,21 @@ Safety Filtering
 
 ## Scoring Formula
 
-Use this simple explainable formula first:
+The current engine keeps the original hybrid recommender signals, then enriches each candidate with safety, nutrient interaction, profile, and feedback signals.
 
 ```txt
-final_score =
-  0.45 * nutrient_compatibility_score +
-  0.35 * association_rule_score +
-  0.20 * user_preference_score
+weighted_score =
+  0.25 * content_based_score +
+  0.25 * association_rule_score +
+  0.20 * nutrient_synergy_score +
+  0.10 * collaborative_score +
+  0.10 * feedback_score +
+  0.10 * profile_match_score
+
+confidence_score = weighted_score * safety_score
 ```
 
-Scores must be normalized between 0 and 1.
+Scores must be normalized between 0 and 1. `safety_score` is a strong multiplier; allergy conflicts block the food before scoring.
 
 ## Content-Based Filtering
 
@@ -145,6 +150,8 @@ Before returning recommendations:
 - Do not provide medical advice.
 - Include disclaimer.
 
+The smart warnings engine also checks nutrient interactions, supplement-food inhibitory interactions, disliked foods, and supplement-supplement competition. Serious warnings include educational language and do not provide diagnosis.
+
 ## Explanation Generation
 
 Every item must include a human-readable explanation.
@@ -171,6 +178,57 @@ can support
 is commonly paired with
 is nutritionally complementary to
 ```
+
+The explanation engine returns structured reasons:
+
+```json
+{
+  "summary": "Spinach is recommended because vitamin C may improve non-heme iron absorption.",
+  "reasons": [
+    {
+      "type": "nutrient_synergy",
+      "title": "Vitamin C + Iron",
+      "message": "Vitamin C may improve non-heme iron absorption.",
+      "confidence": 0.91
+    }
+  ]
+}
+```
+
+## Nutrient Interaction Knowledge Graph
+
+`NutrientInteraction` stores supplement, nutrient, and food relationships:
+
+```txt
+source_type: supplement | nutrient | food
+source_key: normalized slug/key
+target_type: supplement | nutrient | food
+target_key: normalized slug/key
+interaction_type: enhances | inhibits | requires | should_not_combine | supports
+mechanism: educational explanation
+evidence_level: low | medium | high
+severity: info | caution | warning
+active: boolean
+```
+
+Seed the default examples:
+
+```sh
+python manage.py seed_interactions
+```
+
+Current seed examples include vitamin C enhancing iron, calcium/caffeine inhibiting iron, vitamin D supporting calcium, fat supporting vitamin D, zinc competing with copper, magnesium supporting muscle relaxation, and vitamin K caution with anticoagulants.
+
+## Feedback Learning Loop
+
+Feedback types:
+
+```txt
+liked, disliked, saved, tried, not_interested, unsafe_for_me,
+too_expensive, bad_taste, allergy_issue, helpful, not_helpful
+```
+
+Positive feedback raises `feedback_score` for the same or similar food category. Negative feedback lowers it. `unsafe_for_me` and `allergy_issue` block the same food in future recommendations for that user.
 
 ## Recommendation Engine Module Structure
 

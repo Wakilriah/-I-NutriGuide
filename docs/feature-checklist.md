@@ -9,6 +9,20 @@ Legend:
 
 ---
 
+# Explainable Recommendation Upgrade
+
+- [x] Add `NutrientInteraction` model, migration, admin registration, seed command, list endpoint, and graph endpoint.
+- [x] Add explanation engine with educational recommendation reasons.
+- [x] Add smart warnings engine for allergies, disliked foods, inhibitory interactions, and cautions.
+- [x] Add normalized confidence score and score breakdown fields to recommendation items.
+- [x] Extend recommendation feedback types and connect feedback to future scoring/blocking.
+- [x] Update mobile recommendation cards with confidence, explanations, warnings, score breakdown, and feedback buttons.
+- [x] Add admin interaction table and recommendation inspector details.
+- [x] Add backend and mobile tests for explainable recommendation behavior.
+- [x] Update API and recommendation documentation.
+
+---
+
 # Phase 0 - Repository and Planning
 
 ## Monorepo Setup
