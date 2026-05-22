@@ -12,4 +12,4 @@ docker compose --env-file $envFile -f $composeFile pull
 docker compose --env-file $envFile -f $composeFile up -d
 powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "post-deploy.ps1")
 
-Write-Host "Deployment completed. Check health at http://$env:PUBLIC_HOST/api/v1/health/"
+Write-Host "Deployment completed. Check health at https://$env:API_HOST/api/v1/health/"

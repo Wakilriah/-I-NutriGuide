@@ -16,7 +16,7 @@ services:
       context: ./apps/admin-panel
       target: production
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://34.155.56.156/api/v1}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.matchcesoir.pro/api/v1}
       cache_from:
         - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-admin-panel:${CACHE_TAG:-latest}
     platform: ${DOCKER_PLATFORM:-linux/amd64}

@@ -22,6 +22,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "7687:7687"
     volumes:
       - ./infra/traefik/traefik.prod.yml:/etc/traefik/traefik.yml:ro
       - ./infra/traefik/dynamic.prod.yml:/etc/traefik/dynamic.yml:ro
@@ -43,8 +44,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
-      - traefik.http.routers.inutriguide-api.rule=Host(`${PUBLIC_HOST:-34.155.56.156}`) && PathPrefix(`/api`)
-      - traefik.http.routers.inutriguide-api.entrypoints=web
+      - traefik.http.routers.inutriguide-api.rule=Host(`${API_HOST:-api.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-api.entrypoints=websecure
+      - traefik.http.routers.inutriguide-api.tls.certresolver=letsencrypt
       - traefik.http.routers.inutriguide-api.middlewares=secure-headers@file
       - traefik.http.services.inutriguide-api.loadbalancer.server.port=8000
     healthcheck:
@@ -87,8 +89,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
-      - traefik.http.routers.inutriguide-admin.rule=Host(`${PUBLIC_HOST:-34.155.56.156}`)
-      - traefik.http.routers.inutriguide-admin.entrypoints=web
+      - traefik.http.routers.inutriguide-admin.rule=Host(`${ADMIN_HOST:-admin.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-admin.entrypoints=websecure
+      - traefik.http.routers.inutriguide-admin.tls.certresolver=letsencrypt
       - traefik.http.routers.inutriguide-admin.priority=1
       - traefik.http.routers.inutriguide-admin.middlewares=secure-headers@file
       - traefik.http.services.inutriguide-admin.loadbalancer.server.port=80
@@ -139,6 +142,18 @@ services:
       - neo4j_logs:/logs
     networks:
       - private
+      - public
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-neo4j.rule=Host(`${NEO4J_HOST:-neo4j.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-neo4j.entrypoints=websecure
+      - traefik.http.routers.inutriguide-neo4j.tls.certresolver=letsencrypt
+      - traefik.http.routers.inutriguide-neo4j.middlewares=dozzle-auth@file,secure-headers@file
+      - traefik.http.services.inutriguide-neo4j.loadbalancer.server.port=7474
+      - traefik.tcp.routers.inutriguide-neo4j-bolt.rule=HostSNI(`*`)
+      - traefik.tcp.routers.inutriguide-neo4j-bolt.entrypoints=bolt
+      - traefik.tcp.services.inutriguide-neo4j-bolt.loadbalancer.server.port=7687
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
       interval: 15s
@@ -154,8 +169,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
-      - traefik.http.routers.inutriguide-logs.rule=Host(`${LOGS_HOST:-logs.34.155.56.156.nip.io}`)
-      - traefik.http.routers.inutriguide-logs.entrypoints=web
+      - traefik.http.routers.inutriguide-logs.rule=Host(`${DOZZLE_HOST:-dozzle.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-logs.entrypoints=websecure
+      - traefik.http.routers.inutriguide-logs.tls.certresolver=letsencrypt
       - traefik.http.routers.inutriguide-logs.middlewares=dozzle-auth@file,secure-headers@file
       - traefik.http.services.inutriguide-logs.loadbalancer.server.port=8080
     volumes:

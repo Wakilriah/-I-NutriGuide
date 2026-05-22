@@ -26,8 +26,10 @@ DJANGO_SECURE_HSTS_PRELOAD
 DJANGO_ALLOWED_HOSTS
 CORS_ALLOWED_ORIGINS
 CSRF_TRUSTED_ORIGINS
-PUBLIC_HOST
-LOGS_HOST
+API_HOST
+ADMIN_HOST
+DOZZLE_HOST
+NEO4J_HOST
 VITE_API_BASE_URL
 EXPO_PUBLIC_API_BASE_URL
 TRAEFIK_ACME_EMAIL
@@ -97,7 +99,7 @@ case "$TRAEFIK_ACME_EMAIL" in
   *) echo "TRAEFIK_ACME_EMAIL must be a valid email address for Let's Encrypt notices." >&2; exit 1 ;;
 esac
 
-expected_api_base="${expected_scheme}://${PUBLIC_HOST}/api/v1"
+expected_api_base="${expected_scheme}://${API_HOST}/api/v1"
 if [ "${VITE_API_BASE_URL%/}" != "$expected_api_base" ]; then
   echo "VITE_API_BASE_URL must be $expected_api_base." >&2
   exit 1
@@ -108,13 +110,13 @@ if [ "${EXPO_PUBLIC_API_BASE_URL%/}" != "$expected_api_base" ]; then
 fi
 
 case "$CORS_ALLOWED_ORIGINS" in
-  *"${expected_scheme}://${PUBLIC_HOST}"*) ;;
-  *) echo "CORS_ALLOWED_ORIGINS must include ${expected_scheme}://${PUBLIC_HOST}." >&2; exit 1 ;;
+  *"${expected_scheme}://${ADMIN_HOST}"*) ;;
+  *) echo "CORS_ALLOWED_ORIGINS must include ${expected_scheme}://${ADMIN_HOST}." >&2; exit 1 ;;
 esac
 
 case "$CSRF_TRUSTED_ORIGINS" in
-  *"${expected_scheme}://${PUBLIC_HOST}"*) ;;
-  *) echo "CSRF_TRUSTED_ORIGINS must include ${expected_scheme}://${PUBLIC_HOST}." >&2; exit 1 ;;
+  *"${expected_scheme}://${API_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*|*"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${API_HOST}"*) ;;
+  *) echo "CSRF_TRUSTED_ORIGINS must include ${expected_scheme}://${API_HOST} and ${expected_scheme}://${ADMIN_HOST}." >&2; exit 1 ;;
 esac
 
 echo "Production env validation passed: $env_file"
