@@ -9,7 +9,7 @@ x-app-env: &app-env
     - private
 
 x-backend-image: &backend-image
-  image: ${DOCKER_IMAGE_NAMESPACE:-wakilriah}/inutriguide-backend:${IMAGE_TAG:-latest}
+  image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-backend:${IMAGE_TAG:-latest}
 
 services:
   traefik:
@@ -80,7 +80,7 @@ services:
         condition: service_healthy
 
   admin_panel:
-    image: ${DOCKER_IMAGE_NAMESPACE:-wakilriah}/inutriguide-admin-panel:${IMAGE_TAG:-latest}
+    image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-admin-panel:${IMAGE_TAG:-latest}
     restart: unless-stopped
     networks:
       - public
