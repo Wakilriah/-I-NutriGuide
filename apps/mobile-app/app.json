@@ -18,6 +18,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6c282f04-03be-453e-ae12-5d29134c6ae3"
+      }
+    },
+    "owner": "wakilrh"
   }
 }
