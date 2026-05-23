@@ -41,6 +41,7 @@ class NutrientInteraction(models.Model):
         REQUIRES = "requires", "Requires"
         SHOULD_NOT_COMBINE = "should_not_combine", "Should not combine"
         SUPPORTS = "supports", "Supports"
+        COMPETES_WITH = "competes_with", "Competes with"
 
     class EvidenceLevel(models.TextChoices):
         LOW = "low", "Low"

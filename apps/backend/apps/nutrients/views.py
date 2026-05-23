@@ -85,4 +85,6 @@ def _edge_label(item):
         return "may inhibit"
     if item.interaction_type == NutrientInteraction.InteractionType.SHOULD_NOT_COMBINE:
         return "should not combine"
+    if item.interaction_type == NutrientInteraction.InteractionType.COMPETES_WITH:
+        return "may compete"
     return item.interaction_type.replace("_", " ")

@@ -92,12 +92,19 @@ def test_warnings_engine_blocks_allergies_and_flags_inhibitors(user, explainable
         food=explainable_food_data["spinach"],
         food_nutrients=["iron"],
     )
+    safe_allergy = WarningsEngine().evaluate(
+        user_profile={"allergies": ["gluten"]},
+        supplements=[],
+        food=explainable_food_data["spinach"],
+        food_nutrients=["iron"],
+    )
 
     assert blocked.blocked is True
     assert blocked.safety_score == 0
     assert blocked.warnings[0]["type"] == "allergy_conflict"
     assert caution.blocked is False
     assert caution.warnings[0]["type"] == "absorption_conflict"
+    assert safe_allergy.blocked is False
 
 
 def test_confidence_score_uses_safety_as_strong_multiplier():

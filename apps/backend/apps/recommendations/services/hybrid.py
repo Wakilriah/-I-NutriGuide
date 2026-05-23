@@ -25,34 +25,41 @@ class HybridRecommender:
     def recommend(self, user_profile: dict, n: int = 10, foods: list[dict] | None = None) -> dict:
         user_id = user_profile.get("user_id")
         
-        # We use a Knowledge Graph traversal to find recommendations
-        # 1. Filter out disliked foods and foods containing allergens
-        # 2. Score based on shared nutrients with the user's supplements
-        # 3. Boost foods from categories the user hasn't disliked
+        # We use a Knowledge Graph traversal to find recommendations.
+        # Direct matches reward foods sharing nutrients with active supplements.
+        # Synergy matches reward foods containing nutrients supported by supplement nutrients.
         cypher_query = """
         MATCH (u:User {id: $user_id})
-        
-        // Find foods
         MATCH (f:Food)-[:BELONGS_TO]->(c:Category)
-        
-        // Exclude dislikes
         WHERE NOT (u)-[:DISLIKES]->(f)
-        
-        // Calculate score based on supplement synergy (shared nutrients)
-        OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(s:Supplement)-[:CONTAINS_NUTRIENT]->(n:Nutrient)<-[r:CONTAINS_NUTRIENT]-(f)
-        
-        WITH f, c, count(n) as shared_nutrients, sum(r.amount) as nutrient_score
-        
-        WITH f, c, shared_nutrients, 
-             (nutrient_score * 0.7 + shared_nutrients * 0.3) AS graph_score
-             
-        WHERE graph_score >= 0 // Keep all safe foods for baseline fallback
-        
-        ORDER BY graph_score DESC
+
+        OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(:Supplement)-[:CONTAINS_NUTRIENT]->(supplement_nutrient:Nutrient)
+        WITH u, f, c, collect(DISTINCT supplement_nutrient) AS supplement_nutrients
+
+        OPTIONAL MATCH (f)-[direct:CONTAINS_NUTRIENT|RICH_IN]->(direct_nutrient:Nutrient)
+        WHERE direct_nutrient IN supplement_nutrients
+        WITH u, f, c, supplement_nutrients,
+             count(DISTINCT direct_nutrient) AS direct_matches,
+             sum(coalesce(direct.amount, 0)) AS direct_amount,
+             collect(DISTINCT direct_nutrient.slug) AS direct_slugs
+
+        OPTIONAL MATCH (source_nutrient:Nutrient)-[support_rel]->(target_nutrient:Nutrient)<-[synergy:CONTAINS_NUTRIENT|RICH_IN]-(f)
+        WHERE source_nutrient IN supplement_nutrients
+          AND type(support_rel) IN ['ENHANCES', 'SUPPORTS', 'REQUIRES']
+        WITH f, c, direct_matches, direct_amount, direct_slugs,
+             count(DISTINCT target_nutrient) AS synergy_matches,
+             sum(coalesce(synergy.amount, 0)) AS synergy_amount,
+             collect(DISTINCT target_nutrient.slug) AS synergy_slugs
+
+        WITH f, c, direct_matches, synergy_matches, direct_slugs, synergy_slugs,
+             ((direct_matches * 1.0) + (synergy_matches * 2.0) + (coalesce(direct_amount, 0) / 100.0) + (coalesce(synergy_amount, 0) / 100.0)) AS graph_score
+
+        WHERE graph_score > 0
+        ORDER BY graph_score DESC, f.name ASC
         LIMIT $limit
-        
+
         RETURN f.id as id, f.name as name, f.slug as slug, c.name as category, 
-               graph_score, shared_nutrients
+               graph_score, direct_matches, synergy_matches, direct_slugs, synergy_slugs
         """
         
         results = []
@@ -61,7 +68,15 @@ class HybridRecommender:
                 with self.driver.session() as session:
                     records = session.run(cypher_query, user_id=user_id, limit=n)
                     for record in records:
-                        score = round(min(record["graph_score"] / 100.0 + 0.5, 1.0), 4) # Normalize roughly
+                        graph_score = float(record["graph_score"] or 0.0)
+                        direct_matches = int(record["direct_matches"] or 0)
+                        synergy_matches = int(record["synergy_matches"] or 0)
+                        matched_nutrients = sorted(set((record["direct_slugs"] or []) + (record["synergy_slugs"] or [])))
+                        score = round(min(0.45 + (graph_score / 8.0), 1.0), 4)
+                        reason = (
+                            f"Matched through the nutrition graph with {direct_matches} direct nutrient match(es) "
+                            f"and {synergy_matches} synergy path(s)."
+                        )
                         results.append(
                             GraphRecommendation(
                                 food_id=record["id"],
@@ -72,9 +87,9 @@ class HybridRecommender:
                                 cbf_score=score * 0.8,
                                 rules_score=score * 0.1,
                                 cf_score=score * 0.1,
-                                reason=f"Matched via Knowledge Graph traversal (Synergy score: {record['shared_nutrients']})",
+                                reason=reason,
                                 safety_notes=["Verified against known graph constraints"],
-                                matched_nutrients=[],
+                                matched_nutrients=matched_nutrients,
                                 matched_rules=[],
                                 related_supplement=None
                             )

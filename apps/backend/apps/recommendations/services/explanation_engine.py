@@ -66,13 +66,16 @@ class ExplanationEngine:
         return {"summary": summary, "reasons": reasons[:5]}
 
     def _interaction_reasons(self, supplements: list[str], food_nutrients: list[str]) -> list[dict]:
-        tokens = {normalize_token(value) for value in supplements + food_nutrients if value}
+        supplement_tokens = {normalize_token(value) for value in supplements if value}
+        food_tokens = {normalize_token(value) for value in food_nutrients if value}
         reasons = []
         evidence_weight = {"low": 0.55, "medium": 0.74, "high": 0.91}
-        for interaction in NutrientInteraction.objects.filter(active=True).exclude(interaction_type__in=["inhibits", "should_not_combine"]):
+        for interaction in NutrientInteraction.objects.filter(active=True).exclude(
+            interaction_type__in=["inhibits", "should_not_combine", "competes_with"]
+        ):
             source = normalize_token(interaction.source_key)
             target = normalize_token(interaction.target_key)
-            if source not in tokens or target not in tokens:
+            if not self._interaction_relevant(source, target, supplement_tokens, food_tokens):
                 continue
             reasons.append(
                 {
@@ -83,6 +86,9 @@ class ExplanationEngine:
                 }
             )
         return reasons
+
+    def _interaction_relevant(self, source: str, target: str, supplement_tokens: set[str], food_tokens: set[str]) -> bool:
+        return (source in supplement_tokens and target in food_tokens) or (target in supplement_tokens and source in food_tokens)
 
     def _summary(self, food_name: str, reasons: list[dict]) -> str:
         first = reasons[0]["message"].rstrip(".")

@@ -8,8 +8,10 @@ INTERACTIONS = [
     ("nutrient", "calcium", "nutrient", "iron", "inhibits", "Calcium can reduce iron absorption when taken at the same time.", "high", "caution"),
     ("nutrient", "caffeine", "nutrient", "iron", "inhibits", "Caffeine-containing drinks may reduce iron absorption around meals.", "medium", "caution"),
     ("nutrient", "vitamin_d", "nutrient", "calcium", "supports", "Vitamin D is commonly associated with normal calcium absorption.", "high", "info"),
-    ("nutrient", "fat", "nutrient", "vitamin_d", "supports", "Dietary fat can help absorption of fat-soluble vitamin D.", "medium", "info"),
+    ("nutrient", "fat", "nutrient", "vitamin_d", "supports", "Dietary fat may support absorption of fat-soluble vitamin D.", "medium", "info"),
     ("nutrient", "zinc", "nutrient", "copper", "should_not_combine", "High zinc intake may compete with copper over time.", "medium", "caution"),
+    ("nutrient", "iron", "nutrient", "zinc", "competes_with", "Iron and zinc may compete for absorption when high-dose supplements are taken together.", "medium", "caution"),
+    ("nutrient", "magnesium", "nutrient", "vitamin_d", "supports", "Magnesium is associated with vitamin D metabolism as part of normal nutrition.", "medium", "info"),
     ("nutrient", "magnesium", "nutrient", "muscle_relaxation", "supports", "Magnesium is commonly associated with normal muscle function.", "medium", "info"),
     ("nutrient", "vitamin_k", "supplement", "anticoagulants", "should_not_combine", "Vitamin K intake may matter for people using anticoagulant medication. Ask a clinician for personal advice.", "high", "warning"),
 ]

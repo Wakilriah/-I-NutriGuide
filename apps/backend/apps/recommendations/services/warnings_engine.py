@@ -48,15 +48,17 @@ class WarningsEngine:
                 )
                 safety_score = min(safety_score, 0.3)
 
-        profile_tokens = set(self._tokens(supplements + food_nutrients))
+        supplement_tokens = set(self._tokens(supplements))
+        food_tokens = set(self._tokens(food_nutrients))
         for interaction in NutrientInteraction.objects.filter(active=True):
             source = normalize_token(interaction.source_key)
             target = normalize_token(interaction.target_key)
-            if not self._interaction_applies(source, target, profile_tokens):
+            if not self._interaction_applies(source, target, supplement_tokens, food_tokens):
                 continue
             if interaction.interaction_type not in {
                 NutrientInteraction.InteractionType.INHIBITS,
                 NutrientInteraction.InteractionType.SHOULD_NOT_COMBINE,
+                NutrientInteraction.InteractionType.COMPETES_WITH,
             } and interaction.severity != NutrientInteraction.Severity.WARNING:
                 continue
             warning_level = interaction.severity
@@ -79,19 +81,31 @@ class WarningsEngine:
         return WarningResult(warnings=warnings, blocked=blocked, safety_score=0.0 if blocked else safety_score)
 
     def _food_terms(self, food) -> set[str]:
-        terms = {normalize_token(food.name), normalize_token(food.slug), normalize_token(food.category.name)}
-        terms.update(term for term in terms.copy() if term)
-        return terms
+        terms = {
+            normalize_token(food.name),
+            normalize_token(food.slug),
+            normalize_token(food.category.name),
+            normalize_token(food.source),
+        }
+        for chunk in str(food.description or "").replace("|", " ").replace(",", " ").split():
+            terms.add(normalize_token(chunk))
+        return {term for term in terms if term}
 
     def _tokens(self, values) -> list[str]:
         return [normalize_token(value) for value in values or [] if value]
 
-    def _interaction_applies(self, source: str, target: str, tokens: set[str]) -> bool:
-        return source in tokens and target in tokens
+    def _interaction_applies(self, source: str, target: str, supplement_tokens: set[str], food_tokens: set[str]) -> bool:
+        crosses_supplement_food = (source in supplement_tokens and target in food_tokens) or (
+            target in supplement_tokens and source in food_tokens
+        )
+        within_supplements = source in supplement_tokens and target in supplement_tokens
+        return crosses_supplement_food or within_supplements
 
     def _warning_title(self, interaction) -> str:
         source = interaction.source_key.replace("_", " ").title()
         target = interaction.target_key.replace("_", " ").title()
         if interaction.interaction_type == NutrientInteraction.InteractionType.INHIBITS:
             return f"{source} may reduce {target} absorption"
+        if interaction.interaction_type == NutrientInteraction.InteractionType.COMPETES_WITH:
+            return f"{source} and {target} may compete"
         return f"{source} and {target} need caution"

@@ -1,5 +1,6 @@
 from apps.foods.models import Food
 from apps.nutrients.models import NutrientInteraction
+from apps.supplements.models import UserSupplement
 
 from .confidence import calculate_confidence, normalize_score
 from .explanation_engine import ExplanationEngine
@@ -10,7 +11,7 @@ from .warnings_engine import WarningsEngine
 
 def enrich_scored_recommendation(scored: dict, *, food: Food, user_profile: dict, user=None) -> dict | None:
     food_nutrients = _food_nutrient_slugs(food)
-    supplements = [normalize_token(value) for value in user_profile.get("supplements", [])]
+    supplements = _supplement_context_tokens(user_profile, user)
     warnings_result = WarningsEngine().evaluate(
         user_profile=user_profile,
         supplements=supplements,
@@ -106,14 +107,29 @@ def _food_nutrient_slugs(food: Food) -> list[str]:
     ]
 
 
+def _supplement_context_tokens(user_profile: dict, user=None) -> list[str]:
+    tokens = [normalize_token(value) for value in user_profile.get("supplements", [])]
+    if user is not None and getattr(user, "is_authenticated", False):
+        nutrient_slugs = (
+            UserSupplement.objects.filter(user=user, active=True)
+            .values_list("supplement__nutrients__nutrient__slug", flat=True)
+            .distinct()
+        )
+        tokens.extend(normalize_token(slug) for slug in nutrient_slugs)
+    return sorted({token for token in tokens if token})
+
+
 def _nutrient_synergy_score(supplements: list[str], food_nutrients: list[str]) -> float:
-    tokens = set(supplements + food_nutrients)
+    supplement_tokens = {normalize_token(value) for value in supplements if value}
+    food_tokens = {normalize_token(value) for value in food_nutrients if value}
     evidence = {"low": 0.35, "medium": 0.65, "high": 0.9}
     best = 0.0
-    for interaction in NutrientInteraction.objects.filter(active=True).exclude(interaction_type__in=["inhibits", "should_not_combine"]):
+    for interaction in NutrientInteraction.objects.filter(active=True).exclude(
+        interaction_type__in=["inhibits", "should_not_combine", "competes_with"]
+    ):
         source = normalize_token(interaction.source_key)
         target = normalize_token(interaction.target_key)
-        if source in tokens and target in tokens:
+        if (source in supplement_tokens and target in food_tokens) or (target in supplement_tokens and source in food_tokens):
             best = max(best, evidence.get(interaction.evidence_level, 0.55))
     return round(best, 4)
 
