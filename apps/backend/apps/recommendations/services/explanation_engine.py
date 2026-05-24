@@ -1,4 +1,5 @@
 from apps.nutrients.models import NutrientInteraction
+from apps.supplements.fact_sheets import excerpt, matching_fact_sheets
 
 from .normalizer import normalize_token
 
@@ -18,6 +19,7 @@ class ExplanationEngine:
         reasons = []
         interaction_reasons = self._interaction_reasons(supplements, food_nutrients)
         reasons.extend(interaction_reasons)
+        reasons.extend(self._fact_sheet_reasons(supplements))
 
         for rule in matched_rules[:2]:
             explanation = rule.get("explanation") or "This pairing is commonly associated with supplement-food complementarity."
@@ -89,6 +91,25 @@ class ExplanationEngine:
 
     def _interaction_relevant(self, source: str, target: str, supplement_tokens: set[str], food_tokens: set[str]) -> bool:
         return (source in supplement_tokens and target in food_tokens) or (target in supplement_tokens and source in food_tokens)
+
+    def _fact_sheet_reasons(self, supplements: list[str]) -> list[dict]:
+        reasons = []
+        for fact_sheet in matching_fact_sheets(supplements, limit=2):
+            message = excerpt(
+                fact_sheet.benefits
+                or fact_sheet.description
+                or f"NIH ODS provides a supplement fact sheet for {fact_sheet.title}."
+            )
+            reasons.append(
+                {
+                    "type": "nih_ods_fact_sheet",
+                    "title": f"NIH ODS: {fact_sheet.title}",
+                    "message": self._safe_message(message),
+                    "confidence": 0.82,
+                    "source_url": fact_sheet.url,
+                }
+            )
+        return reasons
 
     def _summary(self, food_name: str, reasons: list[dict]) -> str:
         first = reasons[0]["message"].rstrip(".")

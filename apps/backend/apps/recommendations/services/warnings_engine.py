@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from apps.nutrients.models import NutrientInteraction
+from apps.supplements.fact_sheets import excerpt, matching_fact_sheets
 
 from .normalizer import normalize_token
 
@@ -77,6 +78,24 @@ class WarningsEngine:
                 }
             )
             safety_score = min(safety_score, 0.6 if warning_level == "caution" else 0.35)
+
+        for fact_sheet in matching_fact_sheets(supplements, limit=2):
+            safety_text = fact_sheet.interactions or fact_sheet.safety
+            if not safety_text:
+                continue
+            warnings.append(
+                {
+                    "level": "info",
+                    "type": "nih_ods_safety_context",
+                    "title": f"NIH ODS safety context: {fact_sheet.title}",
+                    "message": (
+                        f"{excerpt(safety_text)} This is educational guidance, "
+                        "not medical advice."
+                    ),
+                    "related_items": [fact_sheet.source_id],
+                    "source_url": fact_sheet.url,
+                }
+            )
 
         return WarningResult(warnings=warnings, blocked=blocked, safety_score=0.0 if blocked else safety_score)
 

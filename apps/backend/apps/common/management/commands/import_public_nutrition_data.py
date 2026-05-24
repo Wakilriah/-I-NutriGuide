@@ -14,18 +14,16 @@ from django.utils.text import slugify
 
 from apps.foods.models import Food, FoodCategory, FoodNutrient
 from apps.nutrients.models import Nutrient
-from apps.supplements.models import Supplement, SupplementNutrient
 
 
 USDA_SOURCE = "USDA FDC"
 OPEN_FOOD_FACTS_SOURCE = "Open Food Facts"
-DSLD_SOURCE = "NIH DSLD"
 DEFAULT_CIQUAL_PATH = "seed_data/raw/Table_Ciqual_2020_FR_20250223.csv"
 USER_AGENT = "I-NutriGuide data import local validation (admin@matchcesoir.pro)"
 
 DEFAULT_USDA_QUERIES = ["spinach", "salmon", "oats", "orange", "almonds", "yogurt"]
 DEFAULT_OPEN_FOOD_FACTS_QUERIES = ["oat milk", "peanut butter", "breakfast cereal"]
-DEFAULT_DSLD_QUERIES = ["Vitamin D", "Vitamin C", "Iron", "Magnesium", "Zinc"]
+DEFAULT_ODS_RESOURCES = ["VitaminD", "VitaminC", "Iron", "Magnesium", "Zinc"]
 
 USDA_NUTRIENT_PATTERNS = [
     ("energy", "Calories", "calories", "kcal"),
@@ -70,24 +68,8 @@ OPEN_FOOD_FACTS_NUTRIENTS = [
     ("vitamin-b12_100g", "Vitamin B12", "vitamin-b12", "µg", Decimal("1000000")),
 ]
 
-SUPPLEMENT_NUTRIENT_PATTERNS = [
-    ("vitamin d", "Vitamin D", "vitamin-d"),
-    ("vitamin c", "Vitamin C", "vitamin-c"),
-    ("ascorbic", "Vitamin C", "vitamin-c"),
-    ("iron", "Iron", "iron"),
-    ("calcium", "Calcium", "calcium"),
-    ("magnesium", "Magnesium", "magnesium"),
-    ("zinc", "Zinc", "zinc"),
-    ("vitamin b12", "Vitamin B12", "vitamin-b12"),
-    ("vitamin b-12", "Vitamin B12", "vitamin-b12"),
-    ("folic acid", "Vitamin B9", "vitamin-b9"),
-    ("folate", "Vitamin B9", "vitamin-b9"),
-    ("omega", "Healthy Fat", "healthy-fat"),
-]
-
-
 class Command(BaseCommand):
-    help = "Import a focused local validation set from CIQUAL, USDA FoodData Central, Open Food Facts, and NIH DSLD."
+    help = "Import a focused local validation set from CIQUAL, USDA FoodData Central, Open Food Facts, and NIH ODS fact sheets."
 
     def add_arguments(self, parser):
         parser.add_argument("--ciqual-path", default=DEFAULT_CIQUAL_PATH)
@@ -100,9 +82,10 @@ class Command(BaseCommand):
         parser.add_argument("--openfoodfacts-query", action="append", dest="openfoodfacts_queries")
         parser.add_argument("--openfoodfacts-limit", type=int, default=2)
         parser.add_argument("--skip-openfoodfacts", action="store_true")
-        parser.add_argument("--dsld-query", action="append", dest="dsld_queries")
-        parser.add_argument("--dsld-limit", type=int, default=1)
-        parser.add_argument("--skip-dsld", action="store_true")
+        parser.add_argument("--ods-resource", action="append", dest="ods_resources")
+        parser.add_argument("--ods-limit", type=int, default=5)
+        parser.add_argument("--ods-allow-stubs", action="store_true")
+        parser.add_argument("--skip-ods", action="store_true")
         parser.add_argument("--sync-neo4j", action="store_true")
 
     def handle(self, *args, **options):
@@ -110,9 +93,8 @@ class Command(BaseCommand):
             "ciqual_imported": 0,
             "usda_foods": 0,
             "openfoodfacts_foods": 0,
-            "dsld_supplements": 0,
+            "ods_fact_sheets": 0,
             "nutrient_links": 0,
-            "supplement_links": 0,
         }
 
         call_command("seed_nutrients")
@@ -141,12 +123,17 @@ class Command(BaseCommand):
                 except (HTTPError, URLError, TimeoutError) as exc:
                     self.stderr.write(f"Skipped Open Food Facts query '{query}': {exc}")
 
-        if not options["skip_dsld"]:
-            for query in options["dsld_queries"] or DEFAULT_DSLD_QUERIES:
-                try:
-                    summary["dsld_supplements"] += self._import_dsld_products(query, options["dsld_limit"], summary)
-                except (HTTPError, URLError, TimeoutError) as exc:
-                    self.stderr.write(f"Skipped DSLD query '{query}': {exc}")
+        if not options["skip_ods"]:
+            ods_args = []
+            ods_resources = options["ods_resources"] or DEFAULT_ODS_RESOURCES
+            for resource in ods_resources:
+                ods_args.extend(["--resource-name", resource])
+            if options["ods_limit"]:
+                ods_args.extend(["--limit", str(options["ods_limit"])])
+            if options["ods_allow_stubs"]:
+                ods_args.append("--allow-stubs")
+            call_command("import_ods_fact_sheets", *ods_args)
+            summary["ods_fact_sheets"] = min(options["ods_limit"] or len(ods_resources), len(ods_resources))
 
         if options["sync_neo4j"]:
             call_command("sync_to_neo4j")
@@ -210,32 +197,6 @@ class Command(BaseCommand):
                 self._upsert_food_nutrient(food, nutrient, value * multiplier, unit, summary)
         return imported
 
-    def _import_dsld_products(self, query, limit, summary):
-        params = urlencode({"q": query, "size": limit})
-        payload = self._get_json(f"https://api.ods.od.nih.gov/dsld/v9/search-filter?{params}")
-        imported = 0
-        for hit in payload.get("hits", [])[:limit]:
-            dsld_id = hit.get("_id")
-            if not dsld_id:
-                continue
-            label = self._get_json(f"https://api.ods.od.nih.gov/dsld/v9/label/{dsld_id}")
-            supplement = self._upsert_supplement(label)
-            imported += 1
-            for row in label.get("ingredientRows", []):
-                nutrient_info = self._map_supplement_ingredient(row.get("ingredientGroup") or row.get("name") or "")
-                if nutrient_info is None:
-                    continue
-                name, slug = nutrient_info
-                quantity = first_quantity(row.get("quantity") or [])
-                nutrient = ensure_nutrient(name=name, slug=slug, unit=quantity["unit"] or "mg")
-                SupplementNutrient.objects.update_or_create(
-                    supplement=supplement,
-                    nutrient=nutrient,
-                    defaults={"amount": quantity["amount"], "unit": quantity["unit"]},
-                )
-                summary["supplement_links"] += 1
-        return imported
-
     def _upsert_food(self, *, name, slug_base, category_name, source, description, image_url):
         category_slug = slugify(category_name)[:120] or slugify(source) or "imported-foods"
         category, _ = FoodCategory.objects.update_or_create(
@@ -271,34 +232,11 @@ class Command(BaseCommand):
         )
         summary["nutrient_links"] += 1
 
-    def _upsert_supplement(self, label):
-        name = label.get("fullName") or f"DSLD supplement {label.get('id')}"
-        brand = label.get("brandName") or ""
-        slug = slugify(f"dsld-{label.get('id')}-{name}")[:170]
-        common_dose = self._serving_text(label)
-        supplement, _ = Supplement.objects.update_or_create(
-            slug=slug,
-            defaults={
-                "name": name[:150],
-                "description": self._dsld_description(label, brand),
-                "common_dose": common_dose[:100],
-                "is_active": True,
-            },
-        )
-        return supplement
-
     def _map_usda_nutrient(self, raw_name):
         key = normalize_text(raw_name)
         for pattern, name, slug, unit in USDA_NUTRIENT_PATTERNS:
             if pattern in key:
                 return name, slug, unit
-        return None
-
-    def _map_supplement_ingredient(self, raw_name):
-        key = normalize_text(raw_name)
-        for pattern, name, slug in SUPPLEMENT_NUTRIENT_PATTERNS:
-            if pattern in key:
-                return name, slug
         return None
 
     def _usda_description(self, item):
@@ -326,32 +264,6 @@ class Command(BaseCommand):
             f"Ingredients: {clean_text(product.get('ingredients_text'))}.",
         ]
         return " ".join(part for part in parts if part and "None" not in part)
-
-    def _dsld_description(self, label, brand):
-        warnings = [
-            clean_text(statement.get("notes"))
-            for statement in label.get("statements", [])
-            if "precaution" in str(statement.get("type", "")).lower() or "warning" in str(statement.get("notes", "")).lower()
-        ][:3]
-        ingredient_names = [row.get("ingredientGroup") or row.get("name") for row in label.get("ingredientRows", [])]
-        parts = [
-            "Imported from NIH Dietary Supplement Label Database.",
-            f"DSLD ID: {label.get('id')}.",
-            f"Brand: {brand}.",
-            f"UPC: {label.get('upcSku')}.",
-            f"Product type: {(label.get('productType') or {}).get('langualCodeDescription')}.",
-            f"Ingredients: {', '.join(name for name in ingredient_names if name)}.",
-            "Label data is not an endorsement and should be used for educational nutrition guidance.",
-        ]
-        if warnings:
-            parts.append(f"Label warnings: {' '.join(warnings)}")
-        return " ".join(part for part in parts if part and "None" not in part)
-
-    def _serving_text(self, label):
-        serving = (label.get("servingSizes") or [{}])[0]
-        quantity = serving.get("minQuantity") or serving.get("maxQuantity") or ""
-        unit = serving.get("unit") or ""
-        return f"{quantity} {unit}".strip()
 
     def _get_json(self, url):
         request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
@@ -417,13 +329,3 @@ def clean_text(value):
 
 def first_csv_value(value):
     return (str(value or "").split(",", 1)[0] or "").strip()
-
-
-def first_quantity(rows):
-    if not rows:
-        return {"amount": None, "unit": ""}
-    row = rows[0]
-    return {
-        "amount": decimal_or_none(row.get("quantity")),
-        "unit": normalize_unit(row.get("unit") or ""),
-    }
