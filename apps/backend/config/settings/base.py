@@ -137,8 +137,16 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+from celery.schedules import crontab
+
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://redis:6379/0")
+CELERY_BEAT_SCHEDULE = {
+    "remind-users-track-nutrition": {
+        "task": "apps.accounts.tasks.remind_users_to_track_nutrition",
+        "schedule": crontab(minute=0), # Every hour on the hour
+    },
+}
 RECOMMENDER_ARTIFACT_DIR = Path(os.getenv("RECOMMENDER_ARTIFACT_DIR", BASE_DIR / "storage" / "recommender"))
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")

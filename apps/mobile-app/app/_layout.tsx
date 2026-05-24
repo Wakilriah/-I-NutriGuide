@@ -4,13 +4,17 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "../global.css";
 import type { AuthUser } from "../src/features/auth/api";
-import { getProfile, isProfileComplete } from "../src/features/profile/api";
+import { getProfile, isProfileComplete, updateProfile } from "../src/features/profile/api";
 import { apiClient } from "../src/lib/api";
 import { queryClient } from "../src/lib/query-client";
 import { loadSession } from "../src/lib/secure-storage";
 import { useAuthStore } from "../src/stores/auth-store";
+import { usePushNotifications } from "../src/lib/usePushNotifications";
 
 export default function RootLayout() {
+  const { expoPushToken } = usePushNotifications();
+  const accessToken = useAuthStore((state) => state.accessToken);
+
   useEffect(() => {
     let mounted = true;
 
@@ -55,6 +59,13 @@ export default function RootLayout() {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (expoPushToken && accessToken) {
+      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      updateProfile({ expo_push_token: expoPushToken, timezone: deviceTimezone }).catch(console.error);
+    }
+  }, [expoPushToken, accessToken]);
 
   return (
     <QueryClientProvider client={queryClient}>

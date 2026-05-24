@@ -6,7 +6,7 @@ import { Screen } from "../../src/components/Screen";
 import { AnimatedSection, AppButton, AppCard, AppTopBar, Badge, ErrorState, LoadingState, PageHeader, SectionHeader } from "../../src/components/ui";
 import { getProfile } from "../../src/features/profile/api";
 import { listUserSupplements } from "../../src/features/supplements/api";
-import { getTodayTracking, listTrackingHistory, updateTodayTracking, type DailyTracking } from "../../src/features/tracking/api";
+import { getTodayTracking, getTrackingHistory, updateTodayTracking, type DailyTracking } from "../../src/features/tracking/api";
 import { colors, iconSizes, radii, spacing, typography } from "../../src/theme/design";
 
 type TrackingDraft = {
@@ -54,7 +54,7 @@ export default function TrackingScreen() {
   const profile = useQuery({ queryKey: ["profile"], queryFn: getProfile });
   const supplements = useQuery({ queryKey: ["user-supplements"], queryFn: listUserSupplements });
   const today = useQuery({ queryKey: ["tracking", "today"], queryFn: getTodayTracking });
-  const history = useQuery({ queryKey: ["tracking", "history"], queryFn: listTrackingHistory });
+  const history = useQuery({ queryKey: ["tracking", "history"], queryFn: getTrackingHistory });
   const [draft, setDraft] = useState<TrackingDraft>(emptyDraft);
   const [taken, setTaken] = useState<string[]>([]);
   const [status, setStatus] = useState("");

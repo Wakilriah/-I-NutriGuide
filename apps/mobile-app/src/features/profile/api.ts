@@ -11,6 +11,8 @@ export type UserProfile = {
   allergies: string[];
   dietary_restrictions: string[];
   disliked_foods: string[];
+  expo_push_token?: string;
+  timezone?: string;
 };
 
 export type ProfileUpdatePayload = Partial<{
@@ -24,6 +26,8 @@ export type ProfileUpdatePayload = Partial<{
   allergies: string[];
   dietary_restrictions: string[];
   disliked_foods: string[];
+  expo_push_token: string;
+  timezone: string;
 }>;
 
 export function isProfileComplete(profile: UserProfile) {

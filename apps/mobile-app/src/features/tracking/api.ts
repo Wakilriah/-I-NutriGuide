@@ -1,6 +1,7 @@
 import { apiClient } from "../../lib/api";
 
 export type DailyTracking = {
+  id: number;
   date: string;
   weight_kg: string | null;
   water_ml: number;
@@ -8,23 +9,21 @@ export type DailyTracking = {
   protein_g: string;
   fiber_g: string;
   steps: number;
+  notes: string;
   supplements_taken: string[];
   goals_completed: boolean;
-  notes: string;
-  created_at: string;
-  updated_at: string;
 };
 
-export type DailyTrackingPayload = Partial<{
-  weight_kg: number | null;
+export type DailyTrackingUpdatePayload = Partial<{
+  weight_kg: number | string | null;
   water_ml: number;
   calories: number;
-  protein_g: number;
-  fiber_g: number;
+  protein_g: number | string;
+  fiber_g: number | string;
   steps: number;
+  notes: string;
   supplements_taken: string[];
   goals_completed: boolean;
-  notes: string;
 }>;
 
 export async function getTodayTracking() {
@@ -32,12 +31,12 @@ export async function getTodayTracking() {
   return response.data;
 }
 
-export async function updateTodayTracking(payload: DailyTrackingPayload) {
+export async function updateTodayTracking(payload: DailyTrackingUpdatePayload) {
   const response = await apiClient.patch<DailyTracking>("/tracking/today/", payload);
   return response.data;
 }
 
-export async function listTrackingHistory() {
+export async function getTrackingHistory() {
   const response = await apiClient.get<DailyTracking[]>("/tracking/history/");
   return response.data;
 }

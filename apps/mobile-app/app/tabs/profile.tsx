@@ -10,7 +10,7 @@ import { Screen } from "../../src/components/Screen";
 import { AnimatedSection, AppButton, AppCard, AppInput, AppTopBar, Badge, ErrorState, FilterChip, OptionSelect, PageHeader, SearchInput, SectionHeader, SkeletonCard } from "../../src/components/ui";
 import { searchFoods, type FoodSearchItem } from "../../src/features/foods/api";
 import { getProfile, parseCommaList, updateProfile } from "../../src/features/profile/api";
-import { listTrackingHistory, type DailyTracking } from "../../src/features/tracking/api";
+import { getTrackingHistory, type DailyTracking } from "../../src/features/tracking/api";
 import { useAuthStore } from "../../src/stores/auth-store";
 import { colors, iconSizes, radii, spacing, typography } from "../../src/theme/design";
 
@@ -127,6 +127,7 @@ function profileWeightGraphPoint(weightKg?: string | null): DailyTracking[] {
   const now = new Date().toISOString();
   return [
     {
+      id: 0,
       date: now.slice(0, 10),
       weight_kg: weightKg,
       water_ml: 0,
@@ -137,8 +138,6 @@ function profileWeightGraphPoint(weightKg?: string | null): DailyTracking[] {
       supplements_taken: [],
       goals_completed: false,
       notes: "",
-      created_at: now,
-      updated_at: now,
     },
   ];
 }
@@ -207,7 +206,7 @@ export default function ProfileScreen() {
   const { clearSession, user } = useAuthStore();
   const queryClient = useQueryClient();
   const profile = useQuery({ queryKey: ["profile"], queryFn: getProfile });
-  const trackingHistory = useQuery({ queryKey: ["tracking", "history"], queryFn: listTrackingHistory });
+  const trackingHistory = useQuery({ queryKey: ["tracking", "history"], queryFn: getTrackingHistory });
   const [foodQuery, setFoodQuery] = useState("");
   const [selectedDislikedFoods, setSelectedDislikedFoods] = useState<string[]>([]);
   const [status, setStatus] = useState("");

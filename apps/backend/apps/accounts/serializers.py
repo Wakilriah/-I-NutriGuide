@@ -225,6 +225,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "allergies",
             "dietary_restrictions",
             "disliked_foods",
+            "expo_push_token",
+            "timezone",
             "created_at",
             "updated_at",
         ]

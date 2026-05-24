@@ -84,6 +84,8 @@ class UserProfile(models.Model):
     diet_type = models.CharField(max_length=30, choices=DietType.choices, default=DietType.NONE)
     allergies = models.ManyToManyField(Allergy, blank=True, related_name="profiles")
     dietary_restrictions = models.ManyToManyField(DietaryRestriction, blank=True, related_name="profiles")
+    expo_push_token = models.CharField(max_length=255, blank=True)
+    timezone = models.CharField(max_length=50, default="UTC")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
