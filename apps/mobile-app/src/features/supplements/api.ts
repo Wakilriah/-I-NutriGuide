@@ -26,9 +26,18 @@ export type UserSupplementPayload = {
   active?: boolean;
 };
 
-export async function listSupplements() {
-  const response = await apiClient.get<Supplement[]>("/supplements/");
-  return response.data;
+type PaginatedResponse<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
+export async function listSupplements(search = "") {
+  const response = await apiClient.get<Supplement[] | PaginatedResponse<Supplement>>("/supplements/", {
+    params: search.trim() ? { search: search.trim(), page_size: 20 } : { page_size: 20 },
+  });
+  return Array.isArray(response.data) ? response.data : response.data.results;
 }
 
 export async function listUserSupplements() {

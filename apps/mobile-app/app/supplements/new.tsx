@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, AppCard, AppInput, AppTopBar, Badge, ErrorState, LoadingState, PageHeader, SupplementCard } from "../../src/components/ui";
+import { AppButton, AppCard, AppInput, AppTopBar, Badge, ErrorState, LoadingState, PageHeader, SearchInput, SupplementCard } from "../../src/components/ui";
 import { createUserSupplement, listSupplements } from "../../src/features/supplements/api";
 import { colors, radii, spacing } from "../../src/theme/design";
 
@@ -20,7 +21,8 @@ type AddSupplementValues = z.infer<typeof schema>;
 
 export default function AddSupplementScreen() {
   const queryClient = useQueryClient();
-  const catalog = useQuery({ queryKey: ["supplements"], queryFn: listSupplements });
+  const [search, setSearch] = useState("");
+  const catalog = useQuery({ queryKey: ["supplements", search], queryFn: () => listSupplements(search) });
   const mutation = useMutation({
     mutationFn: createUserSupplement,
     onSuccess: async () => {
@@ -60,6 +62,7 @@ export default function AddSupplementScreen() {
         {catalog.isError ? <ErrorState message="Unable to load supplement catalog." /> : null}
 
         <View style={{ gap: spacing.sm }}>
+          <SearchInput onChangeText={setSearch} placeholder="Search supplements" value={search} />
           {catalog.data?.map((supplement) => (
             <TouchableOpacity
               accessibilityLabel={`Choose ${supplement.name}`}
@@ -74,6 +77,7 @@ export default function AddSupplementScreen() {
               <SupplementCard active={selectedId === String(supplement.id)} dose={supplement.common_dose} name={supplement.name} />
             </TouchableOpacity>
           ))}
+          {!catalog.isLoading && catalog.data?.length === 0 ? <Text style={{ color: colors.muted, fontWeight: "700" }}>No supplements found.</Text> : null}
           {errors.supplement_id ? <Text style={errorStyle}>{errors.supplement_id.message}</Text> : null}
         </View>
 

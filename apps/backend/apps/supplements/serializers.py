@@ -17,13 +17,17 @@ class SupplementNutrientSerializer(serializers.ModelSerializer):
 
 class SupplementNutrientInputSerializer(serializers.Serializer):
     nutrient_slug = serializers.SlugField()
-    amount = serializers.DecimalField(max_digits=10, decimal_places=3, required=False, allow_null=True)
+    amount = serializers.DecimalField(
+        max_digits=10, decimal_places=3, required=False, allow_null=True
+    )
     unit = serializers.CharField(max_length=20, required=False, allow_blank=True)
 
 
 class SupplementSerializer(serializers.ModelSerializer):
     nutrients = SupplementNutrientSerializer(many=True, read_only=True)
-    nutrient_items = SupplementNutrientInputSerializer(many=True, required=False, write_only=True)
+    nutrient_items = SupplementNutrientInputSerializer(
+        many=True, required=False, write_only=True
+    )
 
     class Meta:
         model = Supplement
@@ -33,6 +37,15 @@ class SupplementSerializer(serializers.ModelSerializer):
             "slug",
             "description",
             "common_dose",
+            "source",
+            "source_id",
+            "brand_name",
+            "manufacturer",
+            "product_type",
+            "upc",
+            "physical_state",
+            "off_market",
+            "target_groups",
             "is_active",
             "nutrients",
             "nutrient_items",
@@ -60,9 +73,15 @@ class SupplementSerializer(serializers.ModelSerializer):
         return slugify(value)
 
     def validate_nutrient_items(self, value):
-        missing = [item["nutrient_slug"] for item in value if not Nutrient.objects.filter(slug=item["nutrient_slug"]).exists()]
+        missing = [
+            item["nutrient_slug"]
+            for item in value
+            if not Nutrient.objects.filter(slug=item["nutrient_slug"]).exists()
+        ]
         if missing:
-            raise serializers.ValidationError(f"Unknown nutrient slug(s): {', '.join(missing)}")
+            raise serializers.ValidationError(
+                f"Unknown nutrient slug(s): {', '.join(missing)}"
+            )
         return value
 
     def _replace_nutrients(self, supplement, nutrient_items):
@@ -106,5 +125,7 @@ class UserSupplementSerializer(serializers.ModelSerializer):
 
     def validate_frequency(self, value):
         if value != "daily":
-            raise serializers.ValidationError("Only daily supplement routines are supported.")
+            raise serializers.ValidationError(
+                "Only daily supplement routines are supported."
+            )
         return value
