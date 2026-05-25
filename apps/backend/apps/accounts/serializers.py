@@ -10,7 +10,7 @@ from .models import Allergy, DailyTracking, DietaryRestriction, DislikedFood, Us
 
 User = get_user_model()
 
-PROFILE_GENDERS = {"female", "male", "other", "prefer_not_to_say"}
+PROFILE_GENDERS = {"female", "male", "prefer_not_to_say"}
 PROFILE_GOALS = {"general_health", "energy", "immunity", "muscle", "weight_loss", "digestive_health"}
 PROFILE_ACTIVITY_LEVELS = {"light", "moderate", "active", "very_active"}
 MAX_PROFILE_LIST_ITEMS = 8
@@ -402,12 +402,18 @@ class DailyTrackingSerializer(serializers.ModelSerializer):
             "fiber_g",
             "steps",
             "supplements_taken",
+            "food_entries",
             "goals_completed",
             "notes",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["date", "created_at", "updated_at"]
+
+    def validate_food_entries(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Food entries must be a list.")
+        return value[:100]
 
     def validate_water_ml(self, value):
         if value > 10000:

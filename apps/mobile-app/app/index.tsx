@@ -11,35 +11,32 @@ export default function WelcomeScreen() {
     <GuestRoute>
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ImageBackground source={{ uri: images.bowls }} style={{ flex: 1, justifyContent: "flex-end" }}>
-          <View style={{ flex: 1, justifyContent: "flex-end", padding: spacing.md, backgroundColor: "rgba(0,0,0,0.16)" }}>
+          <View style={{ flex: 1, justifyContent: "flex-end", padding: spacing.md, backgroundColor: "rgba(0,0,0,0.22)" }}>
             <View
               style={{
-                alignItems: "center",
+                alignItems: "stretch",
                 gap: spacing.md,
-                borderColor: "rgba(255,255,255,0.5)",
+                borderColor: colors.borderSoft,
                 borderRadius: radii.hero,
                 borderWidth: 1,
-                backgroundColor: "rgba(255,255,255,0.76)",
+                backgroundColor: "rgba(255,255,255,0.94)",
                 padding: spacing.lg,
-                shadowColor: colors.primaryContainer,
-                shadowOffset: { width: 0, height: 20 },
-                shadowOpacity: 0.16,
-                shadowRadius: 32,
-                elevation: 5,
+                shadowColor: colors.text,
+                shadowOffset: { width: 0, height: 12 },
+                shadowOpacity: 0.12,
+                shadowRadius: 22,
+                elevation: 3,
               }}
             >
-              <View style={{ width: 58, height: 58, alignItems: "center", justifyContent: "center", borderRadius: radii.lg, backgroundColor: colors.primary }}>
+              <View style={{ width: 52, height: 52, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primary }}>
                 <Ionicons color={colors.surface} name="nutrition" size={30} />
               </View>
-              <View style={{ alignItems: "center", gap: spacing.xs }}>
-                <Text style={{ color: colors.primary, fontSize: 24, fontWeight: "900" }}>I-NutriGuide</Text>
-                <Text style={{ color: colors.muted, textAlign: "center" }}>Smart Nutrition, Personalized for You.</Text>
-              </View>
-              <View style={{ alignItems: "center", gap: spacing.xs }}>
+              <View style={{ gap: spacing.xs }}>
                 <Badge label="Smart Food Match" tone="orange" />
-                <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900", lineHeight: 34, textAlign: "center" }}>
-                  Eat Smarter,{"\n"}<Text style={{ color: colors.primary }}>Live Better.</Text>
+                <Text style={{ color: colors.text, fontSize: 30, fontWeight: "900", lineHeight: 36 }}>
+                  I-NutriGuide
                 </Text>
+                <Text style={{ color: colors.muted, fontSize: 16, lineHeight: 23 }}>Smart nutrition guidance built around your supplements, food preferences, and daily goals.</Text>
               </View>
               <View style={{ width: "100%", gap: 10 }}>
                 <ButtonLink href="/auth/login" label="Get Started" />

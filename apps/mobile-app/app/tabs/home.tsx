@@ -1,110 +1,43 @@
+"use client";
+
 import { Ionicons } from "@expo/vector-icons";
-import type { ComponentProps } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
+import { 
+  View, 
+  Text, 
+  Card, 
+  Button, 
+  ProgressBar, 
+  Colors, 
+  TouchableOpacity
+} from "react-native-ui-lib";
+import { ScrollView, ImageBackground } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import {
   AnimatedSection,
-  AppButton,
-  AppCard,
   AppTopBar,
   Badge,
   EmptyState,
-  ErrorState,
-  FoodCard,
-  NutrientCard,
-  SearchInput,
-  SectionHeader,
-  SkeletonCard,
-  StatCard,
-  SupplementCard,
 } from "../../src/components/ui";
 import { generateRecommendations, listRecommendationHistory } from "../../src/features/recommendations/api";
 import { listUserSupplements } from "../../src/features/supplements/api";
+import { getTodayTracking } from "../../src/features/tracking/api";
+import { getProfile } from "../../src/features/profile/api";
 import { useAuthStore } from "../../src/stores/auth-store";
-import { cards, colors, images, radii, spacing } from "../../src/theme/design";
-
-type IconName = ComponentProps<typeof Ionicons>["name"];
-
-type QuickActionProps = {
-  icon: IconName;
-  label: string;
-  onPress: () => void;
-  tone?: "green" | "orange" | "neutral";
-};
-
-function QuickAction({ icon, label, onPress, tone = "green" }: QuickActionProps) {
-  const palette = {
-    green: { backgroundColor: colors.primarySoft, color: colors.primary },
-    orange: { backgroundColor: colors.secondarySoft, color: colors.secondary },
-    neutral: { backgroundColor: colors.surfaceSoft, color: colors.muted },
-  }[tone];
-
-  return (
-    <TouchableOpacity
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={{
-        ...cards.default,
-        flex: 1,
-        minWidth: 102,
-        minHeight: 104,
-        alignItems: "center",
-        justifyContent: "center",
-        gap: spacing.xs,
-        paddingHorizontal: spacing.sm,
-      }}
-    >
-      <View style={{ width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: palette.backgroundColor }}>
-        <Ionicons color={palette.color} name={icon} size={21} />
-      </View>
-      <Text style={{ color: colors.text, fontSize: 13, fontWeight: "900", lineHeight: 18, textAlign: "center" }}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
-
-function HeroMetric({ label, value }: { label: string; value: string | number }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        minWidth: 96,
-        borderColor: "rgba(255,255,255,0.24)",
-        borderRadius: radii.md,
-        borderWidth: 1,
-        backgroundColor: "rgba(255,255,255,0.58)",
-        padding: spacing.sm,
-      }}
-    >
-      <Text style={{ color: colors.text, fontSize: 24, fontWeight: "900" }}>{value}</Text>
-      <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "900", marginTop: 2, textTransform: "uppercase" }}>{label}</Text>
-    </View>
-  );
-}
-
-function MiniPlanCard({ icon, label, title }: { icon: IconName; label: string; title: string }) {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, borderRadius: radii.lg, backgroundColor: colors.surfaceSoft, padding: spacing.sm }}>
-      <View style={{ width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
-        <Ionicons color={colors.primary} name={icon} size={19} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "900", textTransform: "uppercase" }}>{label}</Text>
-        <Text style={{ color: colors.text, fontSize: 15, fontWeight: "900", marginTop: 2 }}>{title}</Text>
-      </View>
-    </View>
-  );
-}
+import { images, spacing } from "../../src/theme/design";
 
 export default function HomeScreen() {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   const supplements = useQuery({ queryKey: ["user-supplements"], queryFn: listUserSupplements });
   const history = useQuery({ queryKey: ["recommendation-history"], queryFn: listRecommendationHistory });
+  const today = useQuery({ queryKey: ["tracking", "today"], queryFn: getTodayTracking });
+  const profile = useQuery({ queryKey: ["profile"], queryFn: getProfile });
+
   const latestRun = history.data?.[0];
-  const latestItem = latestRun?.items[0];
   const activeSupplementCount = supplements.data?.filter((item) => item.active).length ?? 0;
+  
   const generateMutation = useMutation({
     mutationFn: () => generateRecommendations(10),
     onSuccess: async (run) => {
@@ -113,139 +46,157 @@ export default function HomeScreen() {
     },
   });
 
-  const openLatestOrGenerate = () => {
-    if (latestRun) {
-      router.push(`/recommendations/${latestRun.run_id}` as never);
-      return;
-    }
-    generateMutation.mutate();
+  const targets = {
+    calories: profile.data?.goal === "weight_loss" ? 1800 : profile.data?.goal === "muscle" ? 2800 : 2200,
+    water: 2500,
+  };
+
+  const stats = {
+    calories: today.data?.calories ?? 0,
+    water: today.data?.water_ml ?? 0,
+    supplements: today.data?.supplements_taken.length ?? 0,
   };
 
   return (
     <Screen topBar={<AppTopBar onAvatarPress={() => router.push("/tabs/profile" as never)} />}>
-      <View style={{ gap: spacing.lg }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.lg }} showsVerticalScrollIndicator={false}>
+        
+        {/* Modern Hero Section */}
         <AnimatedSection>
-          <ImageBackground
-            imageStyle={{ borderRadius: radii.xl }}
-            source={{ uri: images.breakfast }}
-            style={{ minHeight: 280, justifyContent: "flex-end", overflow: "hidden", borderRadius: radii.xl }}
-          >
-            <View style={{ flex: 1, justifyContent: "flex-end", padding: spacing.md, backgroundColor: colors.overlaySoft }}>
-              <View
-                style={{
-                  gap: spacing.md,
-                  borderColor: "rgba(255,255,255,0.58)",
-                  borderRadius: radii.xl,
-                  borderWidth: 1,
-                  backgroundColor: "rgba(255,255,255,0.84)",
-                  padding: spacing.lg,
-                }}
-              >
-                <View style={{ gap: spacing.xs }}>
-                  <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "900" }}>Hi {user?.name ?? "there"}</Text>
-                  <Text style={{ color: colors.text, fontSize: 22, fontWeight: "900" }}>Good Morning, {user?.name ?? "there"}!</Text>
-                  <Text style={{ color: colors.muted, fontSize: 16, lineHeight: 23 }}>Ready for your Vitamin C boost?</Text>
-                </View>
-
-                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-                  <HeroMetric label="Active supplements" value={activeSupplementCount} />
-                  <HeroMetric label="Food matches" value={history.data?.length ?? 0} />
-                </View>
+          <View br10 marginH-24 style={{ overflow: "hidden" }}>
+            <ImageBackground
+              source={{ uri: images.breakfast }}
+              style={{ minHeight: 240, justifyContent: "flex-end" }}
+            >
+              <View flex bottom padding-24 backgroundColor="rgba(0,0,0,0.15)">
+                <Card padding-16 backgroundColor="rgba(255,255,255,0.92)" style={{ borderWidth: 0 }}>
+                  <Text primary label marginB-4>Overview</Text>
+                  <Text h2>Hi {user?.name.split(' ')[0] ?? "there"}!</Text>
+                  
+                  <View row spread marginT-12>
+                     <View flex marginR-12>
+                        <Text small bold marginB-4 color={Colors.muted}>CALORIES</Text>
+                        <ProgressBar 
+                          progress={(stats.calories / targets.calories) * 100} 
+                          progressColor={Colors.primary} 
+                          style={{ height: 8 }}
+                        />
+                        <Text h3 marginT-4>{stats.calories} <Text body color={Colors.muted}>/ {targets.calories}</Text></Text>
+                     </View>
+                     <View flex>
+                        <Text small bold marginB-4 color={Colors.muted}>WATER</Text>
+                        <ProgressBar 
+                          progress={(stats.water / targets.water) * 100} 
+                          progressColor={Colors.blue} 
+                          style={{ height: 8 }}
+                        />
+                        <Text h3 marginT-4>{stats.water} <Text body color={Colors.muted}>/ {targets.water}</Text></Text>
+                     </View>
+                  </View>
+                </Card>
               </View>
-            </View>
-          </ImageBackground>
+            </ImageBackground>
+          </View>
         </AnimatedSection>
 
-        <AnimatedSection delay={40}>
-          <AppButton
-            accessibilityLabel={latestRun ? "Open latest recommendation" : "Generate today's match"}
-            disabled={generateMutation.isPending}
-            icon="sparkles"
-            label={generateMutation.isPending ? "Generating" : latestRun ? "Open today's match" : "Generate today's match"}
-            onPress={openLatestOrGenerate}
-          />
+        {/* Quick Actions */}
+        <AnimatedSection delay={60}>
+          <View row paddingH-24 marginT-24 style={{ gap: spacing.lg }}>
+            <ActionTile color="success" icon="add-circle" label="Log Food" onPress={() => router.push("/tabs/tracking" as never)} />
+            <ActionTile color="blue" icon="water" label="Hydration" onPress={() => router.push("/tabs/tracking" as never)} />
+            <ActionTile color="orange" icon="medkit" label="Pills" onPress={() => router.push("/tabs/supplements" as never)} />
+          </View>
         </AnimatedSection>
 
-        <AnimatedSection delay={70}>
-          <SearchInput placeholder="Search foods, supplements, nutrients" />
+        {/* AI Guidance Card */}
+        <AnimatedSection delay={120}>
+          <View paddingH-24 marginT-24>
+            <Card padding-24>
+               <View row spread centerV marginB-12>
+                  <Text h3>AI Nutritionist</Text>
+                  <Badge label="Active" tone="green" />
+               </View>
+               
+               {latestRun ? (
+                 <View>
+                    <Text body marginB-16>We've updated your daily goals based on yesterday's metrics.</Text>
+                    <Button 
+                      label="View Full Plan" 
+                      iconSource={() => <Ionicons color="white" name="sparkles" size={18} style={{ marginRight: 8 }} />}
+                      onPress={() => router.push(`/recommendations/${latestRun.run_id}` as never)} 
+                    />
+                 </View>
+               ) : (
+                 <EmptyState 
+                   icon="sparkles-outline"
+                   message="Track your intake for personalized AI advice."
+                   title="No guidance yet" 
+                 />
+               )}
+            </Card>
+          </View>
         </AnimatedSection>
 
-        {generateMutation.isError ? (
-          <AnimatedSection delay={90}>
-            <ErrorState message="Unable to generate recommendations. Please try again." />
-          </AnimatedSection>
-        ) : null}
-
-        <AnimatedSection delay={120} style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-          <QuickAction icon="add-circle" label="Add supplement" onPress={() => router.push("/supplements/new" as never)} />
-          <QuickAction icon="restaurant" label="Food matches" onPress={() => router.push("/tabs/recommendations" as never)} tone="orange" />
-          <QuickAction icon="analytics" label="Track today" onPress={() => router.push("/tabs/tracking" as never)} tone="neutral" />
+        {/* Daily Routine Summary */}
+        <AnimatedSection delay={180}>
+           <View paddingH-24 marginT-24>
+              <Text h3 marginB-12>Your Routine</Text>
+              <View br10 backgroundColor={Colors.surface} padding-24>
+                 <RoutineRow 
+                   done={!!today.data?.food_entries.length} 
+                   icon="restaurant" 
+                   title="Meals Logged" 
+                   value={today.data?.food_entries.length ? `${today.data.food_entries.length} items` : "Empty"}
+                 />
+                 <View backgroundColor={Colors.background} height={1} marginV-12 />
+                 <RoutineRow 
+                   done={stats.supplements >= activeSupplementCount && activeSupplementCount > 0} 
+                   icon="medkit" 
+                   title="Supplements" 
+                   value={`${stats.supplements} / ${activeSupplementCount}`}
+                 />
+              </View>
+           </View>
         </AnimatedSection>
 
-        <AnimatedSection delay={160} style={{ flexDirection: "row", gap: spacing.sm }}>
-          <StatCard icon="nutrition" label="Supplements" value={activeSupplementCount} />
-          <StatCard icon="sparkles" label="Matches" tone="orange" value={history.data?.length ?? 0} />
-        </AnimatedSection>
-
-        <AnimatedSection delay={200} style={{ gap: spacing.sm }}>
-          <SectionHeader title="Today's routine" />
-          {supplements.isLoading ? <SkeletonCard lines={1} /> : null}
-          {supplements.data?.slice(0, 2).map((item) => (
-            <SupplementCard
-              active={item.active}
-              dose={item.dose}
-              frequency={item.frequency}
-              key={item.id}
-              name={item.supplement.name}
-              timeOfDay={item.time_of_day}
-            />
-          ))}
-          {!supplements.isLoading && supplements.data?.length === 0 ? (
-            <EmptyState icon="medical" title="No supplements yet" message="Add your first supplement to unlock personalized food recommendations." />
-          ) : null}
-        </AnimatedSection>
-
-        <AnimatedSection delay={240} style={{ gap: spacing.sm }}>
-          <SectionHeader title={latestItem ? "Best match now" : "Daily plan preview"} />
-          {history.isLoading ? <SkeletonCard lines={2} /> : null}
-          {latestItem ? (
-            <FoodCard
-              category={latestItem.food.category}
-              name={latestItem.food.name}
-              nutrients={latestItem.tags.length ? latestItem.tags : latestItem.matched_nutrients}
-              reason={`Pairs with ${latestItem.matched_supplement?.name ?? "your supplement"} for a stronger nutrient routine.`}
-              score={Number(latestItem.score)}
-            />
-          ) : null}
-          {!history.isLoading && !latestItem ? (
-            <AppCard style={{ gap: spacing.sm }}>
-              <MiniPlanCard icon="sunny" label="Breakfast" title="Citrus yogurt bowl" />
-              <MiniPlanCard icon="leaf" label="Lunch" title="Leafy green protein bowl" />
-              <MiniPlanCard icon="restaurant" label="Dinner" title="Tomato chickpea plate" />
-            </AppCard>
-          ) : null}
-        </AnimatedSection>
-
-        <AnimatedSection delay={280}>
-          <NutrientCard
-            badge="Absorption Tip"
-            description="Vitamin C can support iron absorption, while calcium may reduce iron absorption when taken too close together."
-            icon="bulb"
-            title="Why Timing Matters"
-          />
-        </AnimatedSection>
-
-        <AnimatedSection delay={320} style={{ gap: spacing.sm }}>
-          <AppButton
-            accessibilityLabel="Generate recommendations"
-            disabled={generateMutation.isPending}
-            icon="sparkles"
-            label={generateMutation.isPending ? "Generating" : "Generate recommendations"}
-            onPress={() => generateMutation.mutate()}
-          />
-          <AppButton icon="time" label="View history" onPress={() => router.push("/tabs/recommendations" as never)} variant="ghost" />
-        </AnimatedSection>
-      </View>
+      </ScrollView>
     </Screen>
+  );
+}
+
+function ActionTile({ icon, label, color, onPress }: { icon: any, label: string, color: string, onPress: () => void }) {
+  const fg = (Colors as any)[color] || Colors.primary;
+  return (
+    <TouchableOpacity 
+      backgroundColor={Colors.white} 
+      br10 
+      center 
+      flex 
+      onPress={onPress} 
+      padding-12 
+      style={{ elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } }}
+    >
+      <View backgroundColor={`${fg}20`} br100 padding-12>
+        <Ionicons color={fg} name={icon} size={24} />
+      </View>
+      <Text bold color={fg} marginT-8 small>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function RoutineRow({ icon, title, value, done }: { icon: any, title: string, value: string, done: boolean }) {
+  return (
+    <View centerV row spread>
+       <View centerV row>
+          <View backgroundColor={done ? Colors.primary : Colors.background} br10 center height={36} width={36}>
+             <Ionicons color={done ? 'white' : Colors.muted} name={icon} size={18} />
+          </View>
+          <View marginL-12>
+             <Text bold body>{title}</Text>
+             <Text small>{value}</Text>
+          </View>
+       </View>
+       {done && <Ionicons color={Colors.primary} name="checkmark-circle" size={24} />}
+    </View>
   );
 }

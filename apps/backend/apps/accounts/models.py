@@ -103,6 +103,7 @@ class DailyTracking(models.Model):
     fiber_g = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     steps = models.PositiveIntegerField(default=0)
     supplements_taken = models.JSONField(default=list, blank=True)
+    food_entries = models.JSONField(default=list, blank=True)
     goals_completed = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

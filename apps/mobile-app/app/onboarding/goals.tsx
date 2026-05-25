@@ -2,10 +2,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { View } from "react-native";
+import { 
+  View, 
+  Text, 
+  Card, 
+  Button, 
+  Colors, 
+} from "react-native-ui-lib";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, AppButton, AppCard, GoalSelector, OptionSelect, PageHeader, ProgressSteps } from "../../src/components/ui";
+import { AnimatedSection, PageHeader, ProgressSteps, FilterChip } from "../../src/components/ui";
 import { getProfile, updateProfile } from "../../src/features/profile/api";
 import { spacing } from "../../src/theme/design";
 
@@ -96,38 +102,64 @@ export default function GoalOnboardingScreen() {
 
   return (
     <Screen>
-      <View style={{ gap: spacing.lg }}>
+      <View padding-24 gap-24>
         <ProgressSteps current={3} total={4} />
+        
         <AnimatedSection>
-          <PageHeader eyebrow="Step 3 of 4" title="Goals and preferences" subtitle="Choose the options that best describe your routine." />
+          <PageHeader eyebrow="Step 3 of 4" title="Goals" subtitle="What are you hoping to achieve with I-NutriGuide?" />
         </AnimatedSection>
 
         <AnimatedSection delay={80}>
-          <AppCard style={{ gap: spacing.md }}>
-          <GoalSelector
-            onSelect={(value) => setValue("goal", value, { shouldDirty: true, shouldValidate: true })}
-            options={goalOptions}
-            selected={watch("goal")}
-          />
+          <Card padding-24 gap-24>
+            <View gap-8>
+              <Text label small>Primary Health Goal</Text>
+              <View row style={{ flexWrap: "wrap", gap: 8 }}>
+                {goalOptions.map(opt => (
+                  <FilterChip 
+                    key={opt.value} 
+                    label={opt.label} 
+                    active={watch("goal") === opt.value} 
+                    onPress={() => setValue("goal", opt.value)} 
+                  />
+                ))}
+              </View>
+            </View>
 
-          <OptionSelect
-            error={errors.activity_level?.message}
-            label="Activity level"
-            onSelect={(value) => setValue("activity_level", value, { shouldDirty: true, shouldValidate: true })}
-            options={activityOptions}
-            selected={watch("activity_level")}
-          />
+            <View gap-8>
+              <Text label small>Activity Level</Text>
+              <View row style={{ flexWrap: "wrap", gap: 8 }}>
+                {activityOptions.map(opt => (
+                  <FilterChip 
+                    key={opt.value} 
+                    label={opt.label} 
+                    active={watch("activity_level") === opt.value} 
+                    onPress={() => setValue("activity_level", opt.value)} 
+                  />
+                ))}
+              </View>
+            </View>
 
-          <OptionSelect
-            error={errors.diet_type?.message}
-            label="Diet type"
-            onSelect={(value) => setValue("diet_type", value, { shouldDirty: true, shouldValidate: true })}
-            options={dietOptions}
-            selected={watch("diet_type")}
-          />
+            <View gap-8>
+              <Text label small>Current Diet</Text>
+              <View row style={{ flexWrap: "wrap", gap: 8 }}>
+                {dietOptions.map(opt => (
+                  <FilterChip 
+                    key={opt.value} 
+                    label={opt.label} 
+                    active={watch("diet_type") === opt.value} 
+                    onPress={() => setValue("diet_type", opt.value)} 
+                  />
+                ))}
+              </View>
+            </View>
 
-          <AppButton accessibilityLabel="Save goals" disabled={isSubmitting} icon="arrow-forward" label={isSubmitting ? "Saving" : "Continue"} onPress={onSubmit} />
-          </AppCard>
+            <Button 
+              label={isSubmitting ? "Saving..." : "Continue"} 
+              disabled={isSubmitting} 
+              onPress={onSubmit} 
+              size={Button.sizes.large}
+            />
+          </Card>
         </AnimatedSection>
       </View>
     </Screen>

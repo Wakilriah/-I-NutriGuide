@@ -58,7 +58,7 @@ export default function RegisterScreen() {
           <Text style={{ color: colors.primary, fontSize: 28, fontWeight: "900" }}>I-NutriGuide</Text>
         </View>
         <PageHeader eyebrow="Start healthy" title="Create account" subtitle="Set up your nutrition profile and get supplement-aware food recommendations." />
-        <AppCard style={{ gap: spacing.md, borderRadius: 32, padding: spacing.xl }}>
+        <AppCard style={{ gap: spacing.md, padding: spacing.xl }}>
           <Controller
             control={control}
             name="name"

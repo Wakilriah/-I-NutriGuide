@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../global.css";
 import type { AuthUser } from "../src/features/auth/api";
 import { getProfile, isProfileComplete, updateProfile } from "../src/features/profile/api";
@@ -10,6 +11,9 @@ import { queryClient } from "../src/lib/query-client";
 import { loadSession } from "../src/lib/secure-storage";
 import { useAuthStore } from "../src/stores/auth-store";
 import { usePushNotifications } from "../src/lib/usePushNotifications";
+import { setupUILib } from "../src/theme/ui-lib-config";
+
+setupUILib();
 
 export default function RootLayout() {
   const { expoPushToken } = usePushNotifications();
@@ -68,9 +72,11 @@ export default function RootLayout() {
   }, [expoPushToken, accessToken]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ headerShown: false }} />
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

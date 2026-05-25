@@ -2,17 +2,23 @@ import { router } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { 
+  View, 
+  Text, 
+  Card, 
+  Button, 
+  Colors, 
+  TextField,
+} from "react-native-ui-lib";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, AppButton, AppCard, AppInput, OptionSelect, PageHeader, ProgressSteps } from "../../src/components/ui";
+import { AnimatedSection, PageHeader, ProgressSteps, FilterChip } from "../../src/components/ui";
 import { getProfile, updateProfile } from "../../src/features/profile/api";
 import { spacing } from "../../src/theme/design";
 
 const genderOptions = [
   { icon: "female" as const, label: "Female", value: "female" },
   { icon: "male" as const, label: "Male", value: "male" },
-  { icon: "person" as const, label: "Other", value: "other" },
   { icon: "remove-circle" as const, label: "Prefer not to say", value: "prefer_not_to_say" },
 ];
 
@@ -44,6 +50,8 @@ export default function ProfileOnboardingScreen() {
     handleSubmit,
     reset,
     setError,
+    watch,
+    setValue,
   } = useForm<ProfileValues>({
     resolver: zodResolver(schema),
     defaultValues: { age: "", gender: "", height_cm: "", weight_kg: "" },
@@ -92,46 +100,87 @@ export default function ProfileOnboardingScreen() {
 
   return (
     <Screen>
-      <View style={{ gap: spacing.lg }}>
+      <View padding-24 gap-24>
         <ProgressSteps current={1} total={4} />
+        
         <AnimatedSection>
-          <PageHeader eyebrow="Step 1 of 4" title="Set up your profile" subtitle="These basics help tune nutrition recommendations to your body context." />
+          <PageHeader eyebrow="Getting Started" title="Basics" subtitle="Tell us a bit about yourself to help tune your AI nutritionist." />
         </AnimatedSection>
 
         <AnimatedSection delay={80}>
-          <AppCard style={{ gap: spacing.md }}>
-          <Controller
-            control={control}
-            name="gender"
-            render={({ field: { onChange, value } }) => (
-              <OptionSelect error={errors.gender?.message} label="Gender" onSelect={onChange} options={genderOptions} selected={value} />
-            )}
-          />
+          <Card padding-24 gap-24>
+            <View gap-8>
+              <Text label small>Gender Identity</Text>
+              <View row style={{ flexWrap: "wrap", gap: 8 }}>
+                {genderOptions.map(opt => (
+                  <FilterChip 
+                    key={opt.value} 
+                    label={opt.label} 
+                    active={watch("gender") === opt.value} 
+                    onPress={() => setValue("gender", opt.value)} 
+                  />
+                ))}
+              </View>
+              {errors.gender && <Text small color={Colors.error}>{errors.gender.message}</Text>}
+            </View>
 
-          {[
-            ["age", "Age", "numeric"],
-            ["height_cm", "Height cm", "decimal-pad"],
-            ["weight_kg", "Weight kg", "decimal-pad"],
-          ].map(([fieldName, label, keyboardType]) => (
+            <View row gap-16>
+              <View flex>
+                <Controller
+                  control={control}
+                  name="age"
+                  render={({ field }) => (
+                    <TextField
+                      label="Age"
+                      placeholder="25"
+                      keyboardType="numeric"
+                      onChangeText={field.onChange}
+                      value={field.value}
+                      validationMessage={errors.age?.message}
+                    />
+                  )}
+                />
+              </View>
+              <View flex>
+                <Controller
+                  control={control}
+                  name="weight_kg"
+                  render={({ field }) => (
+                    <TextField
+                      label="Weight (kg)"
+                      placeholder="70"
+                      keyboardType="decimal-pad"
+                      onChangeText={field.onChange}
+                      value={field.value}
+                      validationMessage={errors.weight_kg?.message}
+                    />
+                  )}
+                />
+              </View>
+            </View>
+
             <Controller
               control={control}
-              key={fieldName}
-              name={fieldName as keyof ProfileValues}
-              render={({ field: { onChange, value } }) => (
-                <AppInput
-                  accessibilityLabel={label}
-                  error={errors[fieldName as keyof ProfileValues]?.message}
-                  keyboardType={keyboardType as "default" | "numeric" | "decimal-pad"}
-                  label={label}
-                  onChangeText={onChange}
-                  value={value}
+              name="height_cm"
+              render={({ field }) => (
+                <TextField
+                  label="Height (cm)"
+                  placeholder="175"
+                  keyboardType="decimal-pad"
+                  onChangeText={field.onChange}
+                  value={field.value}
+                  validationMessage={errors.height_cm?.message}
                 />
               )}
             />
-          ))}
 
-          <AppButton accessibilityLabel="Save profile basics" disabled={isSubmitting} icon="arrow-forward" label={isSubmitting ? "Saving" : "Continue"} onPress={onSubmit} />
-          </AppCard>
+            <Button 
+              label={isSubmitting ? "Saving..." : "Continue"} 
+              disabled={isSubmitting} 
+              onPress={onSubmit} 
+              size={Button.sizes.large}
+            />
+          </Card>
         </AnimatedSection>
       </View>
     </Screen>

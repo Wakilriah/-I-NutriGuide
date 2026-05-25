@@ -55,7 +55,7 @@ export default function LoginScreen() {
 
         <PageHeader eyebrow="Welcome back" title="Sign in" subtitle="Use your I-NutriGuide account to continue your food and supplement plan." />
 
-        <AppCard style={{ gap: spacing.md, borderRadius: 32, padding: spacing.xl }}>
+        <AppCard style={{ gap: spacing.md, padding: spacing.xl }}>
           <Controller
             control={control}
             name="email"

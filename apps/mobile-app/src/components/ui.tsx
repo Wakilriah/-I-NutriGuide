@@ -41,15 +41,15 @@ export function AppTopBar({ onAvatarPress, subtitle, title = "I-NutriGuide" }: {
   return (
     <View
       style={{
-        minHeight: 78,
+        minHeight: 72,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottomColor: "rgba(191,202,186,0.46)",
+        borderBottomColor: colors.borderSoft,
         borderBottomWidth: 1,
-        backgroundColor: "rgba(239,253,237,0.94)",
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
+        backgroundColor: colors.surface,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.sm,
         paddingBottom: spacing.sm,
       }}
     >
@@ -60,34 +60,36 @@ export function AppTopBar({ onAvatarPress, subtitle, title = "I-NutriGuide" }: {
         disabled={!onAvatarPress}
         hitSlop={{ bottom: 12, left: 12, right: 12, top: 12 }}
         onPress={onAvatarPress}
-        style={{ minHeight: 52, flex: 1, flexDirection: "row", alignItems: "center", gap: spacing.sm }}
+        style={{ minHeight: 48, flex: 1, flexDirection: "row", alignItems: "center", gap: spacing.sm }}
       >
         <View
           style={{
-            width: 44,
-            height: 44,
-            borderColor: colors.primaryFresh,
-            borderRadius: radii.pill,
-            borderWidth: 2,
+            width: 40,
+            height: 40,
+            borderColor: colors.borderSoft,
+            borderRadius: radii.md,
+            borderWidth: 1,
             overflow: "hidden",
           }}
         >
           <Image source={{ uri: images.avatarWoman }} style={{ width: "100%", height: "100%" }} />
         </View>
         <View>
-          <Text style={{ color: colors.primary, fontSize: 26, fontWeight: "900", lineHeight: 31 }}>{title}</Text>
+          <Text style={{ color: colors.text, fontSize: 20, fontWeight: "900", lineHeight: 25 }}>{title}</Text>
           {subtitle ? <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "800", marginTop: 1 }}>{subtitle}</Text> : null}
         </View>
       </TouchableOpacity>
       <TouchableOpacity
         accessibilityLabel="Notifications"
         style={{
-          width: 42,
-          height: 42,
+          width: 40,
+          height: 40,
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: radii.pill,
-          backgroundColor: "rgba(255,255,255,0.44)",
+          borderColor: colors.borderSoft,
+          borderRadius: radii.md,
+          borderWidth: 1,
+          backgroundColor: colors.surfaceContainerLow,
         }}
       >
         <Ionicons color={colors.primary} name="notifications-outline" size={iconSizes.lg} />
@@ -107,7 +109,7 @@ export function PageHeader({
 }) {
   return (
     <View style={{ gap: spacing.xs }}>
-      {eyebrow ? <Text style={{ color: colors.secondary, fontSize: 13, fontWeight: "900", letterSpacing: 0.4, textTransform: "uppercase" }}>{eyebrow}</Text> : null}
+      {eyebrow ? <Text style={{ color: colors.secondary, fontSize: 12, fontWeight: "900", letterSpacing: 0.4, textTransform: "uppercase" }}>{eyebrow}</Text> : null}
       <Text style={typography.title}>{title}</Text>
       {subtitle ? <Text style={typography.subtitle}>{subtitle}</Text> : null}
     </View>
@@ -143,21 +145,21 @@ export function AppButton({
       disabled={disabled}
       onPress={onPress}
       style={{
-        minHeight: 58,
+        minHeight: 50,
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "row",
         gap: 8,
-        borderRadius: radii.lg,
+        borderRadius: radii.md,
         borderWidth: 1,
         opacity: disabled ? 0.7 : 1,
         paddingHorizontal: spacing.md,
         ...styleByVariant,
         shadowColor: variant === "primary" ? colors.primaryContainer : "transparent",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: variant === "primary" ? 0.18 : 0,
-        shadowRadius: 18,
-        elevation: variant === "primary" ? 3 : 0,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: variant === "primary" ? 0.12 : 0,
+        shadowRadius: 14,
+        elevation: variant === "primary" ? 2 : 0,
       }}
     >
       {icon ? <Ionicons color={textColor} name={icon} size={18} /> : null}
@@ -190,9 +192,9 @@ export function AppInput({
       <TextInput
         placeholderTextColor={colors.placeholder}
         style={{
-          minHeight: 56,
+          minHeight: 50,
           borderColor: error ? colors.danger : "transparent",
-          borderRadius: radii.lg,
+          borderRadius: radii.md,
           borderWidth: 1,
           backgroundColor: colors.surfaceContainerLow,
           color: colors.text,
@@ -233,14 +235,14 @@ export function OptionSelect({
               key={option.value}
               onPress={() => onSelect(option.value)}
               style={{
-                minHeight: 46,
+          minHeight: 42,
                 minWidth: 110,
                 flexGrow: 1,
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "row",
                 gap: 7,
-                borderRadius: radii.lg,
+                borderRadius: radii.md,
                 borderWidth: 1,
                 borderColor: active ? colors.primary : error ? colors.danger : colors.border,
                 backgroundColor: active ? colors.primarySoft : colors.surfaceContainerLow,
@@ -266,7 +268,7 @@ export function Badge({ label, tone = "green" }: { label: string; tone?: "green"
     neutral: { backgroundColor: colors.surfaceContainerHigh, color: colors.muted },
   }[tone];
   return (
-    <View style={{ alignSelf: "flex-start", borderRadius: radii.pill, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: palette.backgroundColor }}>
+    <View style={{ alignSelf: "flex-start", borderRadius: radii.sm, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: palette.backgroundColor }}>
       <Text style={{ color: palette.color, fontSize: 12, fontWeight: "900" }}>{label}</Text>
     </View>
   );
@@ -276,11 +278,11 @@ export function SearchInput({ placeholder = "Search foods, supplements, nutrient
   return (
     <View
       style={{
-        minHeight: 56,
+        minHeight: 50,
         flexDirection: "row",
         alignItems: "center",
         gap: spacing.sm,
-        borderRadius: radii.lg,
+        borderRadius: radii.md,
         backgroundColor: colors.surfaceContainer,
         paddingHorizontal: spacing.md,
       }}
@@ -304,14 +306,14 @@ export function FilterChip({ active, icon, label, onPress }: { active?: boolean;
       accessibilityLabel={label}
       onPress={onPress}
       style={{
-        minHeight: 38,
+        minHeight: 36,
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        borderRadius: radii.pill,
+        borderRadius: radii.md,
         borderWidth: 1,
         borderColor: active ? colors.primary : colors.border,
-        backgroundColor: active ? colors.primaryContainer : "rgba(255,255,255,0.72)",
+        backgroundColor: active ? colors.primary : colors.surface,
         paddingHorizontal: 13,
       }}
     >
@@ -333,7 +335,7 @@ export function SectionHeader({ action, title }: { action?: ReactNode; title: st
 export function EmptyState({ icon = "leaf", message, title }: { icon?: IconName; message: string; title: string }) {
   return (
     <AppCard style={{ alignItems: "center", gap: spacing.sm, padding: spacing.lg }}>
-      <View style={{ width: 52, height: 52, alignItems: "center", justifyContent: "center", borderRadius: radii.pill, backgroundColor: colors.primarySoft }}>
+      <View style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
         <Ionicons color={colors.primary} name={icon} size={iconSizes.lg} />
       </View>
       <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900", textAlign: "center" }}>{title}</Text>
@@ -429,13 +431,13 @@ export function FoodCard({
 }) {
   return (
     <AppCard style={{ ...cards.cream, gap: spacing.md, padding: spacing.sm }}>
-      <ImageBackground imageStyle={{ borderRadius: radii.xl }} source={image} style={{ height: 164, justifyContent: "flex-start", alignItems: "flex-end", overflow: "hidden", borderRadius: radii.xl }}>
+      <ImageBackground imageStyle={{ borderRadius: radii.md }} source={image} style={{ height: 150, justifyContent: "flex-start", alignItems: "flex-end", overflow: "hidden", borderRadius: radii.md }}>
         <View style={{ padding: spacing.sm }}>
           {typeof score === "number" ? <Badge label={score >= 0.8 ? "High Match" : `${Math.round(score * 100)}% match`} tone="orange" /> : null}
         </View>
       </ImageBackground>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.sm }}>
-        <View style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
+        <View style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
           <Ionicons color={colors.primary} name="restaurant" size={20} />
         </View>
         <View style={{ flex: 1 }}>
@@ -474,9 +476,9 @@ export function SupplementCard({
   timeOfDay?: string;
 }) {
   return (
-    <AppCard style={{ ...cards.cream, gap: spacing.sm }}>
+    <AppCard style={{ ...cards.default, gap: spacing.sm }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-        <View style={{ width: 54, height: 54, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: active ? colors.secondaryContainer : colors.surfaceContainerHigh }}>
+        <View style={{ width: 46, height: 46, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: active ? colors.secondaryContainer : colors.surfaceContainerHigh }}>
           <Ionicons color={active ? colors.surface : colors.muted} name="nutrition" size={22} />
         </View>
         <View style={{ flex: 1 }}>
@@ -532,8 +534,8 @@ export function RecommendationCard({
   const reasonTags = details.reasons.slice(0, 3).map((reason) => reason.title);
   const chips = Array.from(new Set([...(nutrients ?? []), ...reasonTags])).slice(0, 6);
   return (
-    <AppCard style={{ ...cards.cream, gap: spacing.md, padding: spacing.sm }}>
-      <ImageBackground imageStyle={{ borderRadius: radii.xl }} source={{ uri: images.avocado }} style={{ height: 172, alignItems: "flex-end", justifyContent: "flex-start", overflow: "hidden", borderRadius: radii.xl }}>
+    <AppCard style={{ ...cards.default, gap: spacing.md, padding: spacing.sm }}>
+      <ImageBackground imageStyle={{ borderRadius: radii.md }} source={{ uri: images.avocado }} style={{ height: 156, alignItems: "flex-end", justifyContent: "flex-start", overflow: "hidden", borderRadius: radii.md }}>
         <View style={{ padding: spacing.sm }}>
           <Badge label={confidenceLabel ? `${confidenceLabel} confidence` : score >= 0.82 ? "Best Pair" : "Good Pair"} tone="orange" />
         </View>
@@ -585,7 +587,7 @@ export function ExplanationPanel({ explanation }: { explanation: { summary: stri
   const [expanded, setExpanded] = useState(false);
   const reasons = explanation.reasons ?? [];
   return (
-    <View style={{ borderColor: colors.borderSoft, borderRadius: radii.md, borderWidth: 1, overflow: "hidden" }}>
+      <View style={{ borderColor: colors.borderSoft, borderRadius: radii.md, borderWidth: 1, overflow: "hidden", backgroundColor: colors.surface }}>
       <TouchableOpacity accessibilityLabel="Toggle recommendation explanation" onPress={() => setExpanded((value) => !value)} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: spacing.md }}>
         <Text style={{ color: colors.text, fontWeight: "900" }}>Why this recommendation?</Text>
         <Ionicons color={colors.primary} name={expanded ? "chevron-up" : "chevron-down"} size={iconSizes.md} />

@@ -1,10 +1,19 @@
 import { apiClient } from "../../lib/api";
 
+export type FoodNutrient = {
+  name: string;
+  slug: string;
+  amount: string;
+  unit: string;
+};
+
 export type FoodSearchItem = {
   id: number;
   name: string;
   slug: string;
   category?: string;
+  serving_size_g: string;
+  nutrients: FoodNutrient[];
 };
 
 type FoodSearchResponse = {

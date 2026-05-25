@@ -16,13 +16,14 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.muted,
-          tabBarLabelStyle: { fontSize: 12, fontWeight: "900" },
+          tabBarLabelStyle: { fontSize: 11, fontWeight: "800", marginTop: 2 },
           tabBarStyle: {
-            minHeight: 82,
-            borderTopColor: "rgba(191,202,186,0.42)",
-            backgroundColor: "rgba(239,253,237,0.94)",
-            paddingBottom: 16,
-            paddingTop: 10,
+            minHeight: 76,
+            borderTopColor: colors.borderSoft,
+            borderTopWidth: 1,
+            backgroundColor: colors.surface,
+            paddingBottom: 12,
+            paddingTop: 8,
           },
         }}
       >

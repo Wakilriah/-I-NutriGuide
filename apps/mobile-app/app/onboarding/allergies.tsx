@@ -2,12 +2,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Text, View } from "react-native";
+import { 
+  View, 
+  Text, 
+  Card, 
+  Button, 
+  Colors, 
+} from "react-native-ui-lib";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, AppButton, AppCard, FilterChip, PageHeader, ProgressSteps } from "../../src/components/ui";
+import { AnimatedSection, PageHeader, ProgressSteps, FilterChip } from "../../src/components/ui";
 import { getProfile, parseCommaList, updateProfile } from "../../src/features/profile/api";
-import { colors, spacing, typography } from "../../src/theme/design";
+import { spacing } from "../../src/theme/design";
 
 const allergyOptions = [
   { icon: "alert-circle" as const, label: "Peanuts", value: "peanuts" },
@@ -99,40 +105,52 @@ export default function AllergyOnboardingScreen() {
 
   return (
     <Screen>
-      <View style={{ gap: spacing.lg }}>
+      <View padding-24 gap-24>
         <ProgressSteps current={2} total={4} />
+        
         <AnimatedSection>
-          <PageHeader eyebrow="Step 2 of 4" title="Allergies and diet" subtitle="Choose from the supported options so recommendations can filter foods safely." />
+          <PageHeader eyebrow="Step 2 of 4" title="Dietary Filters" subtitle="We'll use these to ensure your recommendations are safe and relevant." />
         </AnimatedSection>
 
         <AnimatedSection delay={80}>
-          <AppCard style={{ gap: spacing.md }}>
-            <View style={{ gap: spacing.xs }}>
-              <Text style={typography.label}>Allergic to</Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
-                {allergyOptions.map((option) => (
-                  <FilterChip active={selectedAllergies.includes(option.value)} icon={option.icon} key={option.value} label={option.label} onPress={() => toggle("allergies", option.value, 8)} />
-                ))}
-              </View>
-            </View>
-            <View style={{ gap: spacing.xs }}>
-              <Text style={typography.label}>Dietary restrictions</Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
-                {restrictionOptions.map((option) => (
-                  <FilterChip
-                    active={selectedRestrictions.includes(option.value)}
-                    icon={option.icon}
-                    key={option.value}
-                    label={option.label}
-                    onPress={() => toggle("dietary_restrictions", option.value, 6)}
+          <Card padding-24 gap-24>
+            <View gap-8>
+              <Text label small>Allergies</Text>
+              <View row style={{ flexWrap: "wrap", gap: 8 }}>
+                {allergyOptions.map(opt => (
+                  <FilterChip 
+                    key={opt.value} 
+                    label={opt.label} 
+                    active={selectedAllergies.includes(opt.value)} 
+                    onPress={() => toggle("allergies", opt.value, 8)} 
                   />
                 ))}
               </View>
             </View>
 
-            {errors.allergies ? <Text style={{ color: colors.danger, fontWeight: "800" }}>{errors.allergies.message}</Text> : null}
-            <AppButton accessibilityLabel="Save allergy details" disabled={isSubmitting} icon="shield-checkmark" label={isSubmitting ? "Saving" : "Continue"} onPress={onSubmit} />
-          </AppCard>
+            <View gap-8>
+              <Text label small>Dietary Preferences</Text>
+              <View row style={{ flexWrap: "wrap", gap: 8 }}>
+                {restrictionOptions.map(opt => (
+                  <FilterChip 
+                    key={opt.value} 
+                    label={opt.label} 
+                    active={selectedRestrictions.includes(opt.value)} 
+                    onPress={() => toggle("dietary_restrictions", opt.value, 6)} 
+                  />
+                ))}
+              </View>
+            </View>
+
+            {errors.allergies && <Text small color={Colors.error}>{errors.allergies.message}</Text>}
+            
+            <Button 
+              label={isSubmitting ? "Saving..." : "Continue"} 
+              disabled={isSubmitting} 
+              onPress={onSubmit} 
+              size={Button.sizes.large}
+            />
+          </Card>
         </AnimatedSection>
       </View>
     </Screen>

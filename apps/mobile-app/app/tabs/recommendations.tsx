@@ -51,12 +51,12 @@ export default function RecommendationsScreen() {
                 {run.items[0]?.food ? (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
                     <ImageBackground
-                      imageStyle={{ borderRadius: radii.xl }}
+                      imageStyle={{ borderRadius: radii.md }}
                       source={{ uri: images.salmonBowl }}
                       style={{
                         width: 112,
                         height: 112,
-                        borderRadius: radii.xl,
+                        borderRadius: radii.md,
                         overflow: "hidden",
                         backgroundColor: colors.surfaceContainerHigh,
                       }}

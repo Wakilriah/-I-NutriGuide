@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Nutrient, NutrientInteraction
+from .models import Nutrient, NutrientIntakeReference, NutrientInteraction
 
 
 @admin.register(Nutrient)
@@ -17,4 +17,19 @@ class NutrientInteractionAdmin(admin.ModelAdmin):
     list_display = ["source_type", "source_key", "interaction_type", "target_type", "target_key", "evidence_level", "severity", "active"]
     list_filter = ["source_type", "target_type", "interaction_type", "evidence_level", "severity", "active"]
     search_fields = ["source_key", "target_key", "mechanism"]
+
+
+@admin.register(NutrientIntakeReference)
+class NutrientIntakeReferenceAdmin(admin.ModelAdmin):
+    list_display = [
+        "nutrient",
+        "reference_type",
+        "life_stage",
+        "sex",
+        "amount",
+        "unit",
+        "active",
+    ]
+    list_filter = ["reference_type", "life_stage", "sex", "active", "source"]
+    search_fields = ["nutrient__name", "note", "source_url"]
     readonly_fields = ["created_at", "updated_at"]
