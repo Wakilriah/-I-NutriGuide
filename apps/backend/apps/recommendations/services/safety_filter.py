@@ -41,6 +41,9 @@ class SafetyFilter:
     If this filter returns unsafe, the food must not be scored or returned.
     """
 
+    def __init__(self):
+        self._active_constraints = None
+
     def filter_queryset(self, queryset, user_profile: dict):
         excluded = set(normalize_many(user_profile.get("aliments_exclus", [])))
         allergies = set(normalize_many(user_profile.get("allergies", [])))
@@ -164,9 +167,11 @@ class SafetyFilter:
         for supplement in supplements or []:
             supplement_terms.update(supplement_item_variants(str(supplement)))
             supplement_terms.add(canonical_key(supplement))
+        if not supplement_terms:
+            return []
         context_terms = terms | set(normalize_many(user_profile.get("maladies", []) + user_profile.get("diseases", [])))
         details = []
-        for constraint in SafetyConstraint.objects.filter(is_active=True):
+        for constraint in self._constraints():
             category_key = canonical_key(constraint.supplement_category_name)
             category_item = f"supp:{constraint.supplement_category.canonical_item}" if constraint.supplement_category_id else ""
             if category_key not in supplement_terms and category_item not in supplement_terms:
@@ -181,6 +186,13 @@ class SafetyFilter:
                 level = "MEDIUM"
             details.append(self._detail("safety_constraint", constraint.reason, constraint.avoid_or_review_item, level))
         return details
+
+    def _constraints(self):
+        if self._active_constraints is None:
+            self._active_constraints = list(
+                SafetyConstraint.objects.filter(is_active=True).select_related("supplement_category")
+            )
+        return self._active_constraints
 
     def _matches_any(self, blocked_terms, food_terms: set[str]) -> bool:
         return any(self._matches(normalize_token(term), food_terms) for term in blocked_terms)

@@ -16,6 +16,9 @@ class AssociationScore:
 class AssociationRulesEngine:
     def __init__(self, rules: list[dict] | None = None):
         self.rules = rules or []
+        self._prepared_rules = [self._prepare_rule(rule) for rule in self.rules]
+        self._last_profile_key = None
+        self._last_profile_antecedents = None
         self.max_lift = max([float(rule.get("lift", 1) or 1) for rule in self.rules] + [1.0001])
 
     def fit(
@@ -52,6 +55,9 @@ class AssociationRulesEngine:
                     }
                 )
         self.rules = rules
+        self._prepared_rules = [self._prepare_rule(rule) for rule in self.rules]
+        self._last_profile_key = None
+        self._last_profile_antecedents = None
         self.max_lift = max([float(rule.get("lift", 1) or 1) for rule in self.rules] + [1.0001])
         return self
 
@@ -63,9 +69,7 @@ class AssociationRulesEngine:
         antecedents = self._profile_antecedents(user_profile)
         best = 0.0
         matched = []
-        for rule in self.rules:
-            rule_antecedents = self._items(rule, "antecedent", "antecedents", "antecedent_items")
-            rule_consequents = self._items(rule, "consequent", "consequents", "consequent_items")
+        for rule, rule_antecedents, rule_consequents in self._prepared_rules:
             if not rule_antecedents or not rule_consequents:
                 continue
             if not rule_antecedents.issubset(antecedents) or not rule_consequents.intersection(food_tokens):
@@ -89,6 +93,16 @@ class AssociationRulesEngine:
         return {food["id"]: self.score(user_profile, food) for food in foods}
 
     def _profile_antecedents(self, user_profile: dict) -> set[str]:
+        profile_key = (
+            tuple(user_profile.get("supplements", [])),
+            tuple(user_profile.get("goals", [])),
+            tuple(user_profile.get("maladies", [])),
+            tuple(user_profile.get("liked_foods", [])),
+            tuple(user_profile.get("liked_categories", [])),
+            user_profile.get("activite", 0),
+        )
+        if profile_key == self._last_profile_key and self._last_profile_antecedents is not None:
+            return self._last_profile_antecedents
         items = set()
         for supplement in user_profile.get("supplements", []):
             items.update(supplement_item_variants(str(supplement)))
@@ -106,7 +120,16 @@ class AssociationRulesEngine:
         activity = user_profile.get("activite", 0)
         if activity:
             items.add("activity:active" if float(activity) >= 0.5 else "activity:light")
+        self._last_profile_key = profile_key
+        self._last_profile_antecedents = items
         return items
+
+    def _prepare_rule(self, rule: dict):
+        return (
+            rule,
+            self._items(rule, "antecedent", "antecedents", "antecedent_items"),
+            self._items(rule, "consequent", "consequents", "consequent_items"),
+        )
 
     def _items(self, rule: dict, *keys: str) -> set[str]:
         values = []

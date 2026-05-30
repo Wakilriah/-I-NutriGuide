@@ -1,5 +1,7 @@
 import pytest
+from celery import current_app
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.urls import reverse
 
 from apps.accounts.models import Allergy, UserProfile
@@ -247,3 +249,7 @@ def test_profile_change_invalidates_recommendation_cache(authenticated_client, u
 
 def test_recommendation_cache_smoke_task():
     assert recommendation_cache_smoke_task() == "recommendation-cache-ok"
+
+
+def test_celery_uses_configured_broker():
+    assert current_app.conf.broker_url == settings.CELERY_BROKER_URL
