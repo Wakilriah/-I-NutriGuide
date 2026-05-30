@@ -20,12 +20,12 @@ MEDICAL_BENEFIT_MAP = {
 SUPPLEMENT_SYNERGY_MAP = {
     "vitamine_c": ["fer_non_heme", "fer", "folates"],
     "fer": ["vitamine_c", "folates", "proteines"],
-    "vitamine_d": ["calcium", "magnesium", "phosphore"],
-    "magnesium": ["magnesium", "potassium", "vitamine_b6"],
+    "vitamine_d": ["fat", "lipides", "calcium", "magnesium", "phosphore"],
+    "magnesium": ["magnesium", "potassium", "vitamine_b6", "fibres"],
     "zinc": ["zinc", "proteines"],
     "calcium": ["vitamine_d", "magnesium", "phosphore"],
     "vitamine_b12": ["vitamine_b12", "proteines", "folates"],
-    "omega3": ["omega3", "vitamine_e"],
+    "omega3": ["omega3", "vitamine_e", "fat", "lipides"],
 }
 
 
@@ -43,7 +43,7 @@ class CBFResult:
 
 class ContentBasedFilter:
     def __init__(self, weights: dict[str, float] | None = None):
-        self.weights = weights or {"objectif": 0.35, "medical": 0.40, "supplement": 0.15, "calorique": 0.10}
+        self.weights = weights or {"objectif": 0.30, "medical": 0.35, "supplement": 0.25, "calorique": 0.10}
 
     def score_food(self, user_profile: dict, food: dict) -> CBFResult | None:
         if self._is_excluded(user_profile, food):
@@ -104,7 +104,7 @@ class ContentBasedFilter:
         values = [(nutrient, float(food.get(nutrient, 0) or 0)) for nutrient in nutrients]
         matches = [nutrient for nutrient, value in values if value > 0]
         if not matches:
-            return 0.0, []
+            return 0.4, []
         return clamp(sum(value for _nutrient, value in values) / max(len(values), 1)), matches
 
     def _score_calories(self, user_profile: dict, food: dict) -> float:
@@ -112,10 +112,13 @@ class ContentBasedFilter:
         bmi = float(user_profile.get("imc", 0) or 0)
         activity = float(user_profile.get("activite", 0) or 0)
         goals = set(normalize_many(user_profile.get("goals", [])))
+        bmi_norm = float(user_profile.get("imc_norm", 0.5) or 0.5)
         if "perte_poids" in goals or bmi >= 30:
             return clamp(1 - (kcal / 500))
         if "masse_musculaire" in goals or activity >= 0.7:
             return clamp(kcal / 350)
+        if bmi_norm < 0.25:
+            return clamp(kcal / 300)
         return clamp(1 - abs(kcal - 180) / 400)
 
     def _is_excluded(self, user_profile: dict, food: dict) -> bool:

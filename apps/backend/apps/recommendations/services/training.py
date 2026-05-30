@@ -7,12 +7,13 @@ from apps.accounts.models import UserProfile
 from apps.feedback.models import RecommendationFeedback
 from apps.foods.models import Food
 from apps.recommendations.models import RecommendationItem, RecommendationRun
-from apps.rules.models import AssociationRule
+from apps.rules.models import AssociationRule, FoodSupplementSynergyRule, MinedAssociationRule
+from apps.rules.services import normalize_rule_item, supplement_item_variants
 from apps.supplements.models import UserSupplement
 
 from .association import AssociationRulesEngine
 from .collaborative import CollaborativeArtifacts, build_feature_order, build_user_vector
-from .normalizer import clamp, normalize_token, to_float
+from .normalizer import clamp, normalize_many, normalize_token, to_float
 
 
 ARTIFACT_VERSION = 1
@@ -148,6 +149,8 @@ def build_user_profile(user) -> dict:
     ]
     runs = RecommendationRun.objects.filter(user=user).count()
     feedback = RecommendationFeedback.objects.filter(user=user).count()
+    liked_foods, liked_categories = user_positive_food_context(user)
+    bmi_norm = normalize_bmi(bmi) if bmi else 0.5
     return {
         "user_id": user.id,
         "n_sessions": runs + feedback,
@@ -155,28 +158,71 @@ def build_user_profile(user) -> dict:
             UserSupplement.objects.filter(user=user, active=True).values_list("supplement__slug", flat=True)
         ),
         "goals": profile.goals or ([profile.goal] if profile.goal else []),
+        "diet_type": profile.diet_type,
+        "dietary_restrictions": dietary,
         "maladies": diseases,
         "allergies": list(profile.allergies.values_list("slug", flat=True)),
         "aliments_exclus": list(user.disliked_foods.values_list("slug", flat=True)),
+        "liked_foods": liked_foods,
+        "liked_categories": liked_categories,
         "imc": bmi,
-        "imc_norm": clamp(bmi / 40) if bmi else 0.5,
+        "imc_norm": bmi_norm,
+        "bmi_range": bmi_range(bmi),
         "activite": activity,
+        "activity_level": profile.activity_level,
+        "age": profile.age,
+        "age_norm": clamp((profile.age or 0) / 100) if profile.age else 0.0,
+        "gender": profile.gender,
+        "user_vector": build_reusable_user_vector(
+            supplements=list(UserSupplement.objects.filter(user=user, active=True).values_list("supplement__slug", flat=True)),
+            goals=profile.goals or ([profile.goal] if profile.goal else []),
+            diseases=diseases,
+            allergies=list(profile.allergies.values_list("slug", flat=True)),
+            disliked_foods=list(user.disliked_foods.values_list("slug", flat=True)),
+            bmi_norm=bmi_norm,
+            activity=activity,
+            age=profile.age,
+            gender=profile.gender,
+            liked_foods=liked_foods,
+        ),
     }
 
 
 def build_preview_profile(payload: dict) -> dict:
     bmi = to_float(payload.get("imc") or payload.get("bmi"))
+    bmi_norm = normalize_bmi(bmi) if bmi else to_float(payload.get("imc_norm"), 0.5)
     return {
         "user_id": payload.get("user_id"),
         "n_sessions": int(payload.get("n_sessions", 0) or 0),
         "supplements": payload.get("supplements", []),
         "goals": payload.get("goals", []),
+        "diet_type": payload.get("diet_type") or "none",
+        "dietary_restrictions": payload.get("dietary_restrictions", []),
         "maladies": payload.get("maladies") or payload.get("diseases", []),
         "allergies": payload.get("allergies", []),
         "aliments_exclus": payload.get("aliments_exclus") or payload.get("excluded_foods", []),
+        "liked_foods": payload.get("liked_foods", []),
+        "liked_categories": payload.get("liked_categories", []),
         "imc": bmi,
-        "imc_norm": clamp(bmi / 40) if bmi else to_float(payload.get("imc_norm"), 0.5),
+        "imc_norm": bmi_norm,
+        "bmi_range": bmi_range(bmi),
         "activite": to_float(payload.get("activite") or payload.get("activity"), 0.0),
+        "activity_level": payload.get("activity_level", ""),
+        "age": payload.get("age"),
+        "age_norm": clamp(to_float(payload.get("age")) / 100) if payload.get("age") else 0.0,
+        "gender": payload.get("gender", ""),
+        "user_vector": build_reusable_user_vector(
+            supplements=payload.get("supplements", []),
+            goals=payload.get("goals", []),
+            diseases=payload.get("maladies") or payload.get("diseases", []),
+            allergies=payload.get("allergies", []),
+            disliked_foods=payload.get("aliments_exclus") or payload.get("excluded_foods", []),
+            bmi_norm=bmi_norm,
+            activity=to_float(payload.get("activite") or payload.get("activity"), 0.0),
+            age=payload.get("age"),
+            gender=payload.get("gender", ""),
+            liked_foods=payload.get("liked_foods", []),
+        ),
     }
 
 
@@ -197,6 +243,7 @@ def build_food_database(limit: int | None = None) -> list[dict]:
             "slug": food.slug,
             "category": food.category.name,
             "source": food.source,
+            "association_rule_items": food.association_rule_items,
             "allergenes": [],
             "kcal_100g": 0.0,
         }
@@ -228,13 +275,15 @@ def build_food_interaction_scores() -> dict[int, dict[str, float]]:
         slug = normalize_token(food.slug)
         value = clamp((feedback.rating or 0) / 5)
         if feedback.feedback_type in blocking_types:
-            value = 0.0
+            value = -1.0
         elif feedback.feedback_type in positive_types or feedback.is_helpful:
             value = max(value, 0.7)
         elif feedback.feedback_type in negative_types or not feedback.is_helpful:
-            value = min(value, 0.2)
+            value = -max(0.2, 1 - value)
         if feedback.feedback_type in blocking_types:
             user_scores[slug] = value
+        elif value < 0:
+            user_scores[slug] = min(user_scores.get(slug, 0.0), value)
         else:
             user_scores[slug] = max(user_scores.get(slug, 0.0), value)
     return scores
@@ -263,7 +312,42 @@ def build_rules_from_database() -> list[dict]:
                 "support": rule.support,
                 "confidence": rule.confidence,
                 "lift": rule.lift,
+                "score": rule.score,
                 "explanation": rule.explanation,
+                "source": "association_rule",
+                "rule_type": "positive_synergy",
+            }
+        )
+    for rule in FoodSupplementSynergyRule.objects.filter(is_active=True, association_type="positive"):
+        rules.append(
+            {
+                "antecedent": normalize_rule_item(rule.supplement_item),
+                "consequent": normalize_rule_item(rule.food_item),
+                "support": max(min(rule.seed_weight, 1), 0),
+                "confidence": max(min(rule.seed_weight, 1), 0),
+                "lift": 1 + max(rule.seed_weight, 0),
+                "score": max(min(rule.seed_weight, 1), 0),
+                "explanation": rule.reason,
+                "source": "seed_rule",
+                "rule_type": "positive_synergy",
+                "rule_seed_id": rule.rule_seed_id,
+                "supplement_category": rule.supplement_category_name,
+                "nutrient_relation": rule.nutrient_relation,
+                "source_url": rule.source_url,
+            }
+        )
+    for rule in MinedAssociationRule.objects.filter(is_active=True).exclude(rule_type__in=["avoid_timing", "medical_caution"]):
+        rules.append(
+            {
+                "antecedent_items": [normalize_rule_item(item) for item in rule.antecedent_items],
+                "consequent_items": [normalize_rule_item(item) for item in rule.consequent_items],
+                "support": rule.support,
+                "confidence": rule.confidence,
+                "lift": rule.lift,
+                "score": rule.score,
+                "explanation": rule.explanation,
+                "source": rule.source,
+                "rule_type": rule.rule_type,
             }
         )
     return rules
@@ -272,19 +356,87 @@ def build_rules_from_database() -> list[dict]:
 def profile_items(profile: dict) -> set[str]:
     items = set()
     for supplement in profile.get("supplements", []):
+        items.update(supplement_item_variants(str(supplement)))
         items.add(f"supplement:{normalize_token(supplement)}")
     for goal in profile.get("goals", []):
         items.add(f"goal:{normalize_token(goal)}")
+        items.add(normalize_rule_item(f"goal:{goal}"))
     for disease in profile.get("maladies", []):
         items.add(f"disease:{normalize_token(disease)}")
+        items.add(normalize_rule_item(f"condition:{disease}"))
     return items
 
 
 def merge_rules(primary: list[dict], fallback: list[dict]) -> list[dict]:
     merged = {}
     for rule in fallback + primary:
-        merged[(rule["antecedent"], rule["consequent"])] = rule
+        key = (
+            tuple(rule.get("antecedent_items") or [rule.get("antecedent")]),
+            tuple(rule.get("consequent_items") or [rule.get("consequent")]),
+        )
+        merged[key] = rule
     return list(merged.values())
+
+
+def normalize_bmi(bmi: float) -> float:
+    return clamp((to_float(bmi) - 15) / (40 - 15))
+
+
+def bmi_range(bmi: float) -> str:
+    value = to_float(bmi)
+    if not value:
+        return "unknown"
+    if value < 18.5:
+        return "underweight"
+    if value < 25:
+        return "normal"
+    if value < 30:
+        return "overweight"
+    return "obesity"
+
+
+def user_positive_food_context(user) -> tuple[list[str], list[str]]:
+    positive_types = {"liked", "saved", "tried", "helpful"}
+    foods = []
+    categories = []
+    queryset = RecommendationFeedback.objects.filter(user=user, feedback_type__in=positive_types).select_related(
+        "food__category",
+        "recommendation_item__food__category",
+    )
+    for feedback in queryset:
+        food = feedback.food or feedback.recommendation_item.food
+        if food:
+            foods.append(food.slug)
+            if food.category_id:
+                categories.append(food.category.slug)
+    return sorted(set(foods)), sorted(set(categories))
+
+
+def build_reusable_user_vector(
+    *,
+    supplements,
+    goals,
+    diseases,
+    allergies,
+    disliked_foods,
+    bmi_norm,
+    activity,
+    age,
+    gender,
+    liked_foods,
+) -> dict:
+    return {
+        "supplements": normalize_many(supplements),
+        "goals": normalize_many(goals),
+        "diseases": normalize_many(diseases),
+        "allergies": normalize_many(allergies),
+        "disliked_foods": normalize_many(disliked_foods),
+        "liked_foods": normalize_many(liked_foods),
+        "bmi_norm": round(to_float(bmi_norm, 0.5), 4),
+        "activity": round(to_float(activity), 4),
+        "age_norm": round(clamp(to_float(age) / 100), 4) if age else 0.0,
+        "gender": normalize_token(gender),
+    }
 
 
 def normalize_activity(value: str) -> float:
