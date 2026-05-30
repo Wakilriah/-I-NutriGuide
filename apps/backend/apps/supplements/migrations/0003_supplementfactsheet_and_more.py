@@ -57,16 +57,8 @@ class Migration(migrations.Migration):
                 "ordering": ["title", "audience"],
             },
         ),
-        migrations.RemoveField(
-            model_name="supplementingredient",
-            name="supplement",
-        ),
         migrations.DeleteModel(
             name="SupplementIngredientGroup",
-        ),
-        migrations.RemoveField(
-            model_name="supplementlabelstatement",
-            name="supplement",
         ),
         migrations.DeleteModel(
             name="SupplementResearchEstimate",

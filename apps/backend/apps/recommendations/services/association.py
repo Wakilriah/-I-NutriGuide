@@ -71,7 +71,7 @@ class AssociationRulesEngine:
             if not rule_antecedents.issubset(antecedents) or not rule_consequents.intersection(food_tokens):
                 continue
             lift = float(rule.get("lift", 1) or 1)
-            if lift < 1:
+            if lift <= 1:
                 continue
             if self.max_lift <= 1:
                 score = 0.0
