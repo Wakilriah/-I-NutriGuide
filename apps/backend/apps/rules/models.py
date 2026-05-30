@@ -141,6 +141,11 @@ class SafetyConstraint(models.Model):
         MEDICAL_CAUTION = "medical_caution", "Medical caution"
         EXCLUSION = "exclusion", "Exclusion"
 
+    class SafetyLevel(models.TextChoices):
+        LOW = "LOW", "Low"
+        MEDIUM = "MEDIUM", "Medium"
+        HIGH = "HIGH", "High"
+
     supplement_category = models.ForeignKey(
         SupplementCategory,
         related_name="safety_constraints",
@@ -151,6 +156,7 @@ class SafetyConstraint(models.Model):
     supplement_category_name = models.CharField(max_length=150)
     avoid_or_review_item = models.CharField(max_length=180)
     constraint_type = models.CharField(max_length=40, choices=ConstraintType.choices)
+    safety_level = models.CharField(max_length=10, choices=SafetyLevel.choices, default=SafetyLevel.MEDIUM)
     reason = models.TextField()
     how_to_use = models.TextField(blank=True)
     source_url = models.URLField(max_length=500, blank=True)
@@ -222,6 +228,12 @@ class MinedAssociationRule(models.Model):
         MEDICAL_CAUTION = "medical_caution", "Medical caution"
         NEUTRAL_PATTERN = "neutral_pattern", "Neutral pattern"
 
+    class ReviewStatus(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        NEEDS_REVIEW = "needs_review", "Needs review"
+
     rule_key = models.CharField(max_length=64, unique=True)
     antecedent_items = models.JSONField(default=list)
     consequent_items = models.JSONField(default=list)
@@ -230,6 +242,10 @@ class MinedAssociationRule(models.Model):
     lift = models.FloatField(default=0)
     score = models.FloatField(default=0)
     rule_type = models.CharField(max_length=40, choices=RuleType.choices, default=RuleType.NEUTRAL_PATTERN)
+    review_status = models.CharField(max_length=20, choices=ReviewStatus.choices, default=ReviewStatus.PENDING)
+    admin_note = models.TextField(blank=True)
+    safety_conflict_status = models.CharField(max_length=40, default="unchecked")
+    safety_conflict_details = models.JSONField(default=list, blank=True)
     source = models.CharField(max_length=80, default="mined")
     explanation = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)

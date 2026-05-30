@@ -23,6 +23,8 @@ class RecommendationFeedbackSerializer(serializers.ModelSerializer):
             "feedback_type",
             "rating",
             "is_helpful",
+            "reason",
+            "supplement_context",
             "comment",
             "context",
             "created_at",
@@ -97,14 +99,26 @@ class RecommendationFeedbackSerializer(serializers.ModelSerializer):
         item_id = validated_data.pop("recommendation_item_id")
         validated_data.pop("food_id", None)
         feedback_type = validated_data.get("feedback_type")
-        if feedback_type in {"liked", "saved", "tried", "helpful"}:
+        if feedback_type in {"liked", "saved", "tried", "helpful", "already_tried", "good_recommendation"}:
             validated_data["is_helpful"] = True
-        elif feedback_type in {"disliked", "not_interested", "bad_taste", "not_helpful", "unsafe_for_me", "allergy_issue", "too_expensive"}:
+        elif feedback_type in {
+            "disliked",
+            "not_interested",
+            "bad_taste",
+            "not_helpful",
+            "unsafe_for_me",
+            "allergy_issue",
+            "too_expensive",
+            "not_available",
+            "do_not_eat",
+        }:
             validated_data["is_helpful"] = False
         from apps.recommendations.models import RecommendationItem
 
         item = RecommendationItem.objects.select_related("food").get(id=item_id)
         validated_data.setdefault("food", item.food)
+        if not validated_data.get("supplement_context"):
+            validated_data["supplement_context"] = item.run.supplements_snapshot or []
         feedback, _ = RecommendationFeedback.objects.update_or_create(
             user=self.context["request"].user,
             recommendation_item_id=item_id,

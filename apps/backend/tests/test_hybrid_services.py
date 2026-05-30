@@ -114,4 +114,5 @@ def test_safety_filter_blocks_before_scoring():
     decision = SafetyFilter().evaluate(food=food, food_row={"slug": "peanut-butter"}, user_profile={"allergies": ["peanut"]})
 
     assert decision.safe is False
-    assert decision.status == "blocked"
+    assert decision.status == "BLOCKED"
+    assert decision.level == "HIGH"

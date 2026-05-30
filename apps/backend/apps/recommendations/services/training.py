@@ -266,9 +266,9 @@ def build_food_interaction_scores() -> dict[int, dict[str, float]]:
         user_scores = scores.setdefault(item.run.user_id, {})
         slug = normalize_token(item.food.slug)
         user_scores[slug] = max(user_scores.get(slug, 0.0), clamp(item.score))
-    positive_types = {"liked", "saved", "tried", "helpful"}
-    negative_types = {"disliked", "not_interested", "bad_taste", "not_helpful", "too_expensive"}
-    blocking_types = {"unsafe_for_me", "allergy_issue"}
+    positive_types = {"liked", "saved", "tried", "helpful", "already_tried", "good_recommendation"}
+    negative_types = {"disliked", "not_interested", "bad_taste", "not_helpful", "too_expensive", "not_available"}
+    blocking_types = {"unsafe_for_me", "allergy_issue", "do_not_eat"}
     for feedback in RecommendationFeedback.objects.select_related("recommendation_item__food", "food"):
         user_scores = scores.setdefault(feedback.user_id, {})
         food = feedback.food or feedback.recommendation_item.food
@@ -336,7 +336,12 @@ def build_rules_from_database() -> list[dict]:
                 "source_url": rule.source_url,
             }
         )
-    for rule in MinedAssociationRule.objects.filter(is_active=True).exclude(rule_type__in=["avoid_timing", "medical_caution"]):
+    for rule in (
+        MinedAssociationRule.objects.filter(is_active=True)
+        .exclude(rule_type__in=["avoid_timing", "medical_caution"])
+        .exclude(review_status="rejected")
+        .exclude(safety_conflict_status="conflict_blocking")
+    ):
         rules.append(
             {
                 "antecedent_items": [normalize_rule_item(item) for item in rule.antecedent_items],
@@ -396,7 +401,7 @@ def bmi_range(bmi: float) -> str:
 
 
 def user_positive_food_context(user) -> tuple[list[str], list[str]]:
-    positive_types = {"liked", "saved", "tried", "helpful"}
+    positive_types = {"liked", "saved", "tried", "helpful", "already_tried", "good_recommendation"}
     foods = []
     categories = []
     queryset = RecommendationFeedback.objects.filter(user=user, feedback_type__in=positive_types).select_related(

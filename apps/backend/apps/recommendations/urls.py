@@ -3,6 +3,8 @@ from django.urls import path
 from .views import (
     AdminRecommendationRunListView,
     AdminRecommendationRunDetailView,
+    AdminEvaluationView,
+    AdminKnowledgeGraphView,
     AdminRecommendationWeightProfileDetailView,
     AdminRecommendationWeightProfileListCreateView,
     FoodRecommendationView,
@@ -12,8 +14,10 @@ from .views import (
     RecommendationHistoryView,
     RecommendationPreviewView,
     RefreshRecommendationView,
+    DailyMealPlanView,
     SavedRecommendationItemDestroyView,
     SavedRecommendationItemListCreateView,
+    SupplementTimingPlanView,
 )
 from apps.feedback.views import RecommendationFeedbackViewSet
 
@@ -25,6 +29,8 @@ urlpatterns = [
     path("recommendations/generate/", GenerateRecommendationView.as_view(), name="recommendation-generate"),
     path("recommendations/refresh/", RefreshRecommendationView.as_view(), name="recommendation-refresh"),
     path("recommendations/explain/<int:item_id>/", RecommendationExplainView.as_view(), name="recommendation-explain"),
+    path("recommendations/timing-plan/", SupplementTimingPlanView.as_view(), name="recommendation-timing-plan"),
+    path("recommendations/meal-plan/", DailyMealPlanView.as_view(), name="recommendation-meal-plan"),
     path("recommendations/history/", RecommendationHistoryView.as_view(), name="recommendation-history"),
     path("recommendations/history/<uuid:run_id>/", RecommendationHistoryDetailView.as_view(), name="recommendation-history-detail"),
     path("recommendations/saved-foods/", SavedRecommendationItemListCreateView.as_view(), name="saved-recommendation-list"),
@@ -34,4 +40,6 @@ urlpatterns = [
     path("admin/recommendations/<uuid:run_id>/", AdminRecommendationRunDetailView.as_view(), name="admin-recommendation-detail"),
     path("admin/recommendation-weights/", AdminRecommendationWeightProfileListCreateView.as_view(), name="admin-recommendation-weight-list"),
     path("admin/recommendation-weights/<int:pk>/", AdminRecommendationWeightProfileDetailView.as_view(), name="admin-recommendation-weight-detail"),
+    path("admin/evaluation/", AdminEvaluationView.as_view(), name="admin-evaluation"),
+    path("admin/knowledge-graph/", AdminKnowledgeGraphView.as_view(), name="admin-knowledge-graph"),
 ]

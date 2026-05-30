@@ -21,6 +21,7 @@ from .serializers import (
     SupplementCategorySerializer,
     SupplementNormalizationSerializer,
 )
+from .services import detect_rule_safety_conflicts
 
 
 class AssociationRuleViewSet(viewsets.ModelViewSet):
@@ -167,6 +168,22 @@ class MinedAssociationRuleViewSet(viewsets.ModelViewSet):
         if is_active in {"true", "false"}:
             queryset = queryset.filter(is_active=is_active == "true")
         return queryset
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        self._update_conflict(instance)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._update_conflict(instance)
+
+    def _update_conflict(self, instance):
+        status, details = detect_rule_safety_conflicts(instance.antecedent_items, instance.consequent_items)
+        instance.safety_conflict_status = status
+        instance.safety_conflict_details = details
+        if status.startswith("conflict") and instance.review_status == MinedAssociationRule.ReviewStatus.APPROVED:
+            instance.review_status = MinedAssociationRule.ReviewStatus.NEEDS_REVIEW
+        instance.save(update_fields=["safety_conflict_status", "safety_conflict_details", "review_status", "updated_at"])
 
 
 class AssociationTransactionViewSet(viewsets.ReadOnlyModelViewSet):

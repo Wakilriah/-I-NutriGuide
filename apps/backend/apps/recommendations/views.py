@@ -17,6 +17,9 @@ from .services.cache import get_cached_recommendations, set_cached_recommendatio
 from .services.engine import generate_recommendations, get_food_recommendations_payload, get_recommendation_cache_key
 from .services.enrichment import enrich_scored_recommendation, to_api_result
 from .services.hybrid import HybridRecommender
+from .services.evaluation import recommendation_metrics
+from .services.knowledge_graph import knowledge_graph_payload
+from .services.plans import build_meal_plan, build_timing_plan
 from .services.training import build_preview_profile
 from .tasks import generate_recommendations_for_user
 from apps.common.pagination import AdminPageNumberPagination
@@ -108,7 +111,11 @@ class RecommendationExplainView(generics.RetrieveAPIView):
                 "final_score": recommendation_item.score,
                 "score_breakdown": recommendation_item.score_breakdown,
                 "safety_status": recommendation_item.explanation_details.get("score_details", {}).get("safety_status", "safe"),
+                "safety_level": recommendation_item.explanation_details.get("score_details", {}).get("safety_level", "LOW"),
+                "safety_message": recommendation_item.explanation_details.get("score_details", {}).get("safety_message", ""),
+                "blocked_reason": recommendation_item.explanation_details.get("score_details", {}).get("blocked_reason", ""),
                 "explanation": recommendation_item.explanation_details or {"summary": recommendation_item.explanation, "reasons": []},
+                "alternatives": recommendation_item.explanation_details.get("alternatives", []),
                 "matched_rules": recommendation_item.matched_rules,
                 "matched_nutrients": recommendation_item.matched_nutrients,
                 "warnings": recommendation_item.warnings,
@@ -133,6 +140,51 @@ class RecommendationPreviewView(APIView):
             if enriched is not None:
                 results.append(to_api_result(enriched, food))
         return Response({**payload, "results": results, "recommendations": results})
+
+
+class SupplementTimingPlanView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(build_timing_plan(request.user))
+
+
+class DailyMealPlanView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(build_meal_plan(request.user))
+
+
+class AdminEvaluationView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(
+            recommendation_metrics(
+                date_from=request.query_params.get("date_from"),
+                date_to=request.query_params.get("date_to"),
+                supplement=request.query_params.get("supplement"),
+            )
+        )
+
+
+class AdminKnowledgeGraphView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(
+            knowledge_graph_payload(
+                supplement=request.query_params.get("supplement"),
+                nutrient=request.query_params.get("nutrient"),
+                food=request.query_params.get("food"),
+                interaction_type=request.query_params.get("interaction_type"),
+            )
+        )
 
 
 class RecommendationHistoryView(generics.ListAPIView):

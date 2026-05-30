@@ -108,3 +108,32 @@ def rule_key(antecedent_items: list[str], consequent_items: list[str], *, source
         ]
     )
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()
+
+
+def detect_rule_safety_conflicts(antecedent_items: list[str], consequent_items: list[str]) -> tuple[str, list[dict]]:
+    from .models import SafetyConstraint
+
+    antecedents = {normalize_rule_item(item) for item in antecedent_items}
+    consequents = {normalize_rule_item(item) for item in consequent_items}
+    all_items = antecedents | consequents
+    conflicts = []
+    for constraint in SafetyConstraint.objects.filter(is_active=True):
+        supplement_variants = set(supplement_item_variants(constraint.supplement_category_name))
+        target = canonical_key(constraint.avoid_or_review_item)
+        supplement_matches = bool(antecedents & supplement_variants)
+        target_matches = any(target and (target in item or item.endswith(f":{target}")) for item in all_items)
+        if supplement_matches and target_matches:
+            conflicts.append(
+                {
+                    "constraint_id": constraint.id,
+                    "constraint_type": constraint.constraint_type,
+                    "safety_level": constraint.safety_level,
+                    "message": constraint.reason,
+                    "matched": constraint.avoid_or_review_item,
+                }
+            )
+    if any(item["safety_level"] == "HIGH" for item in conflicts):
+        return "conflict_blocking", conflicts
+    if conflicts:
+        return "conflict_warning", conflicts
+    return "clear", []

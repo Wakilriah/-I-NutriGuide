@@ -116,6 +116,7 @@ class SafetyConstraintSerializer(serializers.ModelSerializer):
             "supplement_category_name",
             "avoid_or_review_item",
             "constraint_type",
+            "safety_level",
             "reason",
             "how_to_use",
             "source_url",
@@ -139,13 +140,17 @@ class MinedAssociationRuleSerializer(serializers.ModelSerializer):
             "lift",
             "score",
             "rule_type",
+            "review_status",
+            "admin_note",
+            "safety_conflict_status",
+            "safety_conflict_details",
             "source",
             "explanation",
             "is_active",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "rule_key", "created_at", "updated_at"]
+        read_only_fields = ["id", "rule_key", "safety_conflict_status", "safety_conflict_details", "created_at", "updated_at"]
 
 
 class AssociationTransactionItemSerializer(serializers.ModelSerializer):

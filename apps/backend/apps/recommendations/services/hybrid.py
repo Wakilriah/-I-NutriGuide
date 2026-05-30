@@ -28,6 +28,9 @@ class HybridRecommendation:
     related_supplement: str | None
     score_breakdown: dict
     safety_status: str
+    safety_level: str
+    safety_message: str
+    blocked_reason: str
     matched_goal_reasons: list
     supplement_synergy_reasons: list
     calorie_reason: str
@@ -75,7 +78,7 @@ class HybridRecommender:
                 user_profile=user_profile,
                 supplements=supplement_tokens,
             )
-            if not safety.safe:
+            if safety.status == "BLOCKED":
                 continue
 
             cbf = self.cbf.score_food(user_profile, row)
@@ -108,7 +111,7 @@ class HybridRecommender:
                     rules_score=round(association.score, 4),
                     cf_score=round(cf_score, 4),
                     reason=self._reason(cbf, association.score, cf_score),
-                    safety_notes=[],
+                    safety_notes=safety.details,
                     matched_nutrients=matched_nutrients,
                     matched_rules=association.matched_rules,
                     related_supplement=related_supplement,
@@ -127,6 +130,9 @@ class HybridRecommender:
                         "user_type": user_type,
                     },
                     safety_status=safety.status,
+                    safety_level=safety.level,
+                    safety_message=safety.message,
+                    blocked_reason=safety.blocked_reason,
                     matched_goal_reasons=self._goal_reasons(user_profile, cbf),
                     supplement_synergy_reasons=self._supplement_reasons(user_profile, cbf),
                     calorie_reason=self._calorie_reason(user_profile, row, cbf.calorie_score),
@@ -183,7 +189,10 @@ class HybridRecommender:
                     "collaborative_score": 0.0,
                     "final_hybrid_score": 0.45,
                 },
-                safety_status="safe",
+                safety_status="SAFE",
+                safety_level="LOW",
+                safety_message="Safe fallback for your current profile.",
+                blocked_reason="",
                 matched_goal_reasons=[],
                 supplement_synergy_reasons=[],
                 calorie_reason="No scored candidates were available, so this safe fallback is shown.",

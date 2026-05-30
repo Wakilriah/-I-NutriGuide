@@ -90,8 +90,26 @@ Primary endpoints under `/api/v1/`:
 - `POST /recommendations/refresh/`
 - `POST /recommendations/feedback/`
 - `GET /recommendations/explain/{id}/`
+- `GET /recommendations/timing-plan/`
+- `GET /recommendations/meal-plan/`
+- `GET /admin/evaluation/`
+- `GET /admin/knowledge-graph/`
 
 Existing compatibility endpoints remain available, including `/recommendations/foods/`, `/recommendations/generate/`, history, preview, and saved-food routes.
+
+## Timing, Meal Plans, Alternatives
+
+`apps/backend/apps/recommendations/services/plans.py` creates supplement timing plans and daily meal plans from the same safety-filtered recommendation payload used by the main recommender. Timing guidance includes best time, recommended foods, avoid-near-intake notes, explanations, and warnings.
+
+`apps/backend/apps/recommendations/services/alternatives.py` attaches safe alternative foods to explanations using nutrient tags, diet tags, category similarity, optional filters, and the hard safety filter.
+
+## Rule Review And Evaluation
+
+Mined association rules include review status, admin notes, and safety conflict metadata. Positive rules that conflict with safety constraints are marked for review or excluded from recommender artifacts when blocking.
+
+`apps/backend/apps/recommendations/services/evaluation.py` reports Precision@K, Recall@K, NDCG, coverage, diversity, confidence, rule hit rate, safety violation rate, save rate, dislike rate, and acceptance rate for the admin evaluation dashboard.
+
+`apps/backend/apps/recommendations/services/knowledge_graph.py` returns supplement-food-nutrient nodes and edges for the admin knowledge graph preview.
 
 ## Caching And Background Work
 

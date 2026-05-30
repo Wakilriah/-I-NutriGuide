@@ -26,7 +26,10 @@ DISEASE_EXCLUSION_TERMS = {
 @dataclass(frozen=True)
 class SafetyDecision:
     safe: bool
-    status: str = "safe"
+    status: str = "SAFE"
+    level: str = "LOW"
+    message: str = "Safe for your current profile."
+    blocked_reason: str = ""
     reasons: list[str] = field(default_factory=list)
     details: list[dict] = field(default_factory=list)
 
@@ -70,11 +73,11 @@ class SafetyFilter:
 
         for allergy in normalize_many(user_profile.get("allergies", [])):
             if self._matches(allergy, terms):
-                details.append(self._detail("allergy", f"Contains or matches allergy '{allergy}'.", allergy))
+                details.append(self._detail("allergy", f"Contains or matches allergy '{allergy}'.", allergy, "HIGH"))
 
         for disliked in normalize_many(user_profile.get("aliments_exclus", [])):
             if self._matches(disliked, terms):
-                details.append(self._detail("disliked_food", f"Matches disliked or forbidden food '{disliked}'.", disliked))
+                details.append(self._detail("disliked_food", f"Matches disliked or forbidden food '{disliked}'.", disliked, "HIGH"))
 
         restrictions = self._restriction_tokens(user_profile)
         restriction_conflicts = self._restriction_conflicts(restrictions, terms)
@@ -83,19 +86,25 @@ class SafetyFilter:
         for disease in normalize_many(user_profile.get("maladies", []) + user_profile.get("diseases", [])):
             for blocked in DISEASE_EXCLUSION_TERMS.get(disease, set()):
                 if self._matches(blocked, terms):
-                    details.append(self._detail("disease_constraint", f"Conflicts with disease constraint '{disease}'.", disease))
+                    details.append(self._detail("disease_constraint", f"Conflicts with disease constraint '{disease}'.", disease, "HIGH"))
 
         caution_text = normalize_token(getattr(food, "avoid_or_caution", "") or row.get("avoid_or_caution"))
         for disease in normalize_many(user_profile.get("maladies", []) + user_profile.get("diseases", [])):
             if disease and disease in caution_text:
-                details.append(self._detail("contraindication", f"Food caution text mentions '{disease}'.", disease))
+                details.append(self._detail("contraindication", f"Food caution text mentions '{disease}'.", disease, "HIGH"))
 
         details.extend(self._constraint_conflicts(supplements or user_profile.get("supplements", []), terms, user_profile))
 
         if details:
+            level = self._highest_level(details)
+            status = "BLOCKED" if level == "HIGH" else "WARNING"
+            message = details[0]["message"]
             return SafetyDecision(
-                safe=False,
-                status="blocked",
+                safe=status != "BLOCKED",
+                status=status,
+                level=level,
+                message=message,
+                blocked_reason=message if status == "BLOCKED" else "",
                 reasons=[detail["message"] for detail in details],
                 details=details,
             )
@@ -141,13 +150,13 @@ class SafetyFilter:
     def _restriction_conflicts(self, restrictions: set[str], terms: set[str]) -> list[dict]:
         details = []
         if "vegan" in restrictions and self._matches_any(MEAT_TERMS | FISH_TERMS | DAIRY_TERMS | EGG_TERMS, terms):
-            details.append(self._detail("dietary_restriction", "Conflicts with vegan restriction.", "vegan"))
+            details.append(self._detail("dietary_restriction", "Conflicts with vegan restriction.", "vegan", "HIGH"))
         if "vegetarian" in restrictions and self._matches_any(MEAT_TERMS | FISH_TERMS, terms):
-            details.append(self._detail("dietary_restriction", "Conflicts with vegetarian restriction.", "vegetarian"))
+            details.append(self._detail("dietary_restriction", "Conflicts with vegetarian restriction.", "vegetarian", "HIGH"))
         if "lactose_free" in restrictions and self._matches_any(DAIRY_TERMS, terms):
-            details.append(self._detail("dietary_restriction", "Conflicts with lactose-free restriction.", "lactose_free"))
+            details.append(self._detail("dietary_restriction", "Conflicts with lactose-free restriction.", "lactose_free", "HIGH"))
         if "gluten_free" in restrictions and self._matches_any(GLUTEN_TERMS, terms):
-            details.append(self._detail("dietary_restriction", "Conflicts with gluten-free restriction.", "gluten_free"))
+            details.append(self._detail("dietary_restriction", "Conflicts with gluten-free restriction.", "gluten_free", "HIGH"))
         return details
 
     def _constraint_conflicts(self, supplements: list[str], terms: set[str], user_profile: dict) -> list[dict]:
@@ -157,7 +166,7 @@ class SafetyFilter:
             supplement_terms.add(canonical_key(supplement))
         context_terms = terms | set(normalize_many(user_profile.get("maladies", []) + user_profile.get("diseases", [])))
         details = []
-        for constraint in SafetyConstraint.objects.filter(is_active=True, constraint_type__in=["medical_review", "exclusion"]):
+        for constraint in SafetyConstraint.objects.filter(is_active=True):
             category_key = canonical_key(constraint.supplement_category_name)
             category_item = f"supp:{constraint.supplement_category.canonical_item}" if constraint.supplement_category_id else ""
             if category_key not in supplement_terms and category_item not in supplement_terms:
@@ -165,7 +174,12 @@ class SafetyFilter:
             target = canonical_key(constraint.avoid_or_review_item.replace("context", ""))
             if target and not any(target in term or term in target for term in context_terms):
                 continue
-            details.append(self._detail("safety_constraint", constraint.reason, constraint.avoid_or_review_item))
+            level = constraint.safety_level
+            if constraint.constraint_type == SafetyConstraint.ConstraintType.EXCLUSION:
+                level = "HIGH"
+            elif constraint.constraint_type == SafetyConstraint.ConstraintType.AVOID_TIMING and level == "HIGH":
+                level = "MEDIUM"
+            details.append(self._detail("safety_constraint", constraint.reason, constraint.avoid_or_review_item, level))
         return details
 
     def _matches_any(self, blocked_terms, food_terms: set[str]) -> bool:
@@ -183,5 +197,9 @@ class SafetyFilter:
                 return True
         return False
 
-    def _detail(self, kind: str, message: str, matched: str) -> dict:
-        return {"type": kind, "message": message, "matched": matched}
+    def _highest_level(self, details: list[dict]) -> str:
+        order = {"LOW": 1, "MEDIUM": 2, "HIGH": 3}
+        return max((detail.get("level", "LOW") for detail in details), key=lambda level: order.get(level, 1), default="LOW")
+
+    def _detail(self, kind: str, message: str, matched: str, level: str) -> dict:
+        return {"type": kind, "message": message, "matched": matched, "level": level}

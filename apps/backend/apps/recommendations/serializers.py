@@ -40,6 +40,11 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
     rule_confidence = serializers.SerializerMethodField()
     lift = serializers.SerializerMethodField()
     safety_note = serializers.SerializerMethodField()
+    safety_status = serializers.SerializerMethodField()
+    safety_level = serializers.SerializerMethodField()
+    safety_message = serializers.SerializerMethodField()
+    blocked_reason = serializers.SerializerMethodField()
+    alternatives = serializers.SerializerMethodField()
 
     class Meta:
         model = RecommendationItem
@@ -67,6 +72,11 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
             "tags",
             "warnings",
             "safety_note",
+            "safety_status",
+            "safety_level",
+            "safety_message",
+            "blocked_reason",
+            "alternatives",
             "explanation",
             "feedback",
         ]
@@ -131,6 +141,21 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
         warnings = self.get_warnings(obj)
         return warnings[0].get("message") if warnings and isinstance(warnings[0], dict) else None
 
+    def get_safety_status(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("safety_status", "SAFE")
+
+    def get_safety_level(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("safety_level", "LOW")
+
+    def get_safety_message(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("safety_message", "Safe for your current profile.")
+
+    def get_blocked_reason(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("blocked_reason", "")
+
+    def get_alternatives(self, obj):
+        return (obj.explanation_details or {}).get("alternatives", [])
+
     def get_feedback(self, obj):
         request = self.context.get("request")
         user_feedback = None
@@ -145,7 +170,18 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
                 }
         return {
             "user_feedback": user_feedback,
-            "available_actions": ["liked", "disliked", "saved", "tried", "not_interested"],
+            "available_actions": [
+                "liked",
+                "disliked",
+                "saved",
+                "not_interested",
+                "allergy_issue",
+                "do_not_eat",
+                "too_expensive",
+                "not_available",
+                "already_tried",
+                "good_recommendation",
+            ],
         }
 
 

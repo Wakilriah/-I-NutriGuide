@@ -123,10 +123,11 @@ class WarningsEngine:
                     continue
                 if "disease" not in constraint.avoid_or_review_item.lower() and "intake" not in constraint.avoid_or_review_item.lower():
                     continue
-            level = "warning" if constraint.constraint_type in {"medical_review", "exclusion"} else "caution"
+            level = "warning" if constraint.safety_level == "HIGH" or constraint.constraint_type in {"medical_review", "exclusion"} else "caution"
             warnings.append(
                 {
                     "level": level,
+                    "safety_level": constraint.safety_level,
                     "type": constraint.constraint_type,
                     "title": f"{constraint.supplement_category_name} safety note",
                     "message": f"{constraint.reason} {constraint.how_to_use}".strip(),

@@ -51,8 +51,8 @@ class FoodSupplementSynergyRuleAdmin(admin.ModelAdmin):
 
 @admin.register(SafetyConstraint)
 class SafetyConstraintAdmin(admin.ModelAdmin):
-    list_display = ["supplement_category_name", "avoid_or_review_item", "constraint_type", "is_active"]
-    list_filter = ["constraint_type", "supplement_category_name", "is_active"]
+    list_display = ["supplement_category_name", "avoid_or_review_item", "constraint_type", "safety_level", "is_active"]
+    list_filter = ["constraint_type", "safety_level", "supplement_category_name", "is_active"]
     search_fields = ["supplement_category_name", "avoid_or_review_item", "reason"]
 
 
@@ -72,6 +72,18 @@ class AssociationTransactionAdmin(admin.ModelAdmin):
 
 @admin.register(MinedAssociationRule)
 class MinedAssociationRuleAdmin(admin.ModelAdmin):
-    list_display = ["antecedent_items", "consequent_items", "support", "confidence", "lift", "score", "rule_type", "source", "is_active"]
-    list_filter = ["rule_type", "source", "is_active"]
-    search_fields = ["antecedent_items", "consequent_items", "explanation"]
+    list_display = [
+        "antecedent_items",
+        "consequent_items",
+        "support",
+        "confidence",
+        "lift",
+        "score",
+        "review_status",
+        "safety_conflict_status",
+        "rule_type",
+        "source",
+        "is_active",
+    ]
+    list_filter = ["review_status", "safety_conflict_status", "rule_type", "source", "is_active"]
+    search_fields = ["antecedent_items", "consequent_items", "explanation", "admin_note"]

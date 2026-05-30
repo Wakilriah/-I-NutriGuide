@@ -2,6 +2,7 @@ from apps.foods.models import Food
 from apps.nutrients.models import NutrientInteraction
 from apps.supplements.models import UserSupplement
 
+from .alternatives import alternatives_for_food
 from .confidence import calculate_confidence, normalize_score
 from .explanation_engine import ExplanationEngine
 from .feedback_learning import feedback_score_for_food
@@ -48,12 +49,16 @@ def enrich_scored_recommendation(scored: dict, *, food: Food, user_profile: dict
         score_breakdown=score_breakdown,
         warnings=warnings_result.warnings,
     )
+    explanation["alternatives"] = alternatives_for_food(food, user_profile, limit=4)
     explanation["score_details"] = {
         "final_score": normalize_score(scored.get("final_score")),
         "cbf_score": score_breakdown.get("content_based_score", 0),
         "association_rule_score": score_breakdown.get("association_rule_score", 0),
         "collaborative_score": score_breakdown.get("collaborative_score", 0),
         "safety_status": scored.get("safety_status", "safe"),
+        "safety_level": scored.get("safety_level", "LOW"),
+        "safety_message": scored.get("safety_message", "Safe for your current profile."),
+        "blocked_reason": scored.get("blocked_reason", ""),
         "matched_goal_reasons": scored.get("matched_goal_reasons", []),
         "supplement_synergy_reasons": scored.get("supplement_synergy_reasons", []),
         "calorie_reason": scored.get("calorie_reason", ""),
@@ -117,6 +122,10 @@ def to_api_result(scored: dict, food: Food, recommendation_id=None, item_id=None
         "score_breakdown": score_breakdown,
         "explanation": explanation,
         "warnings": warnings,
+        "safety_status": scored.get("safety_status", "SAFE"),
+        "safety_level": scored.get("safety_level", "LOW"),
+        "safety_message": scored.get("safety_message", "Safe for your current profile."),
+        "blocked_reason": scored.get("blocked_reason", ""),
         "feedback": {
             "user_feedback": user_feedback,
             "available_actions": ["liked", "disliked", "saved", "tried", "not_interested"],
