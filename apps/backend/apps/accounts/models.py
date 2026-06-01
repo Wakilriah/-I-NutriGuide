@@ -117,3 +117,29 @@ class DailyTracking(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.email} tracking {self.date}"
+
+
+class NotificationLog(models.Model):
+    class NotificationType(models.TextChoices):
+        FOOD_REMINDER = "food_reminder", "Food reminder"
+        SUPPLEMENT_REMINDER = "supplement_reminder", "Supplement reminder"
+        RECOMMENDATION_READY = "recommendation_ready", "Recommendation ready"
+        GENERAL = "general", "General"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="notification_logs", on_delete=models.CASCADE)
+    notification_type = models.CharField(max_length=40, choices=NotificationType.choices, default=NotificationType.GENERAL)
+    title = models.CharField(max_length=160)
+    body = models.TextField()
+    data = models.JSONField(default=dict, blank=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-sent_at"]
+        indexes = [
+            models.Index(fields=["user", "sent_at"], name="notif_log_user_sent_idx"),
+            models.Index(fields=["notification_type"], name="notif_log_type_idx"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user.email} - {self.title}"

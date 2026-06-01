@@ -18,6 +18,8 @@ export type NutrientInteraction = {
 
 export type InteractionListParams = {
   interaction_type?: string;
+  page?: number;
+  page_size?: number;
   severity?: string;
   search?: string;
 };
@@ -28,4 +30,12 @@ export async function fetchNutrientInteractions(params: InteractionListParams = 
     return response.data;
   }
   return response.data.results;
+}
+
+export async function fetchPaginatedNutrientInteractions(params: InteractionListParams = {}) {
+  const response = await apiClient.get<NutrientInteraction[] | PaginatedResponse<NutrientInteraction>>("/nutrition/interactions/", { params });
+  if (Array.isArray(response.data)) {
+    return { count: response.data.length, next: null, previous: null, results: response.data };
+  }
+  return response.data;
 }

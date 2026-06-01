@@ -11,8 +11,10 @@ import {
   fetchFood,
   fetchFoodCategories,
   fetchFoods,
+  resolveFoodImageUrl,
   type FoodPayload,
   updateFood,
+  DEFAULT_FOOD_IMAGE_PATH,
 } from "../../api/foods";
 import { fetchNutrients } from "../../api/nutrients";
 import { MetricSkeletonGrid, TableSkeleton } from "../../components/admin/LoadingStates";
@@ -45,6 +47,15 @@ const foodSchema = z.object({
   source: z.string().max(50, "Source must be 50 characters or less.").optional(),
   serving_size_g: z.string().min(1, "Serving size is required."),
   image_url: z.union([z.string().url("Enter a valid image URL."), z.literal("")]).optional(),
+  image_path: z.string().max(255, "Image path must be 255 characters or less.").optional(),
+  image_alt: z.string().max(255, "Image alt text must be 255 characters or less.").optional(),
+  recommended_for_supplements: z.string().optional(),
+  nutrient_tags: z.string().optional(),
+  synergy_reason: z.string().max(1000, "Synergy reason must be 1000 characters or less.").optional(),
+  avoid_or_caution: z.string().max(1000, "Caution text must be 1000 characters or less.").optional(),
+  allergen_tags: z.string().optional(),
+  diet_tags: z.string().optional(),
+  association_rule_items: z.string().optional(),
   is_active: z.boolean(),
   nutrient_items: z.array(
     z.object({
@@ -66,6 +77,15 @@ const defaultValues: FoodFormValues = {
   source: "",
   serving_size_g: "100",
   image_url: "",
+  image_path: "",
+  image_alt: "",
+  recommended_for_supplements: "",
+  nutrient_tags: "",
+  synergy_reason: "",
+  avoid_or_caution: "",
+  allergen_tags: "",
+  diet_tags: "",
+  association_rule_items: "",
   is_active: true,
   nutrient_items: [{ nutrient_slug: "", amount: "", per_quantity: "100", per_unit: "g" }],
 };
@@ -88,6 +108,28 @@ function getPageSize(value: string | null) {
   return PAGE_SIZE_OPTIONS.includes(parsed as (typeof PAGE_SIZE_OPTIONS)[number])
     ? (parsed as (typeof PAGE_SIZE_OPTIONS)[number])
     : 25;
+}
+
+function splitTags(value?: string) {
+  return (value ?? "")
+    .split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function splitRuleItems(value?: string) {
+  return (value ?? "")
+    .split(/[|\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function joinTags(values?: string[]) {
+  return values?.join(", ") ?? "";
+}
+
+function joinRuleItems(values?: string[]) {
+  return values?.join("|") ?? "";
 }
 
 function getPaginationItems(currentPage: number, pageCount: number) {
@@ -122,6 +164,8 @@ export function FoodsPage() {
   const search = searchParams.get("search") ?? "";
   const categoryFilter = searchParams.get("category") ?? "";
   const sourceFilter = searchParams.get("source") ?? "";
+  const supplementFilter = searchParams.get("recommended_for_supplements") ?? "";
+  const allergenFilter = searchParams.get("allergen_tags") ?? "";
   const statusFilter = searchParams.get("is_active") ?? "";
 
   const updateFoodSearch = (updates: Record<string, string | number | null | undefined>, resetPage = true) => {
@@ -146,9 +190,11 @@ export function FoodsPage() {
       search: search.trim() || undefined,
       category: categoryFilter || undefined,
       source: sourceFilter || undefined,
+      recommended_for_supplements: supplementFilter || undefined,
+      allergen_tags: allergenFilter || undefined,
       is_active: statusFilter ? (statusFilter as "true" | "false") : undefined,
     }),
-    [categoryFilter, page, pageSize, search, sourceFilter, statusFilter],
+    [allergenFilter, categoryFilter, page, pageSize, search, sourceFilter, statusFilter, supplementFilter],
   );
 
   const { data, isError, isLoading } = useQuery({
@@ -247,6 +293,32 @@ export function FoodsPage() {
             </Label>
 
             <Label>
+              <span>Recommended For</span>
+              <Input
+                aria-label="Filter foods by recommended supplement"
+                onChange={(event) => {
+                  updateFoodSearch({ recommended_for_supplements: event.target.value });
+                }}
+                placeholder="Iron, Vitamin C"
+                type="search"
+                value={supplementFilter}
+              />
+            </Label>
+
+            <Label>
+              <span>Allergen Tag</span>
+              <Input
+                aria-label="Filter foods by allergen tag"
+                onChange={(event) => {
+                  updateFoodSearch({ allergen_tags: event.target.value });
+                }}
+                placeholder="citrus, gluten"
+                type="search"
+                value={allergenFilter}
+              />
+            </Label>
+
+            <Label>
               <span>Source</span>
               <select
                 aria-label="Filter foods by source"
@@ -278,13 +350,14 @@ export function FoodsPage() {
           </div>
 
           {isLoading && foods.length === 0 ? (
-            <TableSkeleton columns={6} rows={pageSize > 10 ? 8 : pageSize} />
+            <TableSkeleton columns={7} rows={pageSize > 10 ? 8 : pageSize} />
           ) : foods.length === 0 ? (
             <p className="empty-line">{isError ? "Unable to load foods." : "No foods found."}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Source</TableHead>
@@ -296,6 +369,16 @@ export function FoodsPage() {
               <TableBody>
                 {foods.map((food) => (
                   <TableRow key={food.slug}>
+                    <TableCell>
+                      <img
+                        alt={food.image_alt || `${food.name} preview`}
+                        className="food-thumb"
+                        onError={(event) => {
+                          event.currentTarget.src = resolveFoodImageUrl(DEFAULT_FOOD_IMAGE_PATH);
+                        }}
+                        src={resolveFoodImageUrl(food.image_path, food.image_url)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <strong className="table-title">{food.name}</strong>
                       <span className="table-subtitle">{food.slug}</span>
@@ -453,6 +536,15 @@ export function FoodFormPage() {
       source: editingFood.source,
       serving_size_g: editingFood.serving_size_g || "100",
       image_url: editingFood.image_url,
+      image_path: editingFood.image_path,
+      image_alt: editingFood.image_alt,
+      recommended_for_supplements: joinTags(editingFood.recommended_for_supplements),
+      nutrient_tags: joinTags(editingFood.nutrient_tags),
+      synergy_reason: editingFood.synergy_reason,
+      avoid_or_caution: editingFood.avoid_or_caution,
+      allergen_tags: joinTags(editingFood.allergen_tags),
+      diet_tags: joinTags(editingFood.diet_tags),
+      association_rule_items: joinRuleItems(editingFood.association_rule_items),
       is_active: editingFood.is_active,
       nutrient_items:
         editingFood.nutrients.length > 0
@@ -485,6 +577,15 @@ export function FoodFormPage() {
       source: values.source?.trim() ?? "",
       serving_size_g: values.serving_size_g,
       image_url: values.image_url?.trim() ?? "",
+      image_path: values.image_path?.trim() ?? "",
+      image_alt: values.image_alt?.trim() ?? "",
+      recommended_for_supplements: splitTags(values.recommended_for_supplements),
+      nutrient_tags: splitTags(values.nutrient_tags),
+      synergy_reason: values.synergy_reason?.trim() ?? "",
+      avoid_or_caution: values.avoid_or_caution?.trim() ?? "",
+      allergen_tags: splitTags(values.allergen_tags),
+      diet_tags: splitTags(values.diet_tags),
+      association_rule_items: splitRuleItems(values.association_rule_items),
       is_active: values.is_active,
       nutrient_items: values.nutrient_items
         .filter((item) => item.nutrient_slug && item.amount)
@@ -550,9 +651,22 @@ export function FoodFormPage() {
                 <Input placeholder="Manual" type="text" {...form.register("source")} />
               </Label>
               <Label>
-                <span>Image URL</span>
+                <span>Legacy Image URL</span>
                 <Input type="url" {...form.register("image_url")} />
                 {form.formState.errors.image_url ? <small>{form.formState.errors.image_url.message}</small> : null}
+              </Label>
+            </div>
+
+            <div className="form-grid-2">
+              <Label>
+                <span>Image Path</span>
+                <Input placeholder="/media/foods/fruits/orange.webp" type="text" {...form.register("image_path")} />
+                {form.formState.errors.image_path ? <small>{form.formState.errors.image_path.message}</small> : null}
+              </Label>
+              <Label>
+                <span>Image Alt</span>
+                <Input placeholder="Orange food image for recommendation card" type="text" {...form.register("image_alt")} />
+                {form.formState.errors.image_alt ? <small>{form.formState.errors.image_alt.message}</small> : null}
               </Label>
             </div>
 
@@ -565,6 +679,52 @@ export function FoodFormPage() {
               <input type="checkbox" {...form.register("is_active")} />
               <span>Active</span>
             </Label>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recommendation Metadata</CardTitle>
+            <CardDescription>Image-aware tags and explanations shown on recommendation cards.</CardDescription>
+          </CardHeader>
+          <CardContent className="resource-form">
+            <div className="form-grid-2">
+              <Label>
+                <span>Recommended For Supplements</span>
+                <Input placeholder="Iron, Vitamin C" type="text" {...form.register("recommended_for_supplements")} />
+              </Label>
+              <Label>
+                <span>Nutrient Tags</span>
+                <Input placeholder="vitamin_c, fiber" type="text" {...form.register("nutrient_tags")} />
+              </Label>
+            </div>
+
+            <Label>
+              <span>Synergy Reason</span>
+              <Textarea rows={3} {...form.register("synergy_reason")} />
+              {form.formState.errors.synergy_reason ? <small>{form.formState.errors.synergy_reason.message}</small> : null}
+            </Label>
+
+            <Label>
+              <span>Avoid or Caution</span>
+              <Textarea rows={3} {...form.register("avoid_or_caution")} />
+              {form.formState.errors.avoid_or_caution ? <small>{form.formState.errors.avoid_or_caution.message}</small> : null}
+            </Label>
+
+            <div className="form-grid-3">
+              <Label>
+                <span>Allergen Tags</span>
+                <Input placeholder="citrus" type="text" {...form.register("allergen_tags")} />
+              </Label>
+              <Label>
+                <span>Diet Tags</span>
+                <Input placeholder="vegan, gluten_free" type="text" {...form.register("diet_tags")} />
+              </Label>
+              <Label>
+                <span>Association Rule Items</span>
+                <Input placeholder="FOOD_ORANGE|SUPP_IRON" type="text" {...form.register("association_rule_items")} />
+              </Label>
+            </div>
           </CardContent>
         </Card>
 

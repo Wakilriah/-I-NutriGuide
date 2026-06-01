@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Allergy, DailyTracking, DietaryRestriction, DislikedFood, UserProfile
+from .models import Allergy, DailyTracking, DietaryRestriction, DislikedFood, NotificationLog, UserProfile
 
 User = get_user_model()
 
@@ -413,7 +413,19 @@ class DailyTrackingSerializer(serializers.ModelSerializer):
     def validate_food_entries(self, value):
         if not isinstance(value, list):
             raise serializers.ValidationError("Food entries must be a list.")
-        return value[:100]
+        normalized = []
+        for index, entry in enumerate(value[:100]):
+            if not isinstance(entry, dict):
+                raise serializers.ValidationError(f"Food entry {index + 1} must be an object.")
+            serving_g = entry.get("serving_g")
+            try:
+                serving_g = float(serving_g)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError(f"Food entry {index + 1} requires serving_g in grams.")
+            if serving_g <= 0 or serving_g > 5000:
+                raise serializers.ValidationError(f"Food entry {index + 1} serving_g must be between 1 and 5000 grams.")
+            normalized.append({**entry, "serving_g": round(serving_g, 1)})
+        return normalized
 
     def validate_water_ml(self, value):
         if value > 10000:
@@ -434,3 +446,10 @@ class DailyTrackingSerializer(serializers.ModelSerializer):
         if not isinstance(value, list):
             raise serializers.ValidationError("Supplements taken must be a list.")
         return value[:50]
+
+
+class NotificationLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationLog
+        fields = ["id", "notification_type", "title", "body", "data", "sent_at", "read_at"]
+        read_only_fields = fields

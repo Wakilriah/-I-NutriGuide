@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Quicksand:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#418340",
+            "primary-container": "#098730",
+            "on-surface-variant": "#3f4a3d",
+            "tertiary-fixed-dim": "#91d78a",
+            "primary-fixed-dim": "#71dd7a",
+            "outline": "#6f7a6c",
+            "on-primary-container": "#f7fff1",
+            "background": "#f7f9ff",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#edf4ff",
+            "surface-container-highest": "#d9e3f1",
+            "on-secondary-fixed-variant": "#643f00",
+            "secondary": "#845400",
+            "on-surface": "#121d26",
+            "inverse-surface": "#27313c",
+            "surface-tint": "#006e24",
+            "surface-variant": "#d9e3f1",
+            "surface": "#f7f9ff",
+            "on-primary-fixed-variant": "#005319",
+            "on-tertiary-container": "#f7fff1",
+            "on-primary-fixed": "#002106",
+            "secondary-container": "#fda611",
+            "on-background": "#121d26",
+            "primary": "#006b23",
+            "surface-bright": "#f7f9ff",
+            "surface-dim": "#d1dbe8",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#ffb95b",
+            "on-tertiary-fixed-variant": "#0c5216",
+            "inverse-primary": "#71dd7a",
+            "inverse-on-surface": "#e8f2ff",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "secondary-fixed": "#ffddb6",
+            "tertiary-fixed": "#acf4a4",
+            "surface-container": "#e4effd",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed": "#002203",
+            "on-primary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "outline-variant": "#becab9",
+            "on-secondary-container": "#684100",
+            "surface-container-high": "#dfe9f7",
+            "tertiary": "#276929",
+            "primary-fixed": "#8dfa94",
+            "on-secondary-fixed": "#2a1800"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "section-gap": "40px",
+            "stack-gap": "16px",
+            "base": "8px",
+            "container-padding": "24px",
+            "gutter": "16px"
+          },
+          "fontFamily": {
+            "body-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Quicksand"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-md": ["Quicksand"],
+            "headline-lg-mobile": ["Quicksand"],
+            "display-lg": ["Quicksand"]
+          },
+          "fontSize": {
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #becab9;
+      border-radius: 10px;
+    }
+    .bottom-sheet-transition {
+      transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-md text-on-background overflow-hidden">
+<!-- Background Canvas: Mock Recommendations Screen -->
+<main class="min-h-screen pb-24 blur-[2px] opacity-60">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest overflow-hidden border border-on-primary/20">
+<img alt="user profile picture" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a smiling user with soft studio lighting against a clean, warm beige background. The overall aesthetic is approachable and healthy, perfectly matching a modern wellness application's bright and organic visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPTB7VNzzCJV94Ohm2WF6rf2dUUKaHlhkVUcTupAQz1prtQinLH3AQkpljzCjr-aQmbPlKEMjJR1k9WUoPNs7lKbZX4GrJv1Kr51Js_InXOYqxvVcszCi_bAr9wQN1q_Omz439PPQ_3mfwOAHUr4iS1D1nzIMEhn15n9nwcp_nf3artijGAOoAM0DUeoSSJHFH61oO_YTLiQuYk9ftyyLCPdn-mTR0ggW3De0viW5GLjkHNesED-7LrbBvvZL0Ekx5HV8jw-XRTIo"/>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</span>
+</div>
+<button class="material-symbols-outlined text-on-primary hover:opacity-90 transition-opacity">notifications</button>
+</header>
+<!-- Content Mock -->
+<div class="pt-24 px-container-padding">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-6">Today's Recommendations</h1>
+<div class="grid grid-cols-1 gap-6">
+<!-- Mock Card 1 -->
+<div class="rounded-lg overflow-hidden bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/20">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover" data-alt="A vibrant, top-down photograph of a Mediterranean grain bowl filled with colorful vegetables, quinoa, and fresh herbs. The lighting is bright and natural, emphasizing textures and freshness. The scene is clean and minimalist, set against a soft mint-tinted marble surface that evokes a sense of calm and health." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBjPkZxjLmd0VDSAuQdyARSS5xGLnDajif6ilnN04smroJgoGw2p5fyLoIckQMo97XbGxKYSg6iURhm22kFy6-ojLtzkPtqghR7Eq5rRCmW36kO8HJhKX4X5nT6LeATuWkGTWfieY4_yWCEdMaMQXBNErGKM5IuycXccrsrTOapgQTfh5dkJLB0USXVf23JoG2zT5wggkhd21SVtkUoSMxf6_azy-TmcPFt9Ly5HfQZZD_WUAu1eYogctneaD5WjTMa5jv_mwYcUA"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md rounded-full p-2">
+<span class="material-symbols-outlined text-error">heart_broken</span>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Zesty Quinoa Salad</h3>
+<p class="text-body-md text-on-surface-variant mt-1">High protein • Vegan • 450 kcal</p>
+</div>
+</div>
+<!-- Mock Card 2 -->
+<div class="rounded-lg overflow-hidden bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/20">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover" data-alt="A gourmet salmon fillet served with roasted asparagus and a lemon-dill sauce, presented on a minimalist white ceramic plate. The lighting is soft and airy, creating a high-end restaurant feel. The color palette features warm orange tones and fresh greens against a neutral, warm beige background, projecting health and luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoabLfVgv7Cc_ufRedLFC2_4Q7mUTlT3Q9mnExz6zc7UNc-soYkWalmiT7vE0DoKoaFIyVpkpPVZ0fao3RzYBrIayUQ6wzCsG2Jlzc-gqC6HqmcgxJLx_Xqnz-2Hnz5k_iPkMFpeV0IValqDHfVt6wUWEHidXVOpWL8bJ2UR8KYT_rGMg4JGCFTYNxgV8mO0X_E2UyA3ilG0HRJ-Yj7xtqxDgoZOoyxUMn9fcp75cIB0nvVhvuJPdTh-mwqGC1Bj7dEDpF4SkBUuA"/>
+</div>
+<div class="p-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Grilled Salmon &amp; Asparagus</h3>
+<p class="text-body-md text-on-surface-variant mt-1">Keto friendly • High Omega-3 • 520 kcal</p>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar Mock -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 scale-90">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+</main>
+<!-- Feedback Modal Overlay -->
+<div class="fixed inset-0 z-[100] bg-on-background/30 backdrop-blur-[2px] transition-opacity duration-300" id="modalOverlay">
+<!-- Bottom Sheet -->
+<div class="fixed bottom-0 left-0 right-0 max-w-[600px] mx-auto bg-surface-container-lowest rounded-t-xl shadow-lg transform translate-y-0 bottom-sheet-transition p-6" id="bottomSheet">
+<!-- Handle -->
+<div class="w-12 h-1.5 bg-outline-variant/40 rounded-full mx-auto mb-8"></div>
+<div class="flex flex-col items-center text-center mb-8">
+<div class="w-16 h-16 bg-error-container rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-error text-[32px]">heart_broken</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Help us improve your recommendations</h2>
+<p class="text-body-md text-on-surface-variant max-w-[80%]">Why isn't this relevant?</p>
+</div>
+<!-- Options List -->
+<div class="space-y-3 mb-10 max-h-[353px] overflow-y-auto custom-scrollbar px-1">
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="I do not like this food"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">I do not like this food</span>
+</label>
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="I am allergic"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">I am allergic</span>
+</label>
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="Too expensive"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">Too expensive</span>
+</label>
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="Not available"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">Not available</span>
+</label>
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="Does not match my diet"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">Does not match my diet</span>
+</label>
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="Already tried"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">Already tried</span>
+</label>
+<label class="relative flex items-center p-4 rounded-lg bg-surface border border-outline-variant/30 cursor-pointer hover:bg-surface-container transition-colors group">
+<input class="hidden peer" name="feedback_reason" type="radio" value="Other"/>
+<div class="w-5 h-5 rounded-full border-2 border-outline peer-checked:border-primary peer-checked:bg-primary transition-all mr-4 flex items-center justify-center">
+<div class="w-2 h-2 bg-white rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<span class="font-body-md text-on-surface group-hover:text-primary transition-colors">Other</span>
+</label>
+</div>
+<!-- Actions -->
+<div class="flex flex-col gap-3 pb-4">
+<button class="w-full py-4 bg-secondary-container text-on-secondary-container font-headline-md rounded-full shadow-md hover:opacity-90 active:scale-[0.98] transition-all" onclick="submitFeedback()">
+          Submit Feedback
+        </button>
+<button class="w-full py-3 text-on-surface-variant font-label-md hover:bg-surface-container rounded-full transition-colors" onclick="closeModal()">
+          Dismiss
+        </button>
+</div>
+</div>
+</div>
+<script>
+    function closeModal() {
+      const sheet = document.getElementById('bottomSheet');
+      const overlay = document.getElementById('modalOverlay');
+      
+      sheet.classList.add('translate-y-full');
+      overlay.classList.add('opacity-0');
+      
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        document.body.classList.remove('overflow-hidden');
+      }, 400);
+    }
+
+    function submitFeedback() {
+      const selected = document.querySelector('input[name="feedback_reason"]:checked');
+      if (selected) {
+        // Logic for submitting feedback
+        console.log("Feedback submitted:", selected.value);
+        closeModal();
+      } else {
+        alert("Please select a reason first.");
+      }
+    }
+
+    // Handle clicking outside to close
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modalOverlay')) {
+        closeModal();
+      }
+    });
+
+    // Touch handle interaction logic (simulated)
+    let startY = 0;
+    const sheet = document.getElementById('bottomSheet');
+    
+    sheet.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+    });
+
+    sheet.addEventListener('touchmove', (e) => {
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+      if (diff > 0) {
+        sheet.style.transform = `translateY(${diff}px)`;
+      }
+    });
+
+    sheet.addEventListener('touchend', (e) => {
+      const currentY = e.changedTouches[0].clientY;
+      const diff = currentY - startY;
+      if (diff > 100) {
+        closeModal();
+      } else {
+        sheet.style.transform = `translateY(0)`;
+      }
+    });
+  </script>
+</body></html>

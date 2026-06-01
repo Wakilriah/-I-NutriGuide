@@ -2,21 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { 
-  View, 
-  Text, 
-  Card, 
-  Button, 
-  Colors, 
-  TouchableOpacity,
-  Badge as UIBadge
-} from "react-native-ui-lib";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, PageHeader, ProgressSteps, FilterChip, SearchInput } from "../../src/components/ui";
+import { AppButton, AppCard, Badge, OnboardingShell, SearchInput } from "../../src/components/ui";
 import { searchFoods, type FoodSearchItem } from "../../src/features/foods/api";
 import { getProfile, updateProfile } from "../../src/features/profile/api";
 import { useAuthStore } from "../../src/stores/auth-store";
-import { spacing, radii } from "../../src/theme/design";
+import { colors, radii, spacing, typography } from "../../src/theme/design";
 
 const MAX_DISLIKED_FOODS = 12;
 
@@ -43,7 +35,6 @@ export default function DislikedFoodsOnboardingScreen() {
 
   useEffect(() => {
     let mounted = true;
-
     async function loadProfile() {
       try {
         const profile = await getProfile();
@@ -54,9 +45,7 @@ export default function DislikedFoodsOnboardingScreen() {
         // Empty defaults are fine for first-time onboarding.
       }
     }
-
     void loadProfile();
-
     return () => {
       mounted = false;
     };
@@ -108,72 +97,100 @@ export default function DislikedFoodsOnboardingScreen() {
   };
 
   return (
-    <Screen>
-      <View padding-24 gap-24>
-        <ProgressSteps current={4} total={4} />
-        
-        <AnimatedSection>
-          <PageHeader eyebrow="Almost done" title="Avoidances" subtitle="We'll make sure your daily plans don't include things you dislike." />
-        </AnimatedSection>
+    <Screen contentStyle={{ paddingBottom: 48 }} showAiAssistant={false}>
+      <OnboardingShell current={4} subtitle="Choose foods you dislike so your meal ideas feel realistic from day one." title="Anything you prefer to avoid?">
+        <AppCard style={{ gap: spacing.md, backgroundColor: colors.cream }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm }}>
+            <Text style={typography.section}>My dislikes</Text>
+            <Badge label={`${selectedFoods.length}/${MAX_DISLIKED_FOODS}`} tone={selectedFoods.length >= MAX_DISLIKED_FOODS ? "red" : "green"} />
+          </View>
+          <SearchInput onChangeText={setQuery} placeholder="Search foods to avoid" value={query} />
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
+            {selectedFoods.length ? selectedFoods.map((food) => (
+              <TouchableOpacity key={food} onPress={() => toggleFood(food)} style={styles.selectedChip}>
+                <Text style={styles.selectedChipText}>{food}</Text>
+                <Ionicons color={colors.primary} name="close" size={14} />
+              </TouchableOpacity>
+            )) : <Text style={typography.body}>No foods selected yet.</Text>}
+          </View>
+        </AppCard>
 
-        <AnimatedSection delay={80}>
-          <Card padding-24 gap-16>
-            <View row spread centerV>
-              <Text label small>My Dislikes</Text>
-              <UIBadge label={`${selectedFoods.length}/${MAX_DISLIKED_FOODS}`} backgroundColor={selectedFoods.length >= MAX_DISLIKED_FOODS ? Colors.error : Colors.primary} />
-            </View>
-            
-            <SearchInput onChangeText={setQuery} placeholder="Search foods to avoid" value={query} />
-            
-            <View row style={{ flexWrap: "wrap", gap: 6 }}>
-              {selectedFoods.map(food => (
-                <TouchableOpacity key={food} onPress={() => toggleFood(food)} backgroundColor={Colors.background} br100 paddingH-12 paddingV-6 row centerV>
-                  <Text small bold color={Colors.primary}>{food}</Text>
-                  <Ionicons name="close" size={14} color={Colors.primary} style={{ marginLeft: 4 }} />
-                </TouchableOpacity>
-              ))}
-              {!selectedFoods.length && <Text body color={Colors.muted}>No foods selected yet.</Text>}
-            </View>
-          </Card>
-        </AnimatedSection>
-
-        <AnimatedSection delay={150}>
-           <View gap-8>
-              {foods.slice(0, 6).map((food) => {
-                const selected = selectedFoods.includes(food.name);
-                return (
-                  <TouchableOpacity
-                    key={food.id}
-                    onPress={() => toggleFood(food.name)}
-                    backgroundColor={selected ? Colors.primary : Colors.white}
-                    br10
-                    padding-16
-                    row
-                    spread
-                    style={{ borderWidth: 1, borderColor: selected ? Colors.primary : Colors.background }}
-                  >
-                    <Text body bold color={selected ? 'white' : Colors.text}>{food.name}</Text>
-                    <Ionicons name={selected ? "checkmark-circle" : "add-circle-outline"} size={20} color={selected ? 'white' : Colors.muted} />
-                  </TouchableOpacity>
-                );
-              })}
-           </View>
-        </AnimatedSection>
-
-        {status && <Text bold center color={Colors.error}>{status}</Text>}
-
-        <View marginT-8 gap-12 paddingB-32>
-          <Button 
-            label={saving ? "Finalizing..." : "Get Started"} 
-            disabled={saving} 
-            onPress={onFinish} 
-            size={Button.sizes.large}
-          />
-          <TouchableOpacity onPress={() => router.replace("/tabs/home")} center>
-             <Text small bold color={Colors.muted}>SKIP FOR NOW</Text>
-          </TouchableOpacity>
+        <View style={{ gap: spacing.sm }}>
+          {foods.slice(0, 7).map((food) => {
+            const selected = selectedFoods.includes(food.name);
+            return (
+              <TouchableOpacity key={food.id} onPress={() => toggleFood(food.name)} style={[styles.foodRow, selected && styles.foodRowSelected]}>
+                <View style={styles.foodIcon}>
+                  <Ionicons color={selected ? colors.surface : colors.primary} name={selected ? "checkmark" : "add"} size={18} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.foodName, selected && { color: colors.surface }]}>{food.name}</Text>
+                  <Text style={[styles.foodMeta, selected && { color: colors.surfaceOnDark }]}>{food.category || "Food"}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      </View>
+
+        {status ? <Text style={styles.status}>{status}</Text> : null}
+        <AppButton accessibilityLabel="Get Started" disabled={saving} icon="arrow-forward" label={saving ? "Finalizing..." : "Get Started"} onPress={onFinish} />
+        <TouchableOpacity onPress={() => router.replace("/tabs/home" as never)} style={{ alignItems: "center", paddingVertical: spacing.sm }}>
+          <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "900" }}>SKIP FOR NOW</Text>
+        </TouchableOpacity>
+      </OnboardingShell>
     </Screen>
   );
 }
+
+const styles = {
+  selectedChip: {
+    minHeight: 34,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: spacing.sm,
+  },
+  selectedChipText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "900" as const,
+  },
+  foodRow: {
+    minHeight: 74,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: spacing.sm,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+  },
+  foodRowSelected: {
+    backgroundColor: colors.primary,
+  },
+  foodIcon: {
+    width: 42,
+    height: 42,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderRadius: radii.md,
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  foodName: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "900" as const,
+  },
+  foodMeta: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700" as const,
+    marginTop: 2,
+  },
+  status: {
+    color: colors.danger,
+    fontWeight: "900" as const,
+    textAlign: "center" as const,
+  },
+};

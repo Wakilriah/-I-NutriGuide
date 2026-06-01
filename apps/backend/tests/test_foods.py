@@ -104,3 +104,27 @@ def test_seed_foods_command_is_idempotent():
     assert Food.objects.count() == 21
     assert FoodCategory.objects.filter(slug="fruits").exists()
     assert FoodNutrient.objects.filter(food__slug="orange", nutrient__slug="vitamin-c").exists()
+
+
+def test_import_food_images_seed_command_is_idempotent(tmp_path):
+    csv_path = tmp_path / "food_images.csv"
+    csv_path.write_text(
+        "\n".join(
+            [
+                "food_name,slug,category,image_path,image_alt,recommended_for_supplements,nutrient_tags,synergy_reason,avoid_or_caution,allergen_tags,diet_tags,association_rule_items,is_active",
+                "Orange,Orange,Fruits,/media/foods/fruits/orange.webp,Orange preview,\"Iron, Vitamin C\",\"vitamin_c, fiber\",Supports iron meals.,Avoid with citrus intolerance.,citrus,\"vegan, gluten_free\",FOOD_ORANGE|SUPP_IRON,true",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    call_command("import_food_images_seed", str(csv_path))
+    call_command("import_food_images_seed", str(csv_path))
+
+    assert Food.objects.count() == 1
+    food = Food.objects.get(slug="orange")
+    assert food.image_path == "/media/foods/fruits/orange.webp"
+    assert food.image_alt == "Orange preview"
+    assert food.recommended_for_supplements == ["Iron", "Vitamin C"]
+    assert food.nutrient_tags == ["vitamin_c", "fiber"]
+    assert food.association_rule_items == ["FOOD_ORANGE", "SUPP_IRON"]

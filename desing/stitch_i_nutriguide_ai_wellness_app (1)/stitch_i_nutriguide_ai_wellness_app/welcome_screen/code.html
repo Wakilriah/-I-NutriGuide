@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Welcome to I-NutriGuide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&amp;family=Quicksand:wght@600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;family=Quicksand:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#418340",
+                    "primary-container": "#098730",
+                    "on-surface-variant": "#3f4a3d",
+                    "tertiary-fixed-dim": "#91d78a",
+                    "primary-fixed-dim": "#71dd7a",
+                    "outline": "#6f7a6c",
+                    "on-primary-container": "#f7fff1",
+                    "background": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#edf4ff",
+                    "surface-container-highest": "#d9e3f1",
+                    "on-secondary-fixed-variant": "#643f00",
+                    "secondary": "#845400",
+                    "on-surface": "#121d26",
+                    "inverse-surface": "#27313c",
+                    "surface-tint": "#006e24",
+                    "surface-variant": "#d9e3f1",
+                    "surface": "#f7f9ff",
+                    "on-primary-fixed-variant": "#005319",
+                    "on-tertiary-container": "#f7fff1",
+                    "on-primary-fixed": "#002106",
+                    "secondary-container": "#fda611",
+                    "on-background": "#121d26",
+                    "primary": "#006b23",
+                    "surface-bright": "#f7f9ff",
+                    "surface-dim": "#d1dbe8",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#ffb95b",
+                    "on-tertiary-fixed-variant": "#0c5216",
+                    "inverse-primary": "#71dd7a",
+                    "inverse-on-surface": "#e8f2ff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#ffddb6",
+                    "tertiary-fixed": "#acf4a4",
+                    "surface-container": "#e4effd",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#002203",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "outline-variant": "#becab9",
+                    "on-secondary-container": "#684100",
+                    "surface-container-high": "#dfe9f7",
+                    "tertiary": "#276929",
+                    "primary-fixed": "#8dfa94",
+                    "on-secondary-fixed": "#2a1800"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "40px",
+                    "stack-gap": "16px",
+                    "base": "8px",
+                    "container-padding": "24px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Quicksand"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Quicksand"],
+                    "headline-lg-mobile": ["Quicksand"],
+                    "display-lg": ["Quicksand"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.bg-welcome-hero {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuC6wVciPIMB-rJSV1REqxtlWmz2PXzTU2bgQR2HKnNImvt0Zuhe_Qf4oyvbKYK1rIDX39q51fiv7vpvExLvAb-wZbWAPGW0NycivSzYt3HyfrVglHBR1EoA_I8IUjPgUTm6iH80CdGP8DMf_HR9iBheMHA-kPfOQhSyfZtk3kKPj1dhcPKsg027agn-RGcX85xuKUu9b2VD6YuhHqyvJ3SZB8ke_XNiJlgpGiE8T_XHZhD0IlFa2Q9ZcSKwFVp2YgeC0zNP-ePclpA);
+    background-size: cover;
+    background-position: center
+    }
+.soft-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px)
+    }</style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-hidden">
+<!-- Immersive Welcome Screen -->
+<main class="relative h-screen w-full flex flex-col justify-end bg-welcome-hero" data-alt="A top-down premium food photography shot of a vibrant Buddha bowl filled with fresh kale, sliced avocados, roasted chickpeas, purple cabbage, and a sprinkling of pumpkin seeds. The lighting is bright and natural, creating a soft, life-affirming atmosphere. The color palette is rich in organic greens and earthy tones, perfectly embodying a modern minimalist wellness aesthetic with a sense of calm and vitality.">
+<!-- Gradient Overlays for Readability -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent"></div>
+<!-- Content Container -->
+<div class="relative z-10 w-full max-w-[1200px] mx-auto px-container-padding pb-16 flex flex-col items-center text-center">
+<!-- Logo Section -->
+<div class="mb-stack-gap animate-fade-in-down">
+<img alt="I-NutriGuide Logo" class="w-24 h-24 rounded-full shadow-lg border-4 border-white/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnq35Sz7Y1-UIz66n6KimTB33g_G95wOIeFcQwnCa7fajs9_FG7pM2dH8xqqf803NTIorku_-qh3puWy1i8LKu7xUgLK9383InJmOVKwB8ry0NvM3t8F0OKD-12rmlFBvj8G-VMZ9i-gNIxy30-cCYtpCVTfiAeC1OkFuN65yVEk7JJZgOxX8xTr8wTWuBWnevf3k3kvDTDFTL4udB6G78_hSQ8c5pHdVPtUHW7iWYJY89c_2KGNBtoNVNXMQ0GjF8J8pcd0gm6jc"/>
+</div>
+<!-- Typography Section -->
+<div class="mb-section-gap space-y-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-display-lg md:text-display-lg text-white drop-shadow-md">
+                    I-NutriGuide
+                </h1>
+<p class="font-body-lg text-body-lg text-white/90 max-w-xs mx-auto leading-tight">
+                    Smart food recommendations for your supplements
+                </p>
+</div>
+<!-- Action Section -->
+<div class="w-full max-w-sm space-y-4">
+<!-- Primary Action -->
+<button class="w-full h-14 bg-secondary-container hover:bg-secondary text-on-secondary-container hover:text-on-secondary font-label-md text-label-md rounded-full shadow-xl transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group" onclick="handleStart()">
+                    Get Started
+                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<!-- Secondary Action -->
+<button class="w-full h-14 soft-glass border border-white/30 text-white font-label-md text-label-md rounded-full transition-all duration-300 hover:bg-white/20 active:scale-95" onclick="handleLogin()">
+                    Already have an account? Log in
+                </button>
+</div>
+<!-- Trust / Micro-copy -->
+<div class="mt-8">
+<p class="text-white/60 font-label-md text-[12px] uppercase tracking-widest">
+                    Your Personal Wellness Partner
+                </p>
+</div>
+</div>
+<!-- Atmospheric Floating Elements (Decorative) -->
+<div class="absolute top-20 left-10 w-32 h-32 bg-primary-fixed-dim/20 rounded-full blur-3xl animate-pulse"></div>
+<div class="absolute bottom-40 right-0 w-48 h-48 bg-secondary-fixed-dim/10 rounded-full blur-3xl"></div>
+</main>
+<!-- Navigation suppression: Not included as this is a transactional/onboarding splash screen -->
+<script>
+        // Simple Interaction Logic
+        function handleStart() {
+            const btn = event.currentTarget;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
+            setTimeout(() => {
+                console.log("Navigating to onboarding...");
+                // In a real app: window.location.href = '/onboarding';
+            }, 800);
+        }
+
+        function handleLogin() {
+            console.log("Opening login modal...");
+        }
+
+        // Entrance Animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.animate-fade-in-down');
+            elements.forEach((el, i) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-20px)';
+                el.style.transition = 'all 0.8s ease-out';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 * i);
+            });
+        });
+    </script>
+<style>
+        @keyframes fade-in-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-down {
+            animation: fade-in-down 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</body></html>

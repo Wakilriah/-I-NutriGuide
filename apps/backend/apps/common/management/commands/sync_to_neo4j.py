@@ -10,6 +10,8 @@ from apps.accounts.models import (
 from apps.common.neo4j_client import get_neo4j_driver
 from apps.foods.models import Food, FoodCategory, FoodNutrient
 from apps.nutrients.models import Nutrient, NutrientInteraction
+from apps.rules.models import FoodSupplementSynergyRule, SafetyConstraint, SupplementCategory
+from apps.rules.services import canonical_key
 from apps.recommendations.services.normalizer import normalize_token
 from apps.supplements.models import (
     Supplement,
@@ -100,6 +102,7 @@ class Command(BaseCommand):
             self._sync_supplement_nutrients(session)
             self._sync_supplement_fact_sheets(session)
             self._sync_interactions(session)
+            self._sync_association_dataset(session)
             self._sync_allergies_and_restrictions(session)
             self._sync_users(session)
             self._sync_user_preferences(session)
@@ -332,6 +335,70 @@ class Command(BaseCommand):
                 f"MERGE (source)-[r:{rel_type}]->(target) "
                 "SET r.mechanism=row.mechanism, r.evidence_level=row.evidence_level, r.severity=row.severity",
                 batch=rows,
+            )
+
+    def _sync_association_dataset(self, session):
+        self.stdout.write("Syncing association dataset graph...")
+        session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (sc:SupplementCategory) REQUIRE sc.item IS UNIQUE")
+        categories = [
+            {"id": item.id, "name": item.category, "item": f"supp:{item.canonical_item}", "nutrient": item.main_nutrient}
+            for item in SupplementCategory.objects.filter(is_active=True)
+        ]
+        if categories:
+            session.run(
+                "UNWIND $batch AS row "
+                "MERGE (sc:SupplementCategory {item: row.item}) "
+                "SET sc.id=row.id, sc.name=row.name, sc.main_nutrient=row.nutrient",
+                batch=categories,
+            )
+            session.run(
+                "UNWIND $batch AS row "
+                "MATCH (sc:SupplementCategory {item: row.item}) "
+                "MERGE (n:KnowledgeEntity {type: 'nutrient', key: row.nutrient}) "
+                "MERGE (sc)-[:CONTAINS]->(n)",
+                batch=[row for row in categories if row["nutrient"]],
+            )
+
+        synergies = [
+            {
+                "supplement_item": item.supplement_item,
+                "food_key": canonical_key(item.food_item.split(":", 1)[1]),
+                "food_slug": item.food_item.split(":", 1)[1].replace("_", "-"),
+                "reason": item.reason,
+                "weight": item.seed_weight,
+            }
+            for item in FoodSupplementSynergyRule.objects.filter(is_active=True, association_type="positive")
+            if ":" in item.food_item
+        ]
+        if synergies:
+            session.run(
+                "UNWIND $batch AS row "
+                "MATCH (sc:SupplementCategory {item: row.supplement_item}) "
+                "MATCH (f:Food {slug: row.food_slug}) "
+                "MERGE (sc)-[r:HAS_SYNERGY_WITH]->(f) "
+                "SET r.reason=row.reason, r.weight=row.weight",
+                batch=synergies,
+            )
+
+        constraints = [
+            {
+                "supplement_item": f"supp:{item.supplement_category.canonical_item}" if item.supplement_category_id else "",
+                "target": item.avoid_or_review_item,
+                "target_key": canonical_key(item.avoid_or_review_item),
+                "reason": item.reason,
+                "constraint_type": item.constraint_type,
+            }
+            for item in SafetyConstraint.objects.filter(is_active=True).select_related("supplement_category")
+        ]
+        if constraints:
+            session.run(
+                "UNWIND $batch AS row "
+                "MATCH (sc:SupplementCategory {item: row.supplement_item}) "
+                "MERGE (target:KnowledgeEntity {type: 'safety_item', key: row.target_key}) "
+                "SET target.raw_key=row.target "
+                "MERGE (sc)-[r:SHOULD_NOT_BE_TAKEN_WITH]->(target) "
+                "SET r.reason=row.reason, r.constraint_type=row.constraint_type",
+                batch=[row for row in constraints if row["supplement_item"]],
             )
 
     def _sync_allergies_and_restrictions(self, session):

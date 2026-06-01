@@ -3,33 +3,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { 
-  View, 
-  Text, 
-  Card, 
-  Button, 
-  Colors, 
-  TouchableOpacity,
-  TextField,
-  Incubator,
-} from "react-native-ui-lib";
-import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, AppTopBar, Badge, ErrorState, FilterChip, PageHeader, SkeletonCard } from "../../src/components/ui";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { MobileAppShell } from "../../src/components/MobileAppShell";
+import { AppCard, AppTopBar, Badge, ChatAssistant, ChatInputBar, ChatMessageBubble, ErrorState, QuickPromptChips, SkeletonCard, TypingIndicator } from "../../src/components/ui";
 import { ChatMessage, ChatSession, clearChatSessions, listChatSessions, sendChatMessage } from "../../src/features/chat/api";
-import { spacing } from "../../src/theme/design";
+import { colors, radii, spacing, typography } from "../../src/theme/design";
 
 const starterPrompts = [
-  "Recommend foods for my supplements",
+  "What should I eat with iron?",
+  "Can I take coffee with supplements?",
   "Explain my latest recommendation",
   "What should I avoid?",
-  "Update my disliked foods",
 ];
 
 const welcomeMessage: ChatMessage = {
   id: "welcome",
   role: "assistant",
-  content: "Hi, I am your nutrition assistant. Ask about food pairings, supplement timing, allergies, or recommendation ideas.",
+  content: "Hi! I can help with food pairings, supplement timing, allergies, water, calories, and recommendation explanations.",
   metadata: {},
   recommendation_run_id: null,
   groq_model: "",
@@ -110,12 +100,11 @@ export default function ChatScreen() {
     if (!trimmed || sendMutation.isPending) {
       return;
     }
-    const pendingId = `pending-${trimmed}`;
     setHistoryCleared(false);
     setMessages((current) => [
       ...current,
       {
-        id: pendingId,
+        id: `pending-${trimmed}`,
         role: "user",
         content: trimmed,
         metadata: {},
@@ -131,135 +120,74 @@ export default function ChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: Colors.background }}>
-      <View flex>
-        <AppTopBar />
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: colors.background }}>
+      <MobileAppShell>
+        <AppTopBar title="I-NutriGuide Assistant" subtitle="Online" />
         <ScrollView
-          contentContainerStyle={{ padding: 24, paddingBottom: 32 }}
+          contentContainerStyle={{ gap: spacing.lg, padding: spacing.lg, paddingBottom: 204 }}
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
         >
-          <View gap-24>
-            <AnimatedSection>
-              <PageHeader eyebrow="AI Assistant" title="Chat" subtitle="Get intelligent pairing tips and health explanations." />
-            </AnimatedSection>
+          <ChatAssistant clearing={clearMutation.isPending} onClear={() => clearMutation.mutate()} />
+          <QuickPromptChips onPick={sendMessage} prompts={starterPrompts} />
 
-            <AnimatedSection delay={40}>
-              <Button
-                outline
-                disabled={clearMutation.isPending || sendMutation.isPending}
-                label={clearMutation.isPending ? "Clearing..." : "Clear Chat History"}
-                onPress={() => clearMutation.mutate()}
-                size={Button.sizes.small}
-                color={Colors.muted}
-              />
-            </AnimatedSection>
+          {sessionsQuery.isLoading ? <SkeletonCard lines={2} /> : null}
+          {sendMutation.isError || clearMutation.isError ? <ErrorState message="I could not process that request. Please try again." /> : null}
 
-            <AnimatedSection delay={80}>
-              <Card padding-16 gap-8 style={{ borderLeftWidth: 4, borderLeftColor: Colors.primary }}>
-                <View row centerV spread>
-                   <Badge label="AI Powered" tone="orange" />
-                </View>
-                <Text h3>Personalized insights from your food engine</Text>
-                <Text body>The assistant analyzes your profile, supplements, and goals before generating results.</Text>
-              </Card>
-            </AnimatedSection>
+          <View style={{ gap: spacing.md }}>
+            {messages.map((message) => {
+              const isAssistant = message.role === "assistant";
+              const citedItems = message.metadata?.cited_items ?? [];
+              return (
+                <View key={message.id} style={{ gap: spacing.sm }}>
+                  <ChatMessageBubble role={isAssistant ? "assistant" : "user"}>{message.content}</ChatMessageBubble>
 
-            <AnimatedSection delay={130} gap-8>
-              <Text label small>Quick Questions</Text>
-              <View row style={{ flexWrap: "wrap", gap: 8 }}>
-                {starterPrompts.map((prompt) => (
-                  <FilterChip key={prompt} label={prompt} onPress={() => sendMessage(prompt)} />
-                ))}
-              </View>
-            </AnimatedSection>
-
-            <AnimatedSection delay={180} gap-16>
-              {sessionsQuery.isLoading && <SkeletonCard lines={2} />}
-              {(sendMutation.isError || clearMutation.isError) && <ErrorState message="I could not process that request. Please try again." />}
-              
-              {messages.map((message) => {
-                const isAssistant = message.role === "assistant";
-                const citedItems = message.metadata?.cited_items ?? [];
-                return (
-                  <View key={message.id} gap-8>
-                    <View style={{ alignItems: isAssistant ? "flex-start" : "flex-end" }}>
-                      <View
-                        backgroundColor={isAssistant ? Colors.white : Colors.primary}
-                        padding-16
-                        br10
-                        style={{
-                          maxWidth: "88%",
-                          borderBottomLeftRadius: isAssistant ? 4 : 20,
-                          borderBottomRightRadius: isAssistant ? 20 : 4,
-                          borderWidth: 1,
-                          borderColor: isAssistant ? Colors.background : Colors.primary,
-                        }}
-                      >
-                        <Text bold={isAssistant} color={isAssistant ? Colors.text : Colors.white} body>
-                          {message.content}
-                        </Text>
-                      </View>
-                    </View>
-                    
-                    {isAssistant && citedItems.length > 0 && (
-                      <View gap-8>
-                        {citedItems.slice(0, 3).map((item) => (
-                          <Card key={item.id} padding-12 gap-8 style={{ backgroundColor: Colors.white }}>
-                            <View row centerV spread>
-                              <View row centerV flex>
-                                <View backgroundColor={Colors.background} br10 center height={32} width={32} marginR-12>
-                                   <Ionicons name="restaurant" size={16} color={Colors.primary} />
-                                </View>
-                                <Text body bold flex numberOfLines={1}>{item.food.name}</Text>
-                              </View>
-                              <Badge label={`${Math.round(Number(item.score) * 100)}%`} tone="green" />
+                  {isAssistant && citedItems.length > 0 ? (
+                    <View style={{ gap: spacing.xs }}>
+                      {citedItems.slice(0, 3).map((item) => (
+                        <AppCard key={item.id} style={{ gap: spacing.xs, padding: spacing.md }}>
+                          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                            <View style={styles.foodIcon}>
+                              <Ionicons color={colors.primary} name="restaurant" size={16} />
                             </View>
-                            <Text small color={Colors.muted}>{item.explanation}</Text>
-                          </Card>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                );
-              })}
-              {sendMutation.isPending && <SkeletonCard lines={2} />}
-            </AnimatedSection>
+                            <Text numberOfLines={1} style={{ flex: 1, color: colors.text, fontWeight: "900" }}>{item.food.name}</Text>
+                            <Badge label={`${Math.round(Number(item.score) * 100)}%`} tone="green" />
+                          </View>
+                          <Text style={typography.body}>{item.explanation}</Text>
+                        </AppCard>
+                      ))}
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
+            {sendMutation.isPending ? <TypingIndicator /> : null}
           </View>
         </ScrollView>
 
-        {/* Input Bar */}
-        <View 
-          padding-16 
-          backgroundColor={Colors.white} 
-          style={{ borderTopWidth: 1, borderTopColor: Colors.background }}
-        >
-          <View row centerV gap-12>
-            <View flex backgroundColor={Colors.background} br10 paddingH-16 paddingV-4>
-              <TextField
-                multiline
-                placeholder="Ask your nutritionist..."
-                onChangeText={setDraft}
-                value={draft}
-                hideUnderline
-                style={{ minHeight: 40, maxHeight: 120, color: Colors.text, fontWeight: '600' }}
-              />
-            </View>
-            <TouchableOpacity 
-              onPress={() => sendMessage()} 
-              disabled={sendMutation.isPending}
-              backgroundColor={Colors.primary}
-              br100
-              center
-              style={{ width: 48, height: 48 }}
-            >
-              <Ionicons name="send" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.inputDock}>
+          <ChatInputBar disabled={sendMutation.isPending} onChangeText={setDraft} onSend={() => sendMessage()} value={draft} />
         </View>
-      </View>
+      </MobileAppShell>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = {
+  foodIcon: {
+    width: 34,
+    height: 34,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderRadius: radii.md,
+    backgroundColor: colors.primarySoft,
+  },
+  inputDock: {
+    position: "absolute" as const,
+    left: spacing.lg,
+    right: spacing.lg,
+    bottom: 92,
+  },
+};

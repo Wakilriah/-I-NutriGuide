@@ -5,6 +5,7 @@ import RecommendationDetailScreen from "../../../../app/recommendations/[runId]"
 
 jest.mock("../../../features/recommendations/api", () => ({
   getRecommendationRun: jest.fn(),
+  resolveFoodImageUri: jest.fn((path?: string) => path || "http://localhost:8000/media/foods/default.webp"),
   saveRecommendationItem: jest.fn(async () => ({})),
   submitRecommendationFeedback: jest.fn(async () => ({})),
 }));

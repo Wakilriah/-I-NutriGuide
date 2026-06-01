@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide AI Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#418340",
+                      "primary-container": "#098730",
+                      "on-surface-variant": "#3f4a3d",
+                      "tertiary-fixed-dim": "#91d78a",
+                      "primary-fixed-dim": "#71dd7a",
+                      "outline": "#6f7a6c",
+                      "on-primary-container": "#f7fff1",
+                      "background": "#f7f9ff",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#edf4ff",
+                      "surface-container-highest": "#d9e3f1",
+                      "on-secondary-fixed-variant": "#643f00",
+                      "secondary": "#845400",
+                      "on-surface": "#121d26",
+                      "inverse-surface": "#27313c",
+                      "surface-tint": "#006e24",
+                      "surface-variant": "#d9e3f1",
+                      "surface": "#f7f9ff",
+                      "on-primary-fixed-variant": "#005319",
+                      "on-tertiary-container": "#f7fff1",
+                      "on-primary-fixed": "#002106",
+                      "secondary-container": "#fda611",
+                      "on-background": "#121d26",
+                      "primary": "#006b23",
+                      "surface-bright": "#f7f9ff",
+                      "surface-dim": "#d1dbe8",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed-dim": "#ffb95b",
+                      "on-tertiary-fixed-variant": "#0c5216",
+                      "inverse-primary": "#71dd7a",
+                      "inverse-on-surface": "#e8f2ff",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#ffddb6",
+                      "tertiary-fixed": "#acf4a4",
+                      "surface-container": "#e4effd",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed": "#002203",
+                      "on-primary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "outline-variant": "#becab9",
+                      "on-secondary-container": "#684100",
+                      "surface-container-high": "#dfe9f7",
+                      "tertiary": "#276929",
+                      "primary-fixed": "#8dfa94",
+                      "on-secondary-fixed": "#2a1800"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "40px",
+                      "stack-gap": "16px",
+                      "base": "8px",
+                      "container-padding": "24px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "body-md": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Quicksand"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Quicksand"],
+                      "headline-lg-mobile": ["Quicksand"],
+                      "display-lg": ["Quicksand"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #f7f9ff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .chat-container {
+            height: calc(100vh - 144px); /* Adjusting for TopAppBar and BottomNavBar */
+        }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            background: rgba(0, 107, 35, 0.9);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #becab9;
+            border-radius: 10px;
+        }
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-primary dark:bg-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-on-primary overflow-hidden flex items-center justify-center bg-surface">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A clean, minimalist portrait of a healthy user with warm, natural lighting. The style is modern organic minimalism with soft shadows and a high-key, airy aesthetic, emphasizing vibrant wellness and approachability in a living-wellness environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoHfsY8vPsFCc4LaLlAns1Js-Bf9_zgsbY6tAjscs4POa6S44GsEtBOqIAONQzvGg3LpDWm7Z8oief4iltgwAi7BgqwTjfoqFd6JyKc5eLjlSlbn2vxe4hvIeF-EKguewcIZxxu_V9GZOHknDQGeJmh8p4EQQWtxzrSCYqQEH9amMgWIfV564d3TX1I6mY3XLYoovKAThTBzo1rvgaz3WQ7Y4s8EPdoQSKmMtUGPwm9CsOr6VE1l9FP4AyHjU49gHHtV9eL83TDd8"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide Assistant</h1>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-fixed pulse"></span>
+<span class="font-label-md text-label-md text-on-primary/80">Online</span>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<button class="material-symbols-outlined text-on-primary hover:opacity-90 transition-opacity p-2 rounded-full hover:bg-white/10">notifications</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-32 px-4 md:px-container-padding max-w-[1200px] mx-auto min-h-screen">
+<!-- Chat Flow Container -->
+<section class="chat-container flex flex-col custom-scrollbar overflow-y-auto space-y-6 pb-12">
+<!-- AI Welcome Message -->
+<div class="flex flex-col items-start max-w-[85%] md:max-w-[70%] animate-fade-in">
+<div class="flex items-center gap-2 mb-2 ml-2">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<span class="font-label-md text-label-md text-on-surface-variant">I-NutriGuide AI</span>
+</div>
+<div class="bg-surface-container-high text-on-surface p-4 rounded-[24px] rounded-tl-none shadow-sm border border-outline-variant/30">
+<p class="font-body-md text-body-md">Hi Alex! How can I help with your nutrition today? I've analyzed your recent supplement intake and I'm ready for any questions you might have.</p>
+</div>
+<span class="text-[10px] text-outline ml-2 mt-1">10:02 AM</span>
+</div>
+<!-- User Sample Message -->
+<div class="flex flex-col items-end max-w-[85%] md:max-w-[70%] ml-auto animate-fade-in">
+<div class="bg-primary text-on-primary p-4 rounded-[24px] rounded-tr-none shadow-md">
+<p class="font-body-md text-body-md">I just bought some fresh spinach. What should I pair it with to maximize iron absorption?</p>
+</div>
+<span class="text-[10px] text-outline mr-2 mt-1">10:05 AM</span>
+</div>
+<!-- AI Typing Animation Placeholder -->
+<div class="flex flex-col items-start max-w-[85%] md:max-w-[70%] opacity-0 transition-opacity duration-300" id="typing-indicator">
+<div class="bg-surface-container-high p-4 rounded-[24px] rounded-tl-none flex gap-1">
+<span class="w-1.5 h-1.5 bg-outline rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+<span class="w-1.5 h-1.5 bg-outline rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+<span class="w-1.5 h-1.5 bg-outline rounded-full animate-bounce"></span>
+</div>
+</div>
+</section>
+<!-- Interaction Layer (Floating Input & Chips) -->
+<section class="fixed bottom-20 left-0 w-full px-4 md:px-container-padding z-40 bg-gradient-to-t from-background via-background/90 to-transparent pt-4">
+<div class="max-w-[1200px] mx-auto space-y-4">
+<!-- Question Chips -->
+<div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x no-scrollbar">
+<button class="snap-start flex-shrink-0 bg-white border border-outline-variant px-4 py-2 rounded-full font-label-md text-label-md text-primary hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 whitespace-nowrap">
+                        What should I eat with iron?
+                    </button>
+<button class="snap-start flex-shrink-0 bg-white border border-outline-variant px-4 py-2 rounded-full font-label-md text-label-md text-primary hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 whitespace-nowrap">
+                        Can I take coffee with my supplement?
+                    </button>
+<button class="snap-start flex-shrink-0 bg-white border border-outline-variant px-4 py-2 rounded-full font-label-md text-label-md text-primary hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 whitespace-nowrap">
+                        Give me a meal plan for today.
+                    </button>
+</div>
+<!-- Input Box -->
+<div class="bg-white rounded-[2rem] p-2 flex items-center gap-2 shadow-lg border border-outline-variant/30 mb-4">
+<button class="w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<input class="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface" placeholder="Ask anything about your health..." type="text"/>
+<div class="flex items-center gap-1">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/20 transition-colors">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-on-primary shadow-sm hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple Interaction logic for demo
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const indicator = document.getElementById('typing-indicator');
+                indicator.style.opacity = '1';
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                }, 3000);
+            });
+        });
+
+        // Hide scrollbar but keep functionality
+        const style = document.createElement('style');
+        style.textContent = `
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body></html>

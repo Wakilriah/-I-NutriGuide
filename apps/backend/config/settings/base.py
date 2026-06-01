@@ -99,6 +99,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = Path(os.getenv("DJANGO_MEDIA_ROOT", Path(__file__).resolve().parents[2] / "media"))
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
@@ -144,7 +146,7 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_BEAT_SCHEDULE = {
     "remind-users-track-nutrition": {
         "task": "apps.accounts.tasks.remind_users_to_track_nutrition",
-        "schedule": crontab(minute=0), # Every hour on the hour
+        "schedule": crontab(),  # Every minute for exact supplement reminder times.
     },
 }
 RECOMMENDER_ARTIFACT_DIR = Path(os.getenv("RECOMMENDER_ARTIFACT_DIR", BASE_DIR / "storage" / "recommender"))

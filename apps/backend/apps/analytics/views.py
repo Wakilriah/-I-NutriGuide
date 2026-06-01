@@ -8,9 +8,18 @@ from rest_framework.views import APIView
 
 from apps.feedback.models import RecommendationFeedback
 from apps.foods.models import Food
-from apps.nutrients.models import Nutrient
+from apps.nutrients.models import Nutrient, NutrientInteraction
 from apps.recommendations.models import RecommendationItem, RecommendationRun, SavedRecommendationItem
-from apps.rules.models import AssociationRule
+from apps.rules.models import (
+    AssociationRule,
+    AssociationTransaction,
+    AssociationTransactionItem,
+    FoodSupplementSynergyRule,
+    MinedAssociationRule,
+    SafetyConstraint,
+    SupplementCategory,
+    SupplementNormalization,
+)
 from apps.supplements.models import Supplement, UserSupplement
 
 
@@ -37,6 +46,22 @@ dashboard_response = inline_serializer(
         "total_saved_foods": serializers.IntegerField(),
         "total_association_rules": serializers.IntegerField(),
         "active_association_rules": serializers.IntegerField(),
+        "total_supplement_categories": serializers.IntegerField(),
+        "active_supplement_categories": serializers.IntegerField(),
+        "total_supplement_normalizations": serializers.IntegerField(),
+        "active_supplement_normalizations": serializers.IntegerField(),
+        "total_synergy_seed_rules": serializers.IntegerField(),
+        "active_synergy_seed_rules": serializers.IntegerField(),
+        "total_safety_constraints": serializers.IntegerField(),
+        "active_safety_constraints": serializers.IntegerField(),
+        "total_mined_association_rules": serializers.IntegerField(),
+        "active_mined_association_rules": serializers.IntegerField(),
+        "total_association_transactions": serializers.IntegerField(),
+        "total_association_transaction_items": serializers.IntegerField(),
+        "total_nutrient_interactions": serializers.IntegerField(),
+        "active_nutrient_interactions": serializers.IntegerField(),
+        "average_mined_confidence": serializers.FloatField(),
+        "average_mined_lift": serializers.FloatField(),
         "recommendation_items_with_rules": serializers.IntegerField(),
         "average_rule_score": serializers.FloatField(),
         "most_used_supplements": serializers.ListField(child=serializers.DictField()),
@@ -45,6 +70,9 @@ dashboard_response = inline_serializer(
         "food_category_counts": serializers.ListField(child=serializers.DictField()),
         "food_source_counts": serializers.ListField(child=serializers.DictField()),
         "rule_usage": serializers.ListField(child=serializers.DictField()),
+        "synergy_rule_category_counts": serializers.ListField(child=serializers.DictField()),
+        "mined_rule_source_counts": serializers.ListField(child=serializers.DictField()),
+        "safety_constraint_type_counts": serializers.ListField(child=serializers.DictField()),
         "feedback_type_counts": serializers.ListField(child=serializers.DictField()),
         "most_liked_foods": serializers.ListField(child=serializers.DictField()),
         "most_disliked_foods": serializers.ListField(child=serializers.DictField()),
@@ -108,6 +136,22 @@ class DashboardView(APIView):
                 "total_saved_foods": SavedRecommendationItem.objects.count(),
                 "total_association_rules": AssociationRule.objects.count(),
                 "active_association_rules": AssociationRule.objects.filter(is_active=True).count(),
+                "total_supplement_categories": SupplementCategory.objects.count(),
+                "active_supplement_categories": SupplementCategory.objects.filter(is_active=True).count(),
+                "total_supplement_normalizations": SupplementNormalization.objects.count(),
+                "active_supplement_normalizations": SupplementNormalization.objects.filter(is_active=True).count(),
+                "total_synergy_seed_rules": FoodSupplementSynergyRule.objects.count(),
+                "active_synergy_seed_rules": FoodSupplementSynergyRule.objects.filter(is_active=True).count(),
+                "total_safety_constraints": SafetyConstraint.objects.count(),
+                "active_safety_constraints": SafetyConstraint.objects.filter(is_active=True).count(),
+                "total_mined_association_rules": MinedAssociationRule.objects.count(),
+                "active_mined_association_rules": MinedAssociationRule.objects.filter(is_active=True).count(),
+                "total_association_transactions": AssociationTransaction.objects.count(),
+                "total_association_transaction_items": AssociationTransactionItem.objects.count(),
+                "total_nutrient_interactions": NutrientInteraction.objects.count(),
+                "active_nutrient_interactions": NutrientInteraction.objects.filter(active=True).count(),
+                "average_mined_confidence": MinedAssociationRule.objects.aggregate(avg=Avg("confidence"))["avg"] or 0,
+                "average_mined_lift": MinedAssociationRule.objects.aggregate(avg=Avg("lift"))["avg"] or 0,
                 "recommendation_items_with_rules": RecommendationItem.objects.filter(rule_score__gt=0).count(),
                 "average_rule_score": RecommendationItem.objects.aggregate(avg=Avg("rule_score"))["avg"] or 0,
                 "most_used_supplements": list(
@@ -136,6 +180,21 @@ class DashboardView(APIView):
                     .order_by("-count", "source")[:6]
                 ),
                 "rule_usage": rule_usage,
+                "synergy_rule_category_counts": list(
+                    FoodSupplementSynergyRule.objects.values("supplement_category_name")
+                    .annotate(count=Count("id"))
+                    .order_by("-count", "supplement_category_name")[:8]
+                ),
+                "mined_rule_source_counts": list(
+                    MinedAssociationRule.objects.values("source")
+                    .annotate(count=Count("id"))
+                    .order_by("-count", "source")[:6]
+                ),
+                "safety_constraint_type_counts": list(
+                    SafetyConstraint.objects.values("constraint_type")
+                    .annotate(count=Count("id"))
+                    .order_by("-count", "constraint_type")[:6]
+                ),
                 "feedback_type_counts": list(
                     RecommendationFeedback.objects.values("feedback_type")
                     .annotate(count=Count("id"))
@@ -217,7 +276,9 @@ def _get_rule_usage():
     for matched_rules in items:
         for rule in matched_rules or []:
             rule_id = rule.get("id")
-            label = f"{rule.get('antecedent', 'unknown')} -> {rule.get('consequent', 'unknown')}"
+            antecedent = rule.get("antecedent") or ", ".join(rule.get("antecedent_items") or rule.get("antecedents") or [])
+            consequent = rule.get("consequent") or ", ".join(rule.get("consequent_items") or rule.get("consequents") or [])
+            label = f"{antecedent or 'unknown'} -> {consequent or 'unknown'}"
             key = str(rule_id or label)
             if key not in usage:
                 usage[key] = {"rule_id": rule_id, "label": label, "count": 0}

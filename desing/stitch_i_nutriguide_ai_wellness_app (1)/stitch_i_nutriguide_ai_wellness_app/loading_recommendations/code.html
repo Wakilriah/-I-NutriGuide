@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide | Analyzing Synergy</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#f7fff1",
+                        "surface": "#f7f9ff",
+                        "on-surface": "#121d26",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#418340",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#fda611",
+                        "surface-variant": "#d9e3f1",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#ffddb6",
+                        "surface-container-low": "#edf4ff",
+                        "surface-dim": "#d1dbe8",
+                        "outline-variant": "#becab9",
+                        "on-secondary-fixed": "#2a1800",
+                        "surface-tint": "#006e24",
+                        "on-surface-variant": "#3f4a3d",
+                        "surface-bright": "#f7f9ff",
+                        "tertiary-fixed": "#acf4a4",
+                        "primary-container": "#098730",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline": "#6f7a6c",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#121d26",
+                        "on-primary-container": "#f7fff1",
+                        "inverse-surface": "#27313c",
+                        "tertiary-fixed-dim": "#91d78a",
+                        "inverse-primary": "#71dd7a",
+                        "on-tertiary-fixed": "#002203",
+                        "primary": "#006b23",
+                        "on-secondary-fixed-variant": "#643f00",
+                        "background": "#f7f9ff",
+                        "on-tertiary-fixed-variant": "#0c5216",
+                        "secondary-fixed-dim": "#ffb95b",
+                        "on-primary-fixed-variant": "#005319",
+                        "on-secondary-container": "#684100",
+                        "primary-fixed-dim": "#71dd7a",
+                        "inverse-on-surface": "#e8f2ff",
+                        "surface-container": "#e4effd",
+                        "tertiary": "#276929",
+                        "primary-fixed": "#8dfa94",
+                        "secondary": "#845400",
+                        "on-primary-fixed": "#002106",
+                        "surface-container-high": "#dfe9f7",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d9e3f1",
+                        "soft-mint": "#EAF7EF"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "container-padding": "24px",
+                        "gutter": "16px",
+                        "stack-gap": "16px",
+                        "section-gap": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Quicksand"],
+                        "headline-lg": ["Quicksand"],
+                        "display-lg": ["Quicksand"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Quicksand"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .loading-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .floating-orb {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="bg-soft-mint font-body-md text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-primary dark:bg-primary-container text-on-primary dark:text-on-primary-container bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border-2 border-on-primary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary dark:text-on-primary-container">I-NutriGuide</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:opacity-90 transition-opacity p-2 rounded-full hover:bg-white/10 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-container-padding pt-16 pb-24 relative overflow-hidden">
+<!-- Decorative Background Orbs -->
+<div class="absolute top-1/4 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl floating-orb" style="animation-delay: 0s;"></div>
+<div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-secondary-container/10 rounded-full blur-3xl floating-orb" style="animation-delay: 2s;"></div>
+<!-- Center Loading State -->
+<div class="relative z-10 text-center max-w-md mx-auto">
+<div class="relative mb-8 flex justify-center">
+<!-- Circular pulsing container for the loading animation -->
+<div class="absolute inset-0 bg-primary/10 rounded-full blur-xl scale-110 animate-pulse"></div>
+<div class="relative w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden shadow-lg bg-white p-4">
+<img alt="Loading animation" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALhxDw2aPD0UHFnWEAEO-kQ4u-wwoLoxd838ville9d2BQda1c6csm3-PUzBa2wN-Jo2np9rKtBuSEdoVJxlgmc070JPWOrihx2it6jfkXO-4dPBy2V1bNP6MynLb8jQm27l3S16wmKKHs_LT6LxRLaXOKlAuBt3IWfgHdjyP2_VtERjaz1VCoJYiChn4IPjDSIrxusY2Y7YI-P9fZrJ8ELMnOXrZlAmcZDguv5gqMeNyprTJhCmzyeDu4q7EP9zLf0Wb0YfAZ-6Y"/>
+</div>
+</div>
+<!-- Loading Typography -->
+<div class="space-y-4">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary animate-pulse">
+                    Analyzing your nutrient synergy...
+                </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xs mx-auto">
+                    Finding the perfect matches for your supplements.
+                </p>
+</div>
+<!-- Custom Progress Indicator -->
+<div class="mt-12 w-full max-w-[280px] mx-auto space-y-2">
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden relative">
+<div class="h-full bg-primary rounded-full w-2/3 loading-shimmer"></div>
+</div>
+<div class="flex justify-between px-1">
+<span class="font-label-md text-label-md text-primary">Matching...</span>
+<span class="font-label-md text-label-md text-outline">68%</span>
+</div>
+</div>
+</div>
+<!-- AI Guide Tooltip (Wait Message) -->
+<div class="mt-12 bg-gradient-to-br from-primary to-tertiary text-on-primary px-6 py-4 rounded-lg shadow-lg max-w-sm text-center relative floating-orb">
+<p class="font-body-md text-body-md italic">"A balanced ratio of Vitamin D3 and K2 is essential for optimal calcium absorption. I'm checking your current levels now."</p>
+<!-- Speech bubble arrow -->
+<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container rounded-t-lg shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-2xl">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-2xl">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<script>
+        // Micro-interactions for loading simulation
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusTexts = [
+                "Analyzing Vitamin D synergy...",
+                "Optimizing mineral intake...",
+                "Cross-referencing supplements...",
+                "Finding perfect matches..."
+            ];
+            
+            const statusLabel = document.querySelector('.text-primary.font-label-md');
+            let index = 0;
+
+            setInterval(() => {
+                index = (index + 1) % statusTexts.length;
+                statusLabel.style.opacity = 0;
+                setTimeout(() => {
+                    statusLabel.textContent = statusTexts[index];
+                    statusLabel.style.opacity = 1;
+                }, 300);
+            }, 3000);
+        });
+    </script>
+</body></html>

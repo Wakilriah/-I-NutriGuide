@@ -1,30 +1,31 @@
 export const colors = {
-  background: "#F7F8F5",
+  background: "#F7F9FF",
+  mintBackground: "#F4FCE3",
   cream: "#FFF7EA",
   surface: "#FFFFFF",
-  surfaceSoft: "#F3F6F0",
+  surfaceSoft: "#F7F9FF",
   surfaceContainerLowest: "#FFFFFF",
-  surfaceContainerLow: "#EEF3EA",
-  surfaceContainer: "#E7EDE2",
-  surfaceContainerHigh: "#DDE5D7",
-  surfaceContainerHighest: "#D2DCCC",
-  primary: "#1F6F43",
-  primaryContainer: "#2F8A5B",
-  primaryDark: "#0B3420",
-  primaryFresh: "#79B98B",
-  primarySoft: "#E3F0E6",
-  mint: "#EAF5EC",
-  secondary: "#935A12",
-  secondaryContainer: "#D9822B",
+  surfaceContainerLow: "#EDF4FF",
+  surfaceContainer: "#E4EFFD",
+  surfaceContainerHigh: "#DFE9F7",
+  surfaceContainerHighest: "#D9E3F1",
+  primary: "#006B23",
+  primaryContainer: "#098730",
+  primaryDark: "#002106",
+  primaryFresh: "#71DD7A",
+  primarySoft: "#E8F8EA",
+  mint: "#EAF7EF",
+  secondary: "#845400",
+  secondaryContainer: "#FDA611",
   secondarySoft: "#FFE5C2",
   tomato: "#B8482D",
   blue: "#376A99",
   blueSoft: "#E2ECF5",
-  text: "#18211A",
-  muted: "#5D685B",
-  mutedSoft: "#7B8678",
-  border: "#D2D9CD",
-  borderSoft: "#E2E8DE",
+  text: "#121D26",
+  muted: "#3F4A3D",
+  mutedSoft: "#6F7A6C",
+  border: "#BECAB9",
+  borderSoft: "#D9E3F1",
   danger: "#B42318",
   dangerSoft: "#FDE3DF",
   warning: "#8A5A00",
@@ -38,10 +39,10 @@ export const colors = {
 
 export const radii = {
   sm: 6,
-  md: 8,
-  lg: 10,
-  xl: 12,
-  hero: 16,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  hero: 32,
   pill: 999,
 };
 
@@ -61,11 +62,19 @@ export const iconSizes = {
 };
 
 export const shadow = {
-  shadowColor: "#18211A",
+  shadowColor: "#006B23",
   shadowOffset: { width: 0, height: 10 },
-  shadowOpacity: 0.06,
-  shadowRadius: 18,
+  shadowOpacity: 0.08,
+  shadowRadius: 20,
   elevation: 2,
+};
+
+export const dockShadow = {
+  shadowColor: "#0E1610",
+  shadowOffset: { width: 0, height: 10 },
+  shadowOpacity: 0.14,
+  shadowRadius: 24,
+  elevation: 8,
 };
 
 export const warmShadow = {
@@ -99,6 +108,18 @@ export const cards = {
     padding: spacing.lg,
     ...shadow,
   },
+  onboardingGlass: {
+    borderColor: colors.borderSoft,
+    borderRadius: radii.hero,
+    borderWidth: 1,
+    backgroundColor: "rgba(255,255,255,0.94)",
+    padding: spacing.lg,
+    shadowColor: colors.text,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    elevation: 3,
+  },
   soft: {
     borderColor: colors.borderSoft,
     borderRadius: radii.lg,
@@ -116,8 +137,11 @@ export const cards = {
   },
 };
 
+const welcomeBackgroundImage = "https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=1200&q=85";
+
 export const images = {
-  bowls: "https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=1200&q=85",
+  welcomeBackground: welcomeBackgroundImage,
+  bowls: welcomeBackgroundImage,
   bowlClose: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85",
   breakfast: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=900&q=85",
   greens: "https://images.unsplash.com/photo-1506807803488-8eafc15316c7?auto=format&fit=crop&w=900&q=85",
@@ -128,6 +152,12 @@ export const images = {
 };
 
 export const typography = {
+  display: {
+    color: colors.text,
+    fontSize: 32,
+    fontWeight: "900" as const,
+    lineHeight: 40,
+  },
   title: {
     color: colors.text,
     fontSize: 28,

@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { Text, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, FoodCard, LoadingState, PageHeader, SectionHeader } from "../../src/components/ui";
-import { listSavedRecommendationItems, removeSavedRecommendationItem } from "../../src/features/recommendations/api";
+import { listSavedRecommendationItems, removeSavedRecommendationItem, resolveFoodImageUri } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
 
 export default function SavedFoodsScreen() {
@@ -33,6 +33,7 @@ export default function SavedFoodsScreen() {
         <View style={{ gap: spacing.md }}>
           {savedFoods.data?.map((savedItem) => {
             const item = savedItem.recommendation_item;
+            const explanationSummary = typeof item.explanation === "string" ? item.explanation : item.explanation.summary;
             return (
               <AppCard key={savedItem.id} style={{ gap: spacing.sm }}>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm }}>
@@ -46,9 +47,11 @@ export default function SavedFoodsScreen() {
 
                 <FoodCard
                   category={item.food.category}
+                  fallbackImage={{ uri: resolveFoodImageUri() }}
+                  image={{ uri: resolveFoodImageUri(item.food.image_path) }}
                   name={item.food.name}
                   nutrients={item.tags.length ? item.tags : item.matched_nutrients}
-                  reason={`Helps absorption of ${item.matched_supplement?.name ?? "your supplement"}. ${item.explanation}`}
+                  reason={item.food.synergy_reason || `Helps absorption of ${item.matched_supplement?.name ?? "your supplement"}. ${explanationSummary}`}
                   score={Number(item.score)}
                 />
 
@@ -58,7 +61,7 @@ export default function SavedFoodsScreen() {
                       accessibilityLabel={`Open saved recommendation ${item.id}`}
                       icon="open"
                       label="Open"
-                      onPress={() => router.push(`/recommendations/${item.run_id}` as never)}
+                      onPress={() => router.push(`/tabs/recommendation-detail/${item.run_id}` as never)}
                       variant="secondary"
                     />
                   </View>

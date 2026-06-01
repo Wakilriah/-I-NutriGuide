@@ -8,6 +8,8 @@ import { FeedbackPage } from "../features/feedback/FeedbackPage";
 import { FoodFormPage, FoodsPage } from "../features/knowledge/FoodsPage";
 import { KnowledgeBasePage } from "../features/knowledge/KnowledgeBasePage";
 import { RecommendationDetailPage, RecommendationsPage } from "../features/recommendations/RecommendationsPage";
+import { EvaluationPage } from "../features/recommendations/EvaluationPage";
+import { AssociationDatasetPage } from "../features/rules/AssociationDatasetPage";
 import { RulesPage } from "../features/rules/RulesPage";
 import { UserDetailPage, UsersPage } from "../features/users/UsersPage";
 import { queryClient } from "../lib/query-client";
@@ -40,8 +42,10 @@ function AppRoutes() {
         <Route path="foods/:slug/edit" element={<FoodFormPage />} />
         <Route path="knowledge" element={<KnowledgeBasePage />} />
         <Route path="rules" element={<RulesPage />} />
+        <Route path="rules/dataset" element={<AssociationDatasetPage />} />
         <Route path="recommendations" element={<RecommendationsPage />} />
         <Route path="recommendations/:runId" element={<RecommendationDetailPage />} />
+        <Route path="evaluation" element={<EvaluationPage />} />
         <Route path="feedback" element={<FeedbackPage />} />
         <Route path="chats" element={<ChatsPage />} />
         <Route path="chats/:userId" element={<UserChatsPage />} />

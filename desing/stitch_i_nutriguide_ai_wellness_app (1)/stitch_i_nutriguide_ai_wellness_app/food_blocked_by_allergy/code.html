@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Safety First - Allergy Alert</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#f7fff1",
+                      "surface": "#f7f9ff",
+                      "on-surface": "#121d26",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#418340",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#fda611",
+                      "surface-variant": "#d9e3f1",
+                      "error": "#ba1a1a",
+                      "secondary-fixed": "#ffddb6",
+                      "surface-container-low": "#edf4ff",
+                      "surface-dim": "#d1dbe8",
+                      "outline-variant": "#becab9",
+                      "on-secondary-fixed": "#2a1800",
+                      "surface-tint": "#006e24",
+                      "on-surface-variant": "#3f4a3d",
+                      "surface-bright": "#f7f9ff",
+                      "tertiary-fixed": "#acf4a4",
+                      "primary-container": "#098730",
+                      "on-error-container": "#93000a",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "outline": "#6f7a6c",
+                      "on-tertiary": "#ffffff",
+                      "on-background": "#121d26",
+                      "on-primary-container": "#f7fff1",
+                      "inverse-surface": "#27313c",
+                      "tertiary-fixed-dim": "#91d78a",
+                      "inverse-primary": "#71dd7a",
+                      "on-tertiary-fixed": "#002203",
+                      "primary": "#006b23",
+                      "on-secondary-fixed-variant": "#643f00",
+                      "background": "#f7f9ff",
+                      "on-tertiary-fixed-variant": "#0c5216",
+                      "secondary-fixed-dim": "#ffb95b",
+                      "on-primary-fixed-variant": "#005319",
+                      "on-secondary-container": "#684100",
+                      "primary-fixed-dim": "#71dd7a",
+                      "inverse-on-surface": "#e8f2ff",
+                      "surface-container": "#e4effd",
+                      "tertiary": "#276929",
+                      "primary-fixed": "#8dfa94",
+                      "secondary": "#845400",
+                      "on-primary-fixed": "#002106",
+                      "surface-container-high": "#dfe9f7",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#d9e3f1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "container-padding": "24px",
+                      "gutter": "16px",
+                      "stack-gap": "16px",
+                      "section-gap": "40px"
+              },
+              "fontFamily": {
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Quicksand"],
+                      "headline-lg": ["Quicksand"],
+                      "display-lg": ["Quicksand"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Quicksand"],
+                      "body-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-on-primary/20 flex items-center justify-center overflow-hidden border border-on-primary/30">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A professional studio portrait of a healthy, smiling user with soft natural lighting. The person has a warm expression, embodying wellness and vitality. The background is a soft, out-of-focus mint green, maintaining the clean and modern organic minimalism of the nutrition application's brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNqJyzqt13cf5v3cyRrvcbVudebsHIpDwiUBsvQV8XnnmAO2LAl93ngIlCvTOW6H8wmCqpKZUXzXXqcgcy7NMSdRUnDluVY6AAk4epuJ7QK0wYTEbSg3wOOmtJJg7aR3CwAEOtLjhuI9WJfCTmaSITomqC9zL73x_0alCHBG7nrhLdzweWmBXzCT4nWTHaXdSphviPvYQYjQ0FpRRJWnS3zkbi9vFa_-ew9FSzKC0HOqyZjj9SXjpZhSjNcWLfYk4dt3dYT9ZCSLM"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</h1>
+</div>
+<button class="text-on-primary/80 hover:opacity-90 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-24 px-container-padding max-w-[1200px] mx-auto">
+<!-- Section Header -->
+<div class="mb-gutter flex items-center gap-3">
+<div class="p-2 bg-error-container text-error rounded-full">
+<span class="material-symbols-outlined font-bold" data-icon="shield">shield</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Safety First</h2>
+</div>
+<!-- Content Area: The Blocked Experience -->
+<div class="flex flex-col gap-section-gap">
+<!-- Blocked Food Bento Grid -->
+<div class="relative group max-w-2xl mx-auto w-full">
+<!-- Blurred & Dimmed Food Card -->
+<div class="relative rounded-lg overflow-hidden shadow-sm bg-surface-container-highest opacity-40 grayscale-[0.5] blur-[2px]">
+<div class="aspect-video w-full">
+<img class="w-full h-full object-cover" data-alt="A top-down professional food photograph of a vibrant Peanut Satay dish with rich, creamy sauce, garnished with fresh cilantro and crushed nuts. The lighting is warm and organic, highlighting textures. The overall aesthetic is gourmet and high-quality, fitting a premium health and wellness app's visual language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1HhsgGeXajqtFVBZGs2GJoF7tmUXvBFQ9aHugcyQVW_j7AtpMFDK1l7ZukljFcaxe5HD2eVroR_OKhc__r-zxP0qnb4JnTdIO-4wXRA-HwoDPov83OHy6THvmt7wbWB5PilagEvdI-kIOXSY5xOtyPeDPp0gJX5X8hBV9dRNQM4h96-P3m6fOUPxn7ks7t2pg88YxRqnyFUFUgv_KHmFm_KNrXVgU3jcxZCwp6TDTc6FIpkvhxgPwBlkNp5Pj1hohjbGHhKu0jf4"/>
+</div>
+<div class="p-container-padding">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-md text-label-md bg-surface-variant text-on-surface-variant px-3 py-1 rounded-full">Asian Fusion</span>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md">4.8</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Spicy Peanut Satay</h3>
+<div class="flex gap-4">
+<span class="font-label-md text-label-md text-on-surface-variant">420 kcal</span>
+<span class="font-label-md text-label-md text-on-surface-variant">High Protein</span>
+</div>
+</div>
+</div>
+<!-- Blocked Overlay -->
+<div class="absolute inset-0 z-10 flex flex-col items-center justify-center p-container-padding text-center">
+<div class="glass-card p-8 rounded-lg shadow-lg border border-white/40 max-w-md animate-in fade-in zoom-in duration-500">
+<div class="w-16 h-16 bg-error rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg shadow-error/30">
+<span class="material-symbols-outlined text-on-error text-[40px]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="inline-block bg-error text-on-error px-4 py-1 rounded-full font-label-md text-label-md mb-4 uppercase tracking-wider">
+                            Blocked
+                        </div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-4">Allergy Detected</h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            This food contains <span class="font-bold text-error">Peanuts</span>, which matches your allergy profile. We have filtered it from your recommendations to ensure your safety.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Action Section -->
+<div class="max-w-md mx-auto w-full text-center flex flex-col gap-gutter">
+<button class="w-full py-4 bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-90 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+                    Update Allergies
+                </button>
+<button class="w-full py-4 bg-transparent text-primary font-label-md text-label-md hover:bg-surface-container transition-colors rounded-full">
+                    Return to Recommendations
+                </button>
+</div>
+<!-- AI Guide Tooltip -->
+<div class="max-w-lg mx-auto w-full p-container-padding rounded-lg bg-gradient-to-br from-tertiary-container/10 to-primary-container/10 border border-primary/10 relative">
+<div class="flex gap-4 items-start">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant italic">
+                            "I'm keeping a close eye on all ingredients. Your safety is my top priority while we build your perfect nutrition plan."
+                        </p>
+</div>
+</div>
+<!-- Tooltip tail -->
+<div class="absolute -top-2 left-12 w-4 h-4 bg-white/50 rotate-45 border-t border-l border-primary/10"></div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple interaction for the button
+        document.querySelector('button').addEventListener('click', function() {
+            this.classList.add('scale-95');
+            setTimeout(() => this.classList.remove('scale-95'), 100);
+        });
+        
+        // Ambient background effect
+        const body = document.body;
+        body.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            body.style.backgroundColor = `rgba(247, 249, 255, 1)`;
+        });
+    </script>
+</body></html>

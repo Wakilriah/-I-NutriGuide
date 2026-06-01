@@ -10,6 +10,24 @@ function getDefaultApiBaseUrl() {
 }
 
 export const API_BASE_URL = getDefaultApiBaseUrl();
+export const DEFAULT_FOOD_IMAGE_PATH = "/media/foods/default.webp";
+
+export function getBackendMediaUrl(path?: string | null) {
+  const rawPath = path || DEFAULT_FOOD_IMAGE_PATH;
+  if (/^https?:\/\//i.test(rawPath)) {
+    return rawPath;
+  }
+  if (!rawPath.startsWith("/")) {
+    return rawPath;
+  }
+
+  try {
+    const apiUrl = new URL(API_BASE_URL);
+    return `${apiUrl.origin}${rawPath}`;
+  } catch {
+    return rawPath;
+  }
+}
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

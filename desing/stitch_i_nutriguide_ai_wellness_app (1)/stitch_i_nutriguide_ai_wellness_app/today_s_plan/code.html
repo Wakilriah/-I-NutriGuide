@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Today's Supplement Plan - I-NutriGuide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;family=Quicksand:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .timeline-line {
+      background: linear-gradient(to bottom, transparent, var(--tw-primary), var(--tw-primary), transparent);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#418340",
+            "primary-container": "#098730",
+            "on-surface-variant": "#3f4a3d",
+            "tertiary-fixed-dim": "#91d78a",
+            "primary-fixed-dim": "#71dd7a",
+            "outline": "#6f7a6c",
+            "on-primary-container": "#f7fff1",
+            "background": "#f7f9ff",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#edf4ff",
+            "surface-container-highest": "#d9e3f1",
+            "on-secondary-fixed-variant": "#643f00",
+            "secondary": "#845400",
+            "on-surface": "#121d26",
+            "inverse-surface": "#27313c",
+            "surface-tint": "#006e24",
+            "surface-variant": "#d9e3f1",
+            "surface": "#f7f9ff",
+            "on-primary-fixed-variant": "#005319",
+            "on-tertiary-container": "#f7fff1",
+            "on-primary-fixed": "#002106",
+            "secondary-container": "#fda611",
+            "on-background": "#121d26",
+            "primary": "#006b23",
+            "surface-bright": "#f7f9ff",
+            "surface-dim": "#d1dbe8",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#ffb95b",
+            "on-tertiary-fixed-variant": "#0c5216",
+            "inverse-primary": "#71dd7a",
+            "inverse-on-surface": "#e8f2ff",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "secondary-fixed": "#ffddb6",
+            "tertiary-fixed": "#acf4a4",
+            "surface-container": "#e4effd",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed": "#002203",
+            "on-primary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "outline-variant": "#becab9",
+            "on-secondary-container": "#684100",
+            "surface-container-high": "#dfe9f7",
+            "tertiary": "#276929",
+            "primary-fixed": "#8dfa94",
+            "on-secondary-fixed": "#2a1800"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "section-gap": "40px",
+            "stack-gap": "16px",
+            "base": "8px",
+            "container-padding": "24px",
+            "gutter": "16px"
+          },
+          "fontFamily": {
+            "body-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Quicksand"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-md": ["Quicksand"],
+            "headline-lg-mobile": ["Quicksand"],
+            "display-lg": ["Quicksand"]
+          },
+          "fontSize": {
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- Top AppBar (from JSON guidance) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-on-primary">
+<img alt="user profile picture" class="w-full h-full object-cover" data-alt="A professional and friendly headshot of a person with a warm smile, set against a soft, clean studio background. The lighting is bright and even, reflecting a high-end wellness and health-conscious aesthetic that aligns with the organic minimalism of the brand's primary green and white palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdHAX7uRRDyYQxHLZwLqCBd8TK5GeS8sYay50VVJpAVsqz-sGlPiDjQv2-AAcvCgA6soZvJmGqEPnNj6qvR0LjHy_x5X1CkPeeNVPZpUUNNy-33BXyxO2O-NgPKEfpHIWV8wy2gLlNuJd0Hj1yPgSSW93PT9ZxP5_iLQbk4_eF8xKnNm33bUgmrq_9LqBRwgnSFljZKM9DHHgBxFdtI4NWJr7r_7IzimxprGwBk1a62P_SNwQwc8GIrJWTKGkmsMX0Ps8QEBYAlzw"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</h1>
+</div>
+<button class="text-on-primary hover:opacity-90 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="mt-20 px-container-padding max-w-screen-xl mx-auto">
+<!-- Date Selector Section -->
+<section class="mb-section-gap pt-4">
+<div class="flex items-center justify-between mb-stack-gap">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary">Supplement Plan</h2>
+<button class="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full text-on-surface-variant font-label-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="calendar_today">calendar_today</span>
+<span>Today, Oct 24</span>
+</button>
+</div>
+<!-- Horizontal Date Scroll (Semantic Mockup) -->
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+<div class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl bg-surface-container-highest text-on-surface-variant">
+<span class="font-label-md text-label-md">Mon</span>
+<span class="font-headline-md text-headline-md">21</span>
+</div>
+<div class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl bg-surface-container-highest text-on-surface-variant">
+<span class="font-label-md text-label-md">Tue</span>
+<span class="font-headline-md text-headline-md">22</span>
+</div>
+<div class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl bg-surface-container-highest text-on-surface-variant border-2 border-primary/20">
+<span class="font-label-md text-label-md">Wed</span>
+<span class="font-headline-md text-headline-md">23</span>
+</div>
+<div class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl bg-primary text-on-primary shadow-lg ring-4 ring-primary/10">
+<span class="font-label-md text-label-md">Thu</span>
+<span class="font-headline-md text-headline-md">24</span>
+</div>
+<div class="flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl bg-surface-container-highest text-on-surface-variant">
+<span class="font-label-md text-label-md">Fri</span>
+<span class="font-headline-md text-headline-md">25</span>
+</div>
+</div>
+</section>
+<!-- Timeline Content -->
+<div class="relative">
+<!-- Vertical Timeline Line -->
+<div class="absolute left-[23px] md:left-[31px] top-4 bottom-4 w-1 timeline-line opacity-30"></div>
+<!-- Time Blocks -->
+<div class="space-y-section-gap relative">
+<!-- 08:00 Block -->
+<div class="flex gap-6 group">
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[24px] md:text-[32px]" data-icon="light_mode">light_mode</span>
+</div>
+<span class="mt-2 font-label-md text-label-md text-primary font-bold">08:00</span>
+</div>
+<div class="flex-1">
+<div class="glass-card p-6 rounded-lg shadow-sm border border-white/40 hover:shadow-md transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-md text-[12px]">MORNING</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Iron</h3>
+</div>
+<p class="text-on-surface-variant font-body-md">Essential for oxygen transport and energy.</p>
+</div>
+<img class="w-20 h-20 object-cover rounded-lg shadow-sm" data-alt="A high-quality, vibrant photograph of high-potency iron supplement capsules placed on a clean, white minimalist wooden surface. The scene is bright and airy, flooded with soft morning sunlight that emphasizes a natural, life-affirming wellness atmosphere. The composition is clean, using a soft mint and white color palette consistent with a premium health guide." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4VzQzBEfBty5YNc8KYz_H66yk6K5gtPkdk2z_FAD4OnsFtcKZgVuaZIc8sVGuk0FzLhLfb1VubU0wzbdumvbmiCXriiBTfXh-Dp6RHsa4p6pwA-QKjd77s9HfptPtQ-03QbVb9TbAtBL51pQOnq2fdDbWeyb-tPz5W3h6sEV8gLHj7HbMe3QF8vZ3kQvjbpKQzIsPaIBXE0j0n7FnkRCL_K_XF2JDphJXl2yvX12Yzjk2Xrbm8hn8O9ULoeryS85W5QJh5ZtZj1Q"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex items-start gap-3 bg-primary/5 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary" data-icon="restaurant">restaurant</span>
+<div>
+<span class="block font-label-md text-primary">Pair with Food</span>
+<span class="text-body-md text-on-surface">Orange or Lentil Salad</span>
+</div>
+</div>
+<div class="flex items-start gap-3 bg-error-container/30 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-error" data-icon="block">block</span>
+<div>
+<span class="block font-label-md text-error">Note</span>
+<span class="text-body-md text-on-surface">Avoid coffee 1 hour before/after.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 13:00 Block -->
+<div class="flex gap-6 group">
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[24px] md:text-[32px]" data-icon="sunny">sunny</span>
+</div>
+<span class="mt-2 font-label-md text-label-md text-secondary font-bold">13:00</span>
+</div>
+<div class="flex-1">
+<div class="glass-card p-6 rounded-lg shadow-sm border border-white/40 hover:shadow-md transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-md text-[12px]">LUNCH</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Vitamin D3</h3>
+</div>
+<p class="text-on-surface-variant font-body-md">Immune support and bone health booster.</p>
+</div>
+<img class="w-20 h-20 object-cover rounded-lg shadow-sm" data-alt="Close-up artistic food photography of a perfectly poached egg and sliced avocado on sourdough, representing a meal rich in healthy fats. The lighting is warm and golden, evocative of midday sunshine. The image feels organic and appetite-inspiring, with vibrant greens and oranges that match the living wellness aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5lxW0EB2k4l5S-dAXBO4nFKJFh--HgVJuqUiYoAuz6Flw-Zq-aevEyI028BDoWIfO5T3rmdYhDV7cYUSk5C-HNKBxTmWBWSDseo6HLfkRudV-0gN0q0xwkmabnke6dsYtrMHHXZ6zPQaWA-IRL6fl66JYcWzayTPjR4TXzM4G3JS9rC9vBpuXfcGpDpCQgyaR9lGqFzOAmw_luMFawlj2KpHHgM-8VPxApagLqz6B_iggm0zBsmjk_yuN0PxQkd5iHLbAapStWSA"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex items-start gap-3 bg-primary/5 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary" data-icon="restaurant">restaurant</span>
+<div>
+<span class="block font-label-md text-primary">Pair with Food</span>
+<span class="text-body-md text-on-surface">Fatty Fish/Eggs</span>
+</div>
+</div>
+<div class="flex items-start gap-3 bg-tertiary-container/10 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-tertiary" data-icon="info">info</span>
+<div>
+<span class="block font-label-md text-tertiary">Note</span>
+<span class="text-body-md text-on-surface">Best taken with a meal containing fat.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 20:00 Block -->
+<div class="flex gap-6 group">
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[24px] md:text-[32px]" data-icon="bedtime">bedtime</span>
+</div>
+<span class="mt-2 font-label-md text-label-md text-tertiary font-bold">20:00</span>
+</div>
+<div class="flex-1">
+<div class="glass-card p-6 rounded-lg shadow-sm border border-white/40 hover:shadow-md transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full font-label-md text-[12px]">EVENING</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Magnesium</h3>
+</div>
+<p class="text-on-surface-variant font-body-md">Promotes muscle recovery and sleep quality.</p>
+</div>
+<img class="w-20 h-20 object-cover rounded-lg shadow-sm" data-alt="A tranquil evening setting featuring a small wooden bowl of almonds and a sliced banana on a soft linen napkin. The lighting is dim and cozy, with deep shadows and soft highlights to create a relaxing, pre-sleep atmosphere. The visual style is calm and sophisticated, emphasizing natural, organic materials and a deep green tonal layering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaq_32en0c0tng68Kk6rZO0oetbTyBWV0fb4_a_ji2Qm1Xd6IfKIHSDMC5Vn2hAuAs1XybpBmohbVgZTPFpGSvyLkjA949dNc4H7PwrJSuulTPbf3gCF7rcL4OiMi-r2j0JxT2O4rnHTL1LikobaCVhgjRmoieMQEKXChpWaYNkWqykXxGPtHa6q1BePn_EfjQ5Dq6NqwAvaLnKJJKZZ-_SFpd8jgXz9C0PkGdf_SdEHQXqawfFW8Ks4OBw6zt-UHh0rsXGbbndZk"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex items-start gap-3 bg-primary/5 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary" data-icon="restaurant">restaurant</span>
+<div>
+<span class="block font-label-md text-primary">Pair with Food</span>
+<span class="text-body-md text-on-surface">Banana or Almonds</span>
+</div>
+</div>
+<div class="flex items-start gap-3 bg-tertiary-container/10 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-tertiary" data-icon="bedtime">bedtime</span>
+<div>
+<span class="block font-label-md text-tertiary">Note</span>
+<span class="text-body-md text-on-surface">Supports relaxation before sleep.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Guide Section (Bento style) -->
+<section class="mt-section-gap mb-stack-gap">
+<div class="bg-gradient-to-br from-primary-container to-tertiary p-6 rounded-lg text-on-primary-container shadow-xl">
+<div class="flex items-center gap-3 mb-4">
+<div class="p-2 bg-white/20 rounded-full">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h4 class="font-headline-md text-headline-md">AI Insights</h4>
+</div>
+<p class="font-body-lg text-body-lg mb-4 opacity-90">"Your consistency with Vitamin D3 has improved by 15% this week. Maintaining this lunch routine ensures optimal absorption alongside your midday healthy fats."</p>
+<button class="bg-on-primary-container text-primary px-6 py-2 rounded-full font-label-md hover:bg-white transition-colors">Adjust Schedule</button>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (from JSON guidance) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg md:max-w-md md:left-1/2 md:-translate-x-1/2">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</button>
+<!-- Active State: Supps -->
+<button class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="pill" style="font-variation-settings: 'FILL' 1;">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</button>
+</nav>
+<!-- Interaction Logic -->
+<script>
+    // Micro-interaction: Scale cards on scroll entrance
+    const observerOptions = {
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('opacity-100', 'translate-y-0');
+          entry.target.classList.remove('opacity-0', 'translate-y-8');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.glass-card').forEach(card => {
+      card.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-8');
+      observer.observe(card);
+    });
+  </script>
+</body></html>

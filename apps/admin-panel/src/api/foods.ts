@@ -1,4 +1,6 @@
-import { apiClient } from "./client";
+import { API_BASE_URL, apiClient } from "./client";
+
+export const DEFAULT_FOOD_IMAGE_PATH = "/media/foods/default.webp";
 
 export type FoodNutrient = {
   name: string;
@@ -20,6 +22,15 @@ export type Food = {
   source: string;
   serving_size_g: string;
   image_url: string;
+  image_path: string;
+  image_alt: string;
+  recommended_for_supplements: string[];
+  nutrient_tags: string[];
+  synergy_reason: string;
+  avoid_or_caution: string;
+  allergen_tags: string[];
+  diet_tags: string[];
+  association_rule_items: string[];
   is_active: boolean;
   nutrients: FoodNutrient[];
   created_at: string;
@@ -40,6 +51,8 @@ export type FoodListParams = {
   search?: string;
   category?: string;
   source?: string;
+  recommended_for_supplements?: string;
+  allergen_tags?: string;
   is_active?: "true" | "false";
   page?: number;
   page_size?: number;
@@ -60,6 +73,15 @@ export type FoodPayload = {
   source?: string;
   serving_size_g?: string;
   image_url: string;
+  image_path: string;
+  image_alt: string;
+  recommended_for_supplements: string[];
+  nutrient_tags: string[];
+  synergy_reason: string;
+  avoid_or_caution: string;
+  allergen_tags: string[];
+  diet_tags: string[];
+  association_rule_items: string[];
   is_active: boolean;
   nutrient_items: Array<{
     nutrient_slug: string;
@@ -97,4 +119,20 @@ export async function updateFood(slug: string, payload: FoodPayload) {
 
 export async function deleteFood(slug: string) {
   await apiClient.delete(`/foods/${slug}/`);
+}
+
+export function resolveFoodImageUrl(imagePath?: string | null, legacyImageUrl?: string | null) {
+  const rawPath = imagePath || legacyImageUrl || DEFAULT_FOOD_IMAGE_PATH;
+  if (/^https?:\/\//i.test(rawPath)) {
+    return rawPath;
+  }
+  if (!rawPath.startsWith("/")) {
+    return rawPath;
+  }
+  try {
+    const apiUrl = new URL(API_BASE_URL, window.location.origin);
+    return `${apiUrl.origin}${rawPath}`;
+  } catch {
+    return rawPath;
+  }
 }

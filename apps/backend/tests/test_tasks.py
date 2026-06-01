@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from django.contrib.auth import get_user_model
 from apps.accounts.models import DailyTracking, UserProfile
-from apps.accounts.tasks import remind_users_to_track_nutrition
+from apps.accounts.tasks import _matches_supplement_time, remind_users_to_track_nutrition
 
 User = get_user_model()
 
@@ -88,3 +88,15 @@ def test_skips_users_no_token(mock_publish, test_user_ny):
     
     assert "Sent reminders to 0 users" in result
     mock_publish.assert_not_called()
+
+
+def test_supplement_time_matches_exact_hour_and_minute():
+    local_time = datetime(2024, 1, 1, 8, 30, tzinfo=ZoneInfo("UTC"))
+
+    assert _matches_supplement_time("08:30", local_time)
+    assert not _matches_supplement_time("08:00", local_time)
+
+
+def test_named_supplement_time_matches_on_the_hour_only():
+    assert _matches_supplement_time("morning", datetime(2024, 1, 1, 8, 0, tzinfo=ZoneInfo("UTC")))
+    assert not _matches_supplement_time("morning", datetime(2024, 1, 1, 8, 30, tzinfo=ZoneInfo("UTC")))

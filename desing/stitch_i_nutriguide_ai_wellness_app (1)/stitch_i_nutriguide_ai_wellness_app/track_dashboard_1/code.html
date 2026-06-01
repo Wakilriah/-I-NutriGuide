@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#71dd7a",
+                    "surface-container-high": "#e5e8ee",
+                    "inverse-on-surface": "#eef1f6",
+                    "on-secondary-fixed-variant": "#643f00",
+                    "outline-variant": "#becab9",
+                    "on-background": "#181c20",
+                    "on-primary-container": "#f7fff1",
+                    "secondary-fixed": "#ffddb6",
+                    "primary-container": "#098730",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#b6cbc5",
+                    "tertiary-container": "#657973",
+                    "on-surface": "#181c20",
+                    "surface": "#f7f9ff",
+                    "surface-dim": "#d7dadf",
+                    "on-secondary-fixed": "#2a1800",
+                    "surface-container-highest": "#e0e3e8",
+                    "secondary": "#845400",
+                    "on-tertiary-fixed": "#0c1f1b",
+                    "primary": "#006b23",
+                    "surface-container-low": "#f1f4f9",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#684100",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#ebeef3",
+                    "surface-variant": "#e0e3e8",
+                    "tertiary": "#4c605b",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#8dfa94",
+                    "on-tertiary-container": "#f4fffa",
+                    "primary-fixed-dim": "#71dd7a",
+                    "secondary-fixed-dim": "#ffb95b",
+                    "background": "#f7f9ff",
+                    "outline": "#6f7a6c",
+                    "surface-bright": "#f7f9ff",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#005319",
+                    "on-surface-variant": "#3f4a3d",
+                    "secondary-container": "#fda611",
+                    "on-tertiary-fixed-variant": "#374b46",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#2d3135",
+                    "on-primary-fixed": "#002106",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#d1e7e0",
+                    "surface-tint": "#006e24",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "gutter": "16px",
+                    "container-margin": "20px",
+                    "base": "4px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Quicksand"],
+                    "headline-md": ["Quicksand"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Quicksand"],
+                    "display-lg": ["Quicksand"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #F4FCE3; /* Surface Level 0 as per guidance */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .bento-card {
+            background-color: #ffffff;
+            box-shadow: 0px 4px 20px rgba(47, 158, 68, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- Top Navigation -->
+<header class="w-full top-0 sticky z-40 bg-surface dark:bg-surface-dim shadow-sm flex justify-between items-center px-container-margin h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional and friendly portrait of a young man with a warm smile, set against a clean, softly lit studio background with hints of sage green. The lighting is soft and flattering, creating a premium wellness aesthetic that feels approachable yet high-end. The overall mood is optimistic and healthy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQSGzqYUilm55xhB9PGZeahu5HYE7s9Gdu0KWprBoBRBbB1gn4TgbS759cEF4EQTnki5zsd1UneWqcgmsfJ3f4cTUnfaFGAil0-XbUtf_Lj_dMBkX9EUYb6nbDOXHhq74ygX_um5bHtCUVCg_p1jD8jkPTFsXa4Co4_v0xjhCQkwPEm1ARwMVXJxmGGfGa0ZGZ961Lm_mlLAbklSQCzN6Y8z_XHL91YXir6ncRAA51ZyCdMJ_2GM8oLSiItQPpuWRpAKa_uMAXGvk"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">I-NutriGuide</h1>
+</div>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="px-container-margin pt-gutter pb-32 max-w-[1200px] mx-auto">
+<!-- Welcome Summary -->
+<section class="mb-lg">
+<div class="bento-card rounded-xl p-md flex flex-col md:flex-row md:items-center justify-between gap-md border border-primary-fixed/20">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Today Summary</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        You have <span class="text-primary font-bold">750 kcal</span> remaining today. You are close to your protein goal.
+                    </p>
+</div>
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[16px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[16px]" data-icon="local_fire_department">local_fire_department</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Progress -->
+<div class="grid grid-cols-4 md:grid-cols-12 gap-gutter">
+<!-- Calories Circular Card -->
+<div class="col-span-4 md:col-span-4 bento-card rounded-xl p-md flex flex-col items-center text-center relative overflow-hidden">
+<span class="font-label-md text-label-md text-on-surface-variant self-start">Calories</span>
+<div class="relative w-36 h-36 my-md">
+<svg class="w-full h-full">
+<circle class="text-primary/10" cx="72" cy="72" fill="transparent" r="58" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary progress-ring-circle" cx="72" cy="72" fill="transparent" r="58" stroke="currentColor" stroke-linecap="round" stroke-width="12" style="stroke-dasharray: 364.42; stroke-dashoffset: 123.9;"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-md text-headline-md text-on-surface">1,450</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 2,200</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="restaurant">restaurant</span>
+<span class="font-label-md text-label-md">66% of goal</span>
+</div>
+</div>
+<!-- Steps Circular Card -->
+<div class="col-span-4 md:col-span-4 bento-card rounded-xl p-md flex flex-col items-center text-center">
+<span class="font-label-md text-label-md text-on-surface-variant self-start">Steps</span>
+<div class="relative w-36 h-36 my-md">
+<svg class="w-full h-full">
+<circle class="text-secondary/10" cx="72" cy="72" fill="transparent" r="58" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-secondary progress-ring-circle" cx="72" cy="72" fill="transparent" r="58" stroke="currentColor" stroke-linecap="round" stroke-width="12" style="stroke-dasharray: 364.42; stroke-dashoffset: 130.46;"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-md text-headline-md text-on-surface">6,420</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 10,000</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="footprint">footprint</span>
+<span class="font-label-md text-label-md">Active day</span>
+</div>
+</div>
+<!-- Water Tracking Card -->
+<div class="col-span-4 md:col-span-4 bento-card rounded-xl p-md flex flex-col">
+<div class="flex justify-between items-center mb-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Water Intake</span>
+<span class="font-headline-md text-headline-md text-primary">1.6 <span class="text-label-md font-normal text-on-surface-variant">/ 2.5 L</span></span>
+</div>
+<div class="flex-1 flex items-end gap-2 h-32">
+<!-- Visual Water Bars -->
+<div class="w-full bg-primary/20 h-3/4 rounded-t-lg transition-all hover:bg-primary/40"></div>
+<div class="w-full bg-primary/20 h-1/2 rounded-t-lg transition-all hover:bg-primary/40"></div>
+<div class="w-full bg-primary/20 h-full rounded-t-lg transition-all hover:bg-primary/40"></div>
+<div class="w-full bg-primary/20 h-2/3 rounded-t-lg transition-all hover:bg-primary/40"></div>
+<div class="w-full bg-primary h-[64%] rounded-t-lg shadow-lg"></div>
+<div class="w-full bg-surface-container h-1/4 rounded-t-lg"></div>
+<div class="w-full bg-surface-container h-1/4 rounded-t-lg"></div>
+</div>
+<button class="mt-md w-full py-2 rounded-full bg-primary-container text-on-primary-container font-label-md active:scale-95 transition-all">
+                    + Add Glass
+                </button>
+</div>
+<!-- Macros Card (Full Width in Bento) -->
+<div class="col-span-4 md:col-span-12 bento-card rounded-xl p-md">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-md">Macros Breakdown</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<!-- Protein -->
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md">Protein</span>
+<span class="font-label-md text-label-md">95 / 140g</span>
+</div>
+<div class="h-3 w-full bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 67%;"></div>
+</div>
+</div>
+<!-- Carbs -->
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md">Carbs</span>
+<span class="font-label-md text-label-md">180 / 250g</span>
+</div>
+<div class="h-3 w-full bg-secondary-container/20 rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 72%;"></div>
+</div>
+</div>
+<!-- Fat -->
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md">Fat</span>
+<span class="font-label-md text-label-md">55 / 75g</span>
+</div>
+<div class="h-3 w-full bg-on-surface-variant/10 rounded-full overflow-hidden">
+<div class="h-full bg-on-surface-variant rounded-full" style="width: 73%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Log Activity (Desktop Layout Element) -->
+<div class="col-span-4 md:col-span-8 bento-card rounded-xl p-md flex items-center justify-between overflow-hidden relative min-h-[160px]">
+<div class="relative z-10">
+<h3 class="font-headline-md text-headline-md mb-xs">Evening Workout?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md max-w-xs">Logging your exercise helps refine your daily calorie budget.</p>
+<button class="bg-primary text-on-primary px-lg py-2 rounded-full font-label-md hover:opacity-90 transition-all">Log Activity</button>
+</div>
+<div class="absolute right-0 top-0 h-full w-1/3 md:w-1/2 opacity-20 pointer-events-none">
+<img alt="Fitness Training" class="w-full h-full object-cover" data-alt="A cinematic, high-contrast shot of fitness equipment in a modern, sun-drenched minimalist gym. The scene features light mint-colored weights and a clean wooden floor, bathed in warm, soft afternoon sunlight. The mood is tranquil and inspiring, evoking a premium wellness lifestyle with a focused, energetic atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWVtpCaLjCP49RfCQU77aIvwtplssGrIvkp6aR6lrgrCAKkFYwpTzCTSS8Y_FcpyHicH_AdfkuAwgEMJkdotdwB4w2jkO9nmUuEKO6ckNKuhZeqr-qttvaaKXSytYbDAz4H14rIAr825-Qtm16cX0l-5thnH2mObx3KMECI4C4dm9-nuaEruZAp4B4xvjNmMbJVGZjrx1DFFfKLWoeqIIHjLu9eLBQ-6fF98SWl1kb7reJhSMmzr9CXEzya6kjZ1CGvIoBS02qQTU"/>
+</div>
+</div>
+<!-- Health Insights -->
+<div class="col-span-4 md:col-span-4 bento-card rounded-xl p-md bg-tertiary-fixed/30 flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Insight</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Your step count is 15% higher than last Tuesday. Great consistency!</p>
+<div class="mt-auto pt-sm border-t border-tertiary-container/10">
+<button class="text-tertiary font-label-md hover:underline">View Trends</button>
+</div>
+</div>
+</div>
+</main>
+<!-- AI Chat FAB -->
+<button class="fixed bottom-24 right-container-margin w-14 h-14 bg-primary text-on-primary rounded-full shadow-[0px_8px_24px_rgba(0,0,0,0.12)] z-50 flex items-center justify-center active:scale-95 transition-all hover:scale-105">
+<span class="material-symbols-outlined text-[28px]" data-icon="smart_toy">smart_toy</span>
+</button>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md border-t border-outline-variant/30 shadow-[0px_-4px_20px_rgba(47,158,68,0.08)] rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 font-label-sm text-label-sm transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span>Track</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span>Recs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span>Supps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>Profile</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction for water tracking or FAB
+        document.querySelector('.active\\:scale-95').addEventListener('click', function() {
+            // Placeholder for interactivity
+        });
+
+        // Optional: Animate progress bars on load
+        window.addEventListener('load', () => {
+            const rings = document.querySelectorAll('.progress-ring-circle');
+            rings.forEach(ring => {
+                const radius = ring.r.baseVal.value;
+                const circumference = radius * 2 * Math.PI;
+                // Animation logic handled via CSS transition and initial inline style offsets
+            });
+        });
+    </script>
+</body></html>

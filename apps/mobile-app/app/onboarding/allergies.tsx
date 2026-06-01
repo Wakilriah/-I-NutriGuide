@@ -2,40 +2,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { 
-  View, 
-  Text, 
-  Card, 
-  Button, 
-  Colors, 
-} from "react-native-ui-lib";
+import { Text, View } from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
-import { AnimatedSection, PageHeader, ProgressSteps, FilterChip } from "../../src/components/ui";
+import { AppButton, AppCard, FilterChip, OnboardingShell, SafetyAlertCard } from "../../src/components/ui";
 import { getProfile, parseCommaList, updateProfile } from "../../src/features/profile/api";
-import { spacing } from "../../src/theme/design";
+import { colors, spacing, typography } from "../../src/theme/design";
 
-const allergyOptions = [
-  { icon: "alert-circle" as const, label: "Peanuts", value: "peanuts" },
-  { icon: "alert-circle" as const, label: "Tree nuts", value: "tree_nuts" },
-  { icon: "alert-circle" as const, label: "Milk", value: "milk" },
-  { icon: "alert-circle" as const, label: "Eggs", value: "eggs" },
-  { icon: "alert-circle" as const, label: "Shellfish", value: "shellfish" },
-  { icon: "alert-circle" as const, label: "Fish", value: "fish" },
-  { icon: "alert-circle" as const, label: "Soy", value: "soy" },
-  { icon: "alert-circle" as const, label: "Wheat", value: "wheat" },
-  { icon: "alert-circle" as const, label: "Gluten", value: "gluten" },
-  { icon: "alert-circle" as const, label: "Sesame", value: "sesame" },
-];
-
-const restrictionOptions = [
-  { icon: "leaf" as const, label: "Vegetarian", value: "vegetarian" },
-  { icon: "water" as const, label: "Vegan", value: "vegan" },
-  { icon: "fish" as const, label: "Pescatarian", value: "pescatarian" },
-  { icon: "shield-checkmark" as const, label: "Halal", value: "halal" },
-  { icon: "restaurant" as const, label: "Gluten free", value: "gluten_free" },
-  { icon: "cafe" as const, label: "Lactose free", value: "lactose_free" },
-];
+const allergyOptions = ["peanuts", "tree_nuts", "milk", "eggs", "shellfish", "fish", "soy", "wheat", "gluten", "sesame"];
+const restrictionOptions = ["vegetarian", "vegan", "pescatarian", "halal", "gluten_free", "lactose_free"];
 
 const schema = z.object({
   allergies: z.string(),
@@ -43,6 +18,10 @@ const schema = z.object({
 });
 
 type AllergyValues = z.infer<typeof schema>;
+
+function label(value: string) {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
 
 export default function AllergyOnboardingScreen() {
   const {
@@ -59,24 +38,20 @@ export default function AllergyOnboardingScreen() {
 
   useEffect(() => {
     let mounted = true;
-
     async function loadProfile() {
       try {
         const profile = await getProfile();
-        if (!mounted) {
-          return;
+        if (mounted) {
+          reset({
+            allergies: profile.allergies.join(", "),
+            dietary_restrictions: profile.dietary_restrictions.join(", "),
+          });
         }
-        reset({
-          allergies: profile.allergies.join(", "),
-          dietary_restrictions: profile.dietary_restrictions.join(", "),
-        });
       } catch {
         // Empty defaults are fine for first-time onboarding.
       }
     }
-
     void loadProfile();
-
     return () => {
       mounted = false;
     };
@@ -104,55 +79,29 @@ export default function AllergyOnboardingScreen() {
   });
 
   return (
-    <Screen>
-      <View padding-24 gap-24>
-        <ProgressSteps current={2} total={4} />
-        
-        <AnimatedSection>
-          <PageHeader eyebrow="Step 2 of 4" title="Dietary Filters" subtitle="We'll use these to ensure your recommendations are safe and relevant." />
-        </AnimatedSection>
+    <Screen contentStyle={{ paddingBottom: 48 }} showAiAssistant={false}>
+      <OnboardingShell current={2} subtitle="These filters help keep recommendations relevant and avoid foods you should not eat." title="Any allergies or dietary preferences?">
+        <AppCard style={{ gap: spacing.md, backgroundColor: colors.cream }}>
+          <Text style={typography.section}>Allergies</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
+            {allergyOptions.map((value) => (
+              <FilterChip active={selectedAllergies.includes(value)} icon="alert-circle" key={value} label={label(value)} onPress={() => toggle("allergies", value, 8)} />
+            ))}
+          </View>
+        </AppCard>
 
-        <AnimatedSection delay={80}>
-          <Card padding-24 gap-24>
-            <View gap-8>
-              <Text label small>Allergies</Text>
-              <View row style={{ flexWrap: "wrap", gap: 8 }}>
-                {allergyOptions.map(opt => (
-                  <FilterChip 
-                    key={opt.value} 
-                    label={opt.label} 
-                    active={selectedAllergies.includes(opt.value)} 
-                    onPress={() => toggle("allergies", opt.value, 8)} 
-                  />
-                ))}
-              </View>
-            </View>
+        <AppCard style={{ gap: spacing.md }}>
+          <Text style={typography.section}>Diet style</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
+            {restrictionOptions.map((value) => (
+              <FilterChip active={selectedRestrictions.includes(value)} icon="leaf" key={value} label={label(value)} onPress={() => toggle("dietary_restrictions", value, 6)} />
+            ))}
+          </View>
+        </AppCard>
 
-            <View gap-8>
-              <Text label small>Dietary Preferences</Text>
-              <View row style={{ flexWrap: "wrap", gap: 8 }}>
-                {restrictionOptions.map(opt => (
-                  <FilterChip 
-                    key={opt.value} 
-                    label={opt.label} 
-                    active={selectedRestrictions.includes(opt.value)} 
-                    onPress={() => toggle("dietary_restrictions", opt.value, 6)} 
-                  />
-                ))}
-              </View>
-            </View>
-
-            {errors.allergies && <Text small color={Colors.error}>{errors.allergies.message}</Text>}
-            
-            <Button 
-              label={isSubmitting ? "Saving..." : "Continue"} 
-              disabled={isSubmitting} 
-              onPress={onSubmit} 
-              size={Button.sizes.large}
-            />
-          </Card>
-        </AnimatedSection>
-      </View>
+        {errors.allergies?.message ? <SafetyAlertCard message={errors.allergies.message} tone="danger" /> : null}
+        <AppButton accessibilityLabel="Save allergy filters" disabled={isSubmitting} icon="arrow-forward" label={isSubmitting ? "Saving..." : "Next"} onPress={onSubmit} />
+      </OnboardingShell>
     </Screen>
   );
 }

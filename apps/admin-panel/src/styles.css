@@ -470,6 +470,14 @@ p {
   margin: 0;
 }
 
+.page-heading-copy {
+  max-width: 760px;
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .status-pill {
   padding: 7px 11px;
   border-radius: 999px;
@@ -488,6 +496,14 @@ p {
   display: grid;
   grid-template-columns: repeat(5, minmax(140px, 1fr));
   gap: 14px;
+}
+
+.metric-grid.compact-metric-grid {
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.metric-grid.dashboard-metric-grid {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
 }
 
 .metric-card,
@@ -679,9 +695,19 @@ p {
 
 .food-filter-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   align-items: end;
+}
+
+.food-thumb {
+  width: 58px;
+  height: 44px;
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-soft);
+  object-fit: cover;
 }
 
 .food-filter-grid label,
@@ -1085,6 +1111,61 @@ p {
   color: var(--color-primary-dark);
 }
 
+.food-signal-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.food-signal-list li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgb(248 252 247 / 94%), rgb(255 250 241 / 92%));
+}
+
+.food-signal-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.food-signal-copy {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.food-signal-copy > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.food-signal-copy strong {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.food-signal-copy span {
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
 .empty-line,
 .empty-state p {
   margin: 0;
@@ -1154,6 +1235,10 @@ p {
   gap: 12px;
 }
 
+.compact-card-list-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
 .summary-card {
   display: grid;
   gap: 12px;
@@ -1174,6 +1259,23 @@ p {
   color: var(--color-muted);
   font-size: 0.86rem;
   line-height: 1.45;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tag-list a {
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.tag-list a:hover {
+  text-decoration: underline;
 }
 
 .users-panel {

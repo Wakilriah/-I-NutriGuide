@@ -21,6 +21,22 @@ export type DashboardMetrics = {
   total_saved_foods: number;
   total_association_rules: number;
   active_association_rules: number;
+  total_supplement_categories: number;
+  active_supplement_categories: number;
+  total_supplement_normalizations: number;
+  active_supplement_normalizations: number;
+  total_synergy_seed_rules: number;
+  active_synergy_seed_rules: number;
+  total_safety_constraints: number;
+  active_safety_constraints: number;
+  total_mined_association_rules: number;
+  active_mined_association_rules: number;
+  total_association_transactions: number;
+  total_association_transaction_items: number;
+  total_nutrient_interactions: number;
+  active_nutrient_interactions: number;
+  average_mined_confidence: number;
+  average_mined_lift: number;
   recommendation_items_with_rules: number;
   average_rule_score: number;
   most_used_supplements: Array<{ supplement__name: string; supplement__slug: string; count: number }>;
@@ -29,6 +45,9 @@ export type DashboardMetrics = {
   food_category_counts: Array<{ category__name: string; category__slug: string; count: number }>;
   food_source_counts: Array<{ source: string; count: number }>;
   rule_usage: Array<{ rule_id: number | null; label: string; count: number }>;
+  synergy_rule_category_counts: Array<{ supplement_category_name: string; count: number }>;
+  mined_rule_source_counts: Array<{ source: string; count: number }>;
+  safety_constraint_type_counts: Array<{ constraint_type: string; count: number }>;
 };
 
 export async function fetchDashboardMetrics() {

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide - Food Recommendation Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Quicksand:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+    }
+    .score-ring {
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen pb-24">
+<!-- TopAppBar from JSON -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-on-primary">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up professional headshot of a smiling young adult with diverse features, set against a soft-focus garden background. The lighting is warm and natural, following a bright light-mode aesthetic with soft greens and vibrant whites. The person exudes a sense of health and well-being, aligning with a modern organic minimalism brand identity." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</span>
+</div>
+<button class="material-symbols-outlined text-on-primary hover:opacity-90 transition-opacity active:scale-95 transition-transform" data-icon="notifications">notifications</button>
+</header>
+<main class="mt-16 max-w-[1200px] mx-auto">
+<!-- Hero Image Section -->
+<section class="relative h-[350px] w-full md:rounded-b-lg overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A vibrant and appetizing Kale and Quinoa salad presented in a handcrafted ceramic bowl. The salad features deep green kale leaves, fluffy golden quinoa, bright red pomegranate seeds, and toasted almonds, all lightly drizzled with a lemon vinaigrette. The lighting is high-key and soft, captured in a bright airy studio setting that emphasizes the fresh, organic textures of the ingredients. The composition is clean and minimalist, reinforcing a living wellness philosophy." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-container-padding">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary text-on-primary text-label-md font-label-md px-3 py-1 rounded-full">Top Recommendation</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white">Kale &amp; Quinoa Salad</h1>
+</div>
+<button class="absolute top-4 left-4 w-10 h-10 rounded-full glass-effect flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="history.back()">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+</section>
+<!-- Main Content Canvas -->
+<div class="px-container-padding -mt-8 relative z-10">
+<!-- Match Score & Core Recommendation Card -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm flex flex-col md:flex-row items-center gap-8 border border-outline-variant/30">
+<!-- Circular Progress Ring -->
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary score-ring" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="14.5" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display-lg text-display-lg text-primary leading-none">96</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Match</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Recommended for your Iron supplement</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+            Kale is rich in non-heme iron and vitamin K, while the added lemon juice provides Vitamin C to boost your iron absorption by <span class="text-primary font-bold">up to 3x</span>.
+          </p>
+<!-- Reason Chips -->
+<div class="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">bolt</span> Rich in Iron
+            </span>
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">eco</span> Supports Absorption
+            </span>
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">check_circle</span> Matches Diet
+            </span>
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">verified_user</span> Safe for You
+            </span>
+</div>
+</div>
+</div>
+<!-- Bento-style Breakdown Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap mt-section-gap">
+<!-- Score Breakdown Section -->
+<div class="bg-surface-container rounded-lg p-6 flex flex-col gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Score Breakdown</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Content Score</span>
+<span class="font-label-md text-label-md text-primary">98%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 98%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Association Rule</span>
+<span class="font-label-md text-label-md text-primary">92%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Safety Score</span>
+<span class="font-label-md text-label-md text-primary">100%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Warning Section -->
+<div class="bg-secondary-fixed/20 border border-secondary-fixed/50 rounded-lg p-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1">info</span>
+<h3 class="font-headline-md text-headline-md text-secondary">Dietary Notes</h3>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-2"></span>
+<p class="font-body-md text-body-md text-on-surface-variant">Avoid adding excessive salt to keep sodium levels within your tracked limit for today.</p>
+</div>
+<div class="flex gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-2"></span>
+<p class="font-body-md text-body-md text-on-surface-variant">If using canned quinoa, rinse thoroughly to reduce phytic acid, which can hinder iron uptake.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Alternatives Section -->
+<section class="mt-section-gap mb-12">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4 px-2">Similar Alternatives</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A bright green spinach and fruit smoothie in a tall glass, garnished with a slice of fresh orange. The background is a clean, sunlit kitchen counter with soft bokeh. The overall aesthetic is vibrant and healthy, featuring organic tones of emerald green and citrus orange." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Spinach Smoothie</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">92% Match</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A comforting bowl of hearty lentil soup with carrots and fresh herbs, steam gently rising. The lighting is warm and inviting, emphasizing the earthy textures of the legumes. The background is a dark wooden table with a sprig of fresh parsley, creating a grounded, nourishing feel." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Lentil Stew</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">89% Match</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Crispy roasted chickpeas seasoned with smoked paprika and sea salt, displayed in a small wooden bowl. The close-up shot highlights the crunchy texture and vibrant spices under bright, directional morning sunlight. The scene is minimalist and focused on healthy, plant-based snacking." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Spiced Chickpeas</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">85% Match</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A vibrant beet and goat cheese salad with walnuts on a minimalist white plate. The deep ruby reds of the beets contrast beautifully with the creamy white cheese. The aesthetic is sophisticated and clean, using natural lighting to showcase the organic colors of the fresh vegetables." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Beetroot Power</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">82% Match</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Button Container -->
+<div class="fixed bottom-24 left-0 w-full px-container-padding flex justify-center pointer-events-none">
+<button class="pointer-events-auto bg-secondary-container text-on-secondary-container px-12 py-4 rounded-full font-headline-md text-headline-md shadow-lg flex items-center gap-3 hover:opacity-95 active:scale-95 transition-all transform hover:-translate-y-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">bookmark</span>
+          Save to My Foods
+        </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar from JSON -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="restaurant" style="font-variation-settings: 'FILL' 1">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<script>
+    // Minimal interaction script for visual polish
+    document.addEventListener('DOMContentLoaded', () => {
+      // Small reveal animation for cards
+      const elements = document.querySelectorAll('.bg-surface-container-low, .bg-surface-container, .bg-secondary-fixed\\/20');
+      elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.5s ease-out';
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, 100 * index);
+      });
+    });
+  </script>
+</body>
+</html><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<body></body>

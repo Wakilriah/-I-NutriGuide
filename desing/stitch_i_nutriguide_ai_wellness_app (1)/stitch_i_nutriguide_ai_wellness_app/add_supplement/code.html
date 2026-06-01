@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "tertiary-container": "#418340",
+                  "primary-container": "#098730",
+                  "on-surface-variant": "#3f4a3d",
+                  "tertiary-fixed-dim": "#91d78a",
+                  "primary-fixed-dim": "#71dd7a",
+                  "outline": "#6f7a6c",
+                  "on-primary-container": "#f7fff1",
+                  "background": "#f7f9ff",
+                  "error-container": "#ffdad6",
+                  "surface-container-low": "#edf4ff",
+                  "surface-container-highest": "#d9e3f1",
+                  "on-secondary-fixed-variant": "#643f00",
+                  "secondary": "#845400",
+                  "on-surface": "#121d26",
+                  "inverse-surface": "#27313c",
+                  "surface-tint": "#006e24",
+                  "surface-variant": "#d9e3f1",
+                  "surface": "#f7f9ff",
+                  "on-primary-fixed-variant": "#005319",
+                  "on-tertiary-container": "#f7fff1",
+                  "on-primary-fixed": "#002106",
+                  "secondary-container": "#fda611",
+                  "on-background": "#121d26",
+                  "primary": "#006b23",
+                  "surface-bright": "#f7f9ff",
+                  "surface-dim": "#d1dbe8",
+                  "on-error-container": "#93000a",
+                  "secondary-fixed-dim": "#ffb95b",
+                  "on-tertiary-fixed-variant": "#0c5216",
+                  "inverse-primary": "#71dd7a",
+                  "inverse-on-surface": "#e8f2ff",
+                  "surface-container-lowest": "#ffffff",
+                  "error": "#ba1a1a",
+                  "on-error": "#ffffff",
+                  "secondary-fixed": "#ffddb6",
+                  "tertiary-fixed": "#acf4a4",
+                  "surface-container": "#e4effd",
+                  "on-tertiary": "#ffffff",
+                  "on-tertiary-fixed": "#002203",
+                  "on-primary": "#ffffff",
+                  "on-secondary": "#ffffff",
+                  "outline-variant": "#becab9",
+                  "on-secondary-container": "#684100",
+                  "surface-container-high": "#dfe9f7",
+                  "tertiary": "#276929",
+                  "primary-fixed": "#8dfa94",
+                  "on-secondary-fixed": "#2a1800"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "section-gap": "40px",
+                  "stack-gap": "16px",
+                  "base": "8px",
+                  "container-padding": "24px",
+                  "gutter": "16px"
+          },
+          "fontFamily": {
+                  "body-md": ["Plus Jakarta Sans"],
+                  "body-lg": ["Plus Jakarta Sans"],
+                  "headline-lg": ["Quicksand"],
+                  "label-md": ["Plus Jakarta Sans"],
+                  "headline-md": ["Quicksand"],
+                  "headline-lg-mobile": ["Quicksand"],
+                  "display-lg": ["Quicksand"]
+          },
+          "fontSize": {
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                  "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #f7f9ff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 107, 35, 0.2);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background min-h-screen pb-24">
+<!-- Top AppBar (Transactional Variant - Back Button) -->
+<header class="fixed top-0 w-full z-50 flex items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<button aria-label="Go back" class="mr-4 p-2 rounded-full hover:bg-white/20 transition-colors">
+<span class="material-symbols-outlined text-on-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">Add New Supplement</h1>
+</header>
+<main class="pt-24 px-container-padding max-w-[1200px] mx-auto">
+<!-- Hero Image / Visual Anchor -->
+<div class="mb-section-gap">
+<div class="relative w-full h-48 md:h-64 rounded-lg overflow-hidden shadow-sm">
+<img alt="" class="w-full h-full object-cover" data-alt="A clean, minimalist lifestyle photograph of clear glass vitamins jars sitting on a marble surface. The lighting is soft and natural, coming from a side window, highlighting the organic textures and warm beige tones of the setting. Soft mint green leaves are visible in the background, creating a calm, wellness-focused atmosphere that aligns with a high-end health application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuRWlrQvd1nxTDVTvHUS0UNP08pQnEBbgtts8Uoil9W_WBcq-N4HwoEurDdwpeHzIS8hrps4Z6PCmDWPatDqoCwTXgEqJLw6EVVTRPoLN9jGV-Owp2SgJauNHtPni1bEFgLL4HpizcTOhLrOGYzggTEjSp6ulWxhs76_FOiZCkVoVrjc3h38fuDlIZiddKSgj-IuURc6vcXy9g9TUOtq0tnVCruu2fcVdVJdSS0SLKhNf1fKpuvJQvclA_mvlFxYbtdroTD7siU7Q"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+<div class="absolute bottom-6 left-6">
+<p class="font-label-md text-label-md text-white/90 uppercase tracking-widest mb-1">Personalize Your Routine</p>
+<h2 class="font-headline-md text-headline-md text-white">Supplement Details</h2>
+</div>
+</div>
+</div>
+<!-- Form Section -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-section-gap">
+<div class="md:col-span-8 bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-surface-variant/50">
+<form class="space-y-stack-gap">
+<!-- Supplement Name -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block ml-1" for="supp-name">Supplement Name</label>
+<input class="w-full h-14 px-4 bg-surface rounded-lg border-none text-on-surface font-body-md placeholder:text-outline/60 focus:ring-2 focus:ring-primary transition-all" id="supp-name" placeholder="e.g. Magnesium Citrate" type="text"/>
+</div>
+<!-- Dose & Frequency Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block ml-1" for="supp-dose">Dose (Optional)</label>
+<input class="w-full h-14 px-4 bg-surface rounded-lg border-none text-on-surface font-body-md placeholder:text-outline/60 focus:ring-2 focus:ring-primary" id="supp-dose" placeholder="e.g. 200mg" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block ml-1" for="supp-freq">Frequency</label>
+<div class="relative">
+<select class="w-full h-14 px-4 bg-surface rounded-lg border-none text-on-surface font-body-md appearance-none focus:ring-2 focus:ring-primary" id="supp-freq">
+<option value="daily">Daily</option>
+<option value="weekly">Weekly</option>
+<option value="alternate">Alternate Days</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-4 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Time of Day Selector -->
+<div class="space-y-3 pt-2">
+<label class="font-label-md text-label-md text-on-surface-variant block ml-1">Time of day</label>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+<!-- Morning -->
+<label class="cursor-pointer group">
+<input class="hidden peer" type="checkbox"/>
+<div class="flex flex-col items-center justify-center p-4 rounded-lg bg-surface border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/10 group-hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary mb-1">light_mode</span>
+<span class="font-label-md text-label-md text-on-surface">Morning</span>
+</div>
+</label>
+<!-- Lunch -->
+<label class="cursor-pointer group">
+<input class="hidden peer" type="checkbox"/>
+<div class="flex flex-col items-center justify-center p-4 rounded-lg bg-surface border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/10 group-hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary mb-1">wb_sunny</span>
+<span class="font-label-md text-label-md text-on-surface">Lunch</span>
+</div>
+</label>
+<!-- Evening -->
+<label class="cursor-pointer group">
+<input class="hidden peer" type="checkbox"/>
+<div class="flex flex-col items-center justify-center p-4 rounded-lg bg-surface border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/10 group-hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary mb-1">dark_mode</span>
+<span class="font-label-md text-label-md text-on-surface">Evening</span>
+</div>
+</label>
+<!-- Before Bed -->
+<label class="cursor-pointer group">
+<input class="hidden peer" type="checkbox"/>
+<div class="flex flex-col items-center justify-center p-4 rounded-lg bg-surface border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/10 group-hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary mb-1">bedtime</span>
+<span class="font-label-md text-label-md text-on-surface">Bedtime</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Notes -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block ml-1" for="supp-notes">Notes</label>
+<textarea class="w-full p-4 bg-surface rounded-lg border-none text-on-surface font-body-md placeholder:text-outline/60 focus:ring-2 focus:ring-primary" id="supp-notes" placeholder="Add any specific instructions (e.g. take with food)..." rows="4"></textarea>
+</div>
+<!-- Action -->
+<div class="pt-4">
+<button class="w-full h-16 bg-secondary-container text-on-secondary-container font-headline-md text-headline-md font-bold rounded-lg shadow-lg shadow-secondary/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined">add_task</span>
+              Save Supplement
+            </button>
+</div>
+</form>
+</div>
+<!-- Informational / Guide Sidebar -->
+<aside class="md:col-span-4 space-y-gutter">
+<div class="bg-primary-container text-on-primary-container p-6 rounded-lg shadow-sm">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+<h3 class="font-headline-md text-headline-md font-semibold">Pro Tip</h3>
+</div>
+<p class="font-body-md text-body-md opacity-90 leading-relaxed">
+            Taking supplements at the same time every day helps build a lasting habit. Some vitamins, like D and K, are best absorbed when taken with a meal containing healthy fats.
+          </p>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-sm border border-surface-variant/50">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-widest mb-4">Quick Stats</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant font-body-md">Current Stack</span>
+<span class="font-bold text-on-surface">4 items</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full w-[65%]"></div>
+</div>
+<p class="text-sm text-outline font-body-md">You're maintaining a 85% consistency rate this week. Keep it up!</p>
+</div>
+</div>
+</aside>
+</section>
+</main>
+<!-- Bottom Navigation Bar (SUPPS tab active) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pill</span>
+<span class="font-label-md text-label-md font-bold">Supps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+    // Micro-interactions for form controls
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('focus', () => {
+        el.parentElement.classList.add('scale-[1.01]');
+        el.parentElement.classList.add('transition-transform');
+      });
+      el.addEventListener('blur', () => {
+        el.parentElement.classList.remove('scale-[1.01]');
+      });
+    });
+
+    // Handle Time Selector Toggles
+    const timeCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+    timeCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const container = e.target.nextElementSibling;
+        if (e.target.checked) {
+          container.querySelector('span.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
+        } else {
+          container.querySelector('span.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+        }
+      });
+    });
+
+    // Form submission animation placeholder
+    document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Saving...`;
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined">check_circle</span> Supplement Added!`;
+        btn.classList.replace('bg-secondary-container', 'bg-primary-container');
+        btn.classList.replace('text-on-secondary-container', 'text-on-primary-container');
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.replace('bg-primary-container', 'bg-secondary-container');
+          btn.classList.replace('text-on-primary-container', 'text-on-secondary-container');
+          btn.disabled = false;
+        }, 2000);
+      }, 1200);
+    });
+  </script>
+</body></html>
