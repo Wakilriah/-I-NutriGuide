@@ -20,8 +20,8 @@ export default function TabsLayout() {
         <Tabs
           screenOptions={{
             headerShown: false,
-            tabBarActiveBackgroundColor: colors.primary,
-            tabBarActiveTintColor: colors.surface,
+            tabBarActiveBackgroundColor: "transparent",
+            tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: colors.muted,
             tabBarLabelStyle: { fontSize: 11, fontWeight: "900", marginTop: 2 },
             tabBarItemStyle: {
@@ -29,6 +29,7 @@ export default function TabsLayout() {
               marginHorizontal: 3,
               marginVertical: 9,
               paddingVertical: 4,
+              backgroundColor: "transparent",
             },
             tabBarStyle: {
               position: "absolute",

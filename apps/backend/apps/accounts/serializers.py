@@ -424,8 +424,30 @@ class DailyTrackingSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Food entry {index + 1} requires serving_g in grams.")
             if serving_g <= 0 or serving_g > 5000:
                 raise serializers.ValidationError(f"Food entry {index + 1} serving_g must be between 1 and 5000 grams.")
-            normalized.append({**entry, "serving_g": round(serving_g, 1)})
+            normalized.append(
+                {
+                    **entry,
+                    "serving_g": round(serving_g, 1),
+                    "carbs_g": self._coerce_food_number(entry.get("carbs_g"), "carbs_g", index),
+                    "fat_g": self._coerce_food_number(entry.get("fat_g"), "fat_g", index),
+                    "meal_type": str(entry.get("meal_type", "")).strip()[:40],
+                    "unit": str(entry.get("unit", "")).strip()[:20],
+                    "time": str(entry.get("time", "")).strip()[:20],
+                    "notes": str(entry.get("notes", "")).strip()[:500],
+                }
+            )
         return normalized
+
+    def _coerce_food_number(self, value, field, index):
+        if value in (None, ""):
+            return 0
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError(f"Food entry {index + 1} {field} must be numeric.")
+        if number < 0 or number > 10000:
+            raise serializers.ValidationError(f"Food entry {index + 1} {field} must be between 0 and 10000.")
+        return round(number, 1)
 
     def validate_water_ml(self, value):
         if value > 10000:

@@ -22,10 +22,7 @@ export default function WelcomeScreen() {
 
           <View style={{ gap: spacing.md }}>
             <ButtonLink href="/auth/login" label="Get Started  ->" />
-            <Link href="/auth/login" style={styles.glassLogin}>
-              Already have an account? Log in
-            </Link>
-            <Link href="/auth/register" style={styles.registerLink}>
+            <Link href="/auth/register" style={styles.glassLink}>
               Create a new account
             </Link>
           </View>
@@ -66,7 +63,7 @@ const styles = {
     lineHeight: 30,
     textAlign: "center" as const,
   },
-  glassLogin: {
+  glassLink: {
     minHeight: 58,
     overflow: "hidden" as const,
     borderColor: "rgba(255,255,255,0.42)",
@@ -78,12 +75,6 @@ const styles = {
     fontWeight: "900" as const,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    textAlign: "center" as const,
-  },
-  registerLink: {
-    color: colors.surfaceOnDark,
-    fontSize: 14,
-    fontWeight: "800" as const,
     textAlign: "center" as const,
   },
   footer: {

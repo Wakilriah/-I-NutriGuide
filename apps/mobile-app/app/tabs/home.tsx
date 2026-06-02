@@ -117,7 +117,7 @@ export default function HomeScreen() {
         <View style={styles.trackingCard}>
           <View style={styles.sectionHeader}>
             <Text style={typography.section}>Today's tracking</Text>
-            <Badge label={`${today.data?.food_entries.length ?? 0} foods`} tone="neutral" />
+            <Badge label={`${today.data?.food_entries?.length ?? 0} foods`} tone="neutral" />
           </View>
           <MacroProgressBar color={colors.primary} label="Calories" target={calorieTarget} unit="kcal" value={calories} />
           <MacroProgressBar color={colors.secondaryContainer} label="Protein" target={proteinTarget} value={protein} />

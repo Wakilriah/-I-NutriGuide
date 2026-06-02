@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
@@ -103,9 +103,7 @@ export default function LoginScreen() {
           <AppButton accessibilityLabel="Submit login" disabled={isSubmitting} icon="log-in" label={isSubmitting ? "Signing in" : "Sign in"} onPress={onSubmit} />
         </View>
 
-        <Link href="/auth/register" style={{ color: colors.primary, fontWeight: "800", textAlign: "center" }}>
-          Create an account
-        </Link>
+        <AppButton accessibilityLabel="Create an account" icon="person-add" label="Create an account" onPress={() => router.push("/auth/register" as never)} />
       </AuthGlassCard>
     </AuthBackgroundScreen>
   );

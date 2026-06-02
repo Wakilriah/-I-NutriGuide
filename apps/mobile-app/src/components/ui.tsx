@@ -1221,6 +1221,7 @@ export function ChatInputBar({
       <View style={{ flex: 1, minHeight: 58, maxHeight: 124, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderColor: colors.borderSoft, borderRadius: radii.xl, borderWidth: 1, backgroundColor: colors.surface, paddingHorizontal: spacing.md, ...shadow }}>
         <Ionicons color={colors.muted} name="chatbubble-ellipses-outline" size={22} />
         <TextInput
+          accessibilityLabel="Chat message"
           multiline
           onChangeText={onChangeText}
           placeholder="Ask about supplements, meals, or safety..."
@@ -1229,7 +1230,7 @@ export function ChatInputBar({
           value={value}
         />
       </View>
-      <TouchableOpacity disabled={disabled} onPress={onSend} style={{ width: 56, height: 56, alignItems: "center", justifyContent: "center", borderRadius: radii.pill, backgroundColor: colors.primary, opacity: disabled ? 0.65 : 1, ...shadow }}>
+      <TouchableOpacity accessibilityLabel="Send chat message" disabled={disabled} onPress={onSend} style={{ width: 56, height: 56, alignItems: "center", justifyContent: "center", borderRadius: radii.pill, backgroundColor: colors.primary, opacity: disabled ? 0.65 : 1, ...shadow }}>
         <Ionicons color={colors.surface} name="send" size={20} />
       </TouchableOpacity>
     </View>
@@ -1242,7 +1243,7 @@ export function ChatAssistant({ onClear, clearing }: { clearing?: boolean; onCle
       <Badge label="AI guide" tone="orange" />
       <Text style={{ color: colors.surface, fontSize: 24, fontWeight: "900", lineHeight: 31 }}>Ask about your food and supplements</Text>
       <Text style={{ color: colors.surfaceOnDark, fontSize: 15, lineHeight: 22 }}>I use your profile and saved recommendations for simple, cautious wellness guidance.</Text>
-      <TouchableOpacity disabled={clearing} onPress={onClear} style={{ alignSelf: "flex-start", minHeight: 38, flexDirection: "row", alignItems: "center", gap: 6, borderRadius: radii.pill, backgroundColor: colors.surface, paddingHorizontal: spacing.md }}>
+      <TouchableOpacity accessibilityLabel="Clear chat history" disabled={clearing} onPress={onClear} style={{ alignSelf: "flex-start", minHeight: 38, flexDirection: "row", alignItems: "center", gap: 6, borderRadius: radii.pill, backgroundColor: colors.surface, paddingHorizontal: spacing.md }}>
         <Ionicons color={colors.primary} name="refresh" size={16} />
         <Text style={{ color: colors.primary, fontSize: 13, fontWeight: "900" }}>{clearing ? "Clearing..." : "Clear chat"}</Text>
       </TouchableOpacity>
@@ -1298,6 +1299,9 @@ export function FoodSearchLogCard({ children, onSearchChange, searchValue }: { c
 }
 
 function entryMeal(entry: FoodEntry) {
+  if (entry.meal_type) {
+    return entry.meal_type;
+  }
   const match = entry.food_name.match(/\((Breakfast|Lunch|Dinner|Snack)\)$/i);
   return match?.[1] ?? "Snack";
 }
@@ -1316,7 +1320,7 @@ export function LoggedFoodList({ entries, onEdit, onRemove, title = "Logged food
             <View key={group.meal} style={{ gap: spacing.xs }}>
               <Text style={{ color: colors.secondary, fontSize: 12, fontWeight: "900", textTransform: "uppercase" }}>{group.meal}</Text>
               {group.entries.map(({ entry, index }) => (
-                <FoodLogItem calories={entry.calories} key={`${entry.timestamp}-${index}`} name={entry.food_name.replace(/\s+\((Breakfast|Lunch|Dinner|Snack)\)$/i, "")} onEdit={onEdit ? () => onEdit(index) : undefined} onRemove={onRemove ? () => onRemove(index) : undefined} protein={entry.protein_g} serving={entry.serving_g} />
+                <FoodLogItem calories={entry.calories} carbs={entry.carbs_g} fat={entry.fat_g} key={`${entry.timestamp}-${index}`} name={entry.food_name.replace(/\s+\((Breakfast|Lunch|Dinner|Snack)\)$/i, "")} onEdit={onEdit ? () => onEdit(index) : undefined} onRemove={onRemove ? () => onRemove(index) : undefined} protein={entry.protein_g} serving={entry.serving_g} time={entry.time} unit={entry.unit} />
               ))}
             </View>
           ) : null,
@@ -1382,7 +1386,7 @@ export function TrackingSummaryCards({
   );
 }
 
-export function FoodLogItem({ calories, carbs, fat, name, onEdit, onRemove, protein, serving }: { calories?: number; carbs?: number; fat?: number; name: string; onEdit?: () => void; onRemove?: () => void; protein?: number; serving?: number }) {
+export function FoodLogItem({ calories, carbs, fat, name, onEdit, onRemove, protein, serving, time, unit }: { calories?: number; carbs?: number; fat?: number; name: string; onEdit?: () => void; onRemove?: () => void; protein?: number; serving?: number; time?: string; unit?: string }) {
   return (
     <View style={{ minHeight: 58, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderRadius: radii.md, backgroundColor: colors.surfaceContainerLow, padding: spacing.sm }}>
       <View style={{ width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.cream }}>
@@ -1390,7 +1394,7 @@ export function FoodLogItem({ calories, carbs, fat, name, onEdit, onRemove, prot
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ color: colors.text, fontSize: 14, fontWeight: "900" }}>{name}</Text>
-        <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "700", marginTop: 2 }}>{[serving ? `${serving}g` : null, calories != null ? `${calories} kcal` : null, protein != null ? `${protein}g protein` : null, carbs != null ? `${carbs}g carbs` : null, fat != null ? `${fat}g fat` : null].filter(Boolean).join(" - ")}</Text>
+        <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "700", marginTop: 2 }}>{[serving ? `${serving}${unit && unit !== "g" ? ` ${unit}` : "g"}` : null, calories != null ? `${calories} kcal` : null, protein != null ? `${protein}g protein` : null, carbs != null ? `${carbs}g carbs` : null, fat != null ? `${fat}g fat` : null, time || null].filter(Boolean).join(" - ")}</Text>
       </View>
       {onEdit ? (
         <TouchableOpacity accessibilityLabel={`Edit ${name}`} onPress={onEdit} style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}>

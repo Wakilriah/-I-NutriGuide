@@ -3,11 +3,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { MetricSlider } from "../../src/components/MetricSlider";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppTopBar, ErrorState, LoadingState, PageHeader, SearchInput } from "../../src/components/ui";
 import { searchFoodsPage } from "../../src/features/foods/api";
 import { getProfile, updateProfile } from "../../src/features/profile/api";
+import { useDebouncedValue } from "../../src/hooks/useDebouncedValue";
 import { cards, colors, radii, spacing, typography } from "../../src/theme/design";
 
 const goalOptions = [
@@ -67,9 +69,9 @@ function calculateBmi(weightKg: string, heightCm: string) {
 export default function ProfileInfoScreen() {
   const queryClient = useQueryClient();
   const profile = useQuery({ queryKey: ["profile"], queryFn: getProfile });
-  const [age, setAge] = useState("");
-  const [heightCm, setHeightCm] = useState("");
-  const [weightKg, setWeightKg] = useState("");
+  const [age, setAge] = useState("30");
+  const [heightCm, setHeightCm] = useState("170");
+  const [weightKg, setWeightKg] = useState("70");
   const [goal, setGoal] = useState("general_health");
   const [activity, setActivity] = useState("");
   const [diet, setDiet] = useState("none");
@@ -78,13 +80,14 @@ export default function ProfileInfoScreen() {
   const [dislikedFoods, setDislikedFoods] = useState<string[]>([]);
   const [foodQuery, setFoodQuery] = useState("");
   const [status, setStatus] = useState("");
+  const debouncedFoodQuery = useDebouncedValue(foodQuery.trim(), 350);
   const bmi = calculateBmi(weightKg, heightCm);
 
   const foodSearch = useInfiniteQuery({
-    enabled: foodQuery.trim().length >= 2,
+    enabled: debouncedFoodQuery.length >= 2,
     initialPageParam: 1,
-    queryKey: ["foods", "profile-disliked", foodQuery.trim()],
-    queryFn: ({ pageParam }) => searchFoodsPage({ page: pageParam, search: foodQuery.trim() }),
+    queryKey: ["foods", "profile-disliked", debouncedFoodQuery],
+    queryFn: ({ pageParam }) => searchFoodsPage({ page: pageParam, search: debouncedFoodQuery }),
     getNextPageParam: (lastPage, allPages) => (lastPage.next ? allPages.length + 1 : undefined),
   });
   const foodResults = foodSearch.data?.pages.flatMap((page) => page.results) ?? [];
@@ -93,9 +96,9 @@ export default function ProfileInfoScreen() {
     if (!profile.data) {
       return;
     }
-    setAge(profile.data.age ? String(profile.data.age) : "");
-    setHeightCm(profile.data.height_cm ?? "");
-    setWeightKg(profile.data.weight_kg ?? "");
+    setAge(profile.data.age ? String(profile.data.age) : "30");
+    setHeightCm(profile.data.height_cm ?? "170");
+    setWeightKg(profile.data.weight_kg ?? "70");
     setGoal(profile.data.goal || "general_health");
     setActivity(profile.data.activity_level || "");
     setDiet(profile.data.diet_type || "none");
@@ -137,9 +140,15 @@ export default function ProfileInfoScreen() {
         {profile.data ? (
           <>
             <View style={styles.grid}>
-              <Field icon="calendar" keyboardType="numeric" label="Age" onChangeText={setAge} value={age} />
-              <Field icon="scale" keyboardType="numeric" label="Weight kg" onChangeText={setWeightKg} value={weightKg} />
-              <Field icon="resize" keyboardType="numeric" label="Height cm" onChangeText={setHeightCm} value={heightCm} />
+              <View style={styles.metricTile}>
+                <MetricSlider icon="calendar" label="Age" maximum={120} minimum={13} onChange={setAge} suffix="yrs" value={age} />
+              </View>
+              <View style={styles.metricTile}>
+                <MetricSlider icon="scale" label="Weight" maximum={350} minimum={25} onChange={setWeightKg} step={0.5} suffix="kg" value={weightKg} />
+              </View>
+              <View style={styles.metricTile}>
+                <MetricSlider icon="resize" label="Height" maximum={260} minimum={80} onChange={setHeightCm} suffix="cm" value={heightCm} />
+              </View>
               <View style={styles.tile}>
                 <Ionicons color={colors.secondary} name="body" size={20} />
                 <Text style={styles.inputLabel}>BMI</Text>
@@ -192,16 +201,6 @@ export default function ProfileInfoScreen() {
   );
 }
 
-function Field({ icon, keyboardType, label, onChangeText, value }: { icon: keyof typeof Ionicons.glyphMap; keyboardType?: "numeric"; label: string; onChangeText: (value: string) => void; value: string }) {
-  return (
-    <View style={styles.tile}>
-      <Ionicons color={colors.primary} name={icon} size={20} />
-      <Text style={styles.inputLabel}>{label}</Text>
-      <TextInput keyboardType={keyboardType} onChangeText={onChangeText} placeholder="0" placeholderTextColor={colors.placeholder} style={styles.input} value={value} />
-    </View>
-  );
-}
-
 function OptionGroup({ label, onSelect, options, selected }: { label: string; onSelect: (value: string) => void; options: Array<{ label: string; value: string }>; selected: string }) {
   return (
     <View style={{ gap: spacing.xs }}>
@@ -251,18 +250,15 @@ const styles = {
     gap: spacing.xs,
     padding: spacing.md,
   },
+  metricTile: {
+    minWidth: "100%" as const,
+    flex: 1,
+  },
   inputLabel: {
     color: colors.muted,
     fontSize: 12,
     fontWeight: "900" as const,
     textTransform: "uppercase" as const,
-  },
-  input: {
-    minHeight: 38,
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "900" as const,
-    paddingVertical: 4,
   },
   bmiValue: {
     color: colors.text,

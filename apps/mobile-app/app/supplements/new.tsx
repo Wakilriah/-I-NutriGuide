@@ -8,11 +8,12 @@ import { ActivityIndicator, FlatList, ImageBackground, Text, TextInput, Touchabl
 import { MobileAppShell } from "../../src/components/MobileAppShell";
 import { AppButton, AppTopBar, Badge, ErrorState, PageHeader, SearchInput } from "../../src/components/ui";
 import { createUserSupplement, listSupplementsPage, type Supplement } from "../../src/features/supplements/api";
+import { useDebouncedValue } from "../../src/hooks/useDebouncedValue";
 import { cards, colors, images, radii, spacing, typography } from "../../src/theme/design";
 
 type SelectedSupplement = {
   supplement: Supplement;
-  doseAmount: number;
+  doseAmount: string;
   doseUnit: string;
   frequency: string;
   timingPeriods: string[];
@@ -21,7 +22,7 @@ type SelectedSupplement = {
 
 const doseUnits = ["mg", "g", "mcg", "IU"];
 const frequencyOptions = [
-  { label: "One day", value: "daily" },
+  { label: "Once daily", value: "daily" },
   { label: "Twice a day", value: "twice daily" },
   { label: "Weekly", value: "weekly" },
   { label: "As needed", value: "as needed" },
@@ -39,13 +40,24 @@ function parseCommonDose(value: string) {
   const match = value.match(/(\d+(?:\.\d+)?)\s*(mcg|mg|g|iu)?/i);
   const unit = match?.[2]?.toLowerCase();
   return {
-    amount: match ? Number(match[1]) : 1,
+    amount: match ? match[1] : "1",
     unit: unit === "iu" ? "IU" : unit || "mg",
   };
 }
 
 function formatDose(entry: SelectedSupplement) {
-  return `${entry.doseAmount} ${entry.doseUnit}`;
+  return `${normalizeDoseAmount(entry.doseAmount)} ${entry.doseUnit}`;
+}
+
+function normalizeDoseAmount(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function formatDoseAmountInput(value: string) {
+  const normalized = value.replace(",", ".").replace(/[^\d.]/g, "");
+  const [whole, ...rest] = normalized.split(".");
+  return rest.length ? `${whole}.${rest.join("").slice(0, 3)}` : whole;
 }
 
 function formatTimeInput(value: string) {
@@ -91,11 +103,12 @@ export default function AddSupplementScreen() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Record<number, SelectedSupplement>>({});
   const [status, setStatus] = useState("");
+  const debouncedSearch = useDebouncedValue(search.trim(), 350);
 
   const catalog = useInfiniteQuery({
     initialPageParam: 1,
-    queryKey: ["supplements", "infinite", search.trim()],
-    queryFn: ({ pageParam }) => listSupplementsPage({ page: pageParam, search: search.trim() }),
+    queryKey: ["supplements", "infinite", debouncedSearch],
+    queryFn: ({ pageParam }) => listSupplementsPage({ page: pageParam, search: debouncedSearch }),
     getNextPageParam: (lastPage, allPages) => (lastPage.next ? allPages.length + 1 : undefined),
   });
   const supplements = catalog.data?.pages.flatMap((page) => page.results) ?? [];
@@ -104,15 +117,13 @@ export default function AddSupplementScreen() {
     mutationFn: async () => {
       const entries = Object.values(selected);
       for (const entry of entries) {
-        for (const timing of entry.timings) {
-          await createUserSupplement({
-            supplement_id: entry.supplement.id,
-            dose: formatDose(entry),
-            frequency: entry.frequency,
-            time_of_day: timing,
-            active: true,
-          });
-        }
+        await createUserSupplement({
+          supplement_id: entry.supplement.id,
+          dose: formatDose(entry),
+          frequency: entry.frequency,
+          time_of_day: entry.timings.join(", "),
+          active: true,
+        });
       }
     },
     onError: () => setStatus("Unable to save supplements. Check dose and timing fields."),
@@ -199,7 +210,7 @@ export default function AddSupplementScreen() {
   };
 
   const selectedTimingCount = Object.values(selected).reduce((sum, entry) => sum + entry.timings.length, 0);
-  const canSave = Object.values(selected).length > 0 && Object.values(selected).every((entry) => entry.doseAmount > 0 && entry.timings.length > 0 && entry.timings.every(isValidReminderTime));
+  const canSave = Object.values(selected).length > 0 && Object.values(selected).every((entry) => normalizeDoseAmount(entry.doseAmount) > 0 && entry.timings.length > 0 && entry.timings.every(isValidReminderTime));
 
   return (
     <MobileAppShell>
@@ -236,11 +247,19 @@ export default function AddSupplementScreen() {
                     <View style={styles.optionBlock}>
                       <Text style={styles.fieldLabel}>Dose</Text>
                       <View style={styles.doseRow}>
-                        <TouchableOpacity onPress={() => updateSelected(entry.supplement.id, "doseAmount", Math.max(1, entry.doseAmount - 1))} style={styles.stepperButton}>
+                        <TouchableOpacity onPress={() => updateSelected(entry.supplement.id, "doseAmount", String(Math.max(1, normalizeDoseAmount(entry.doseAmount) - 1)))} style={styles.stepperButton}>
                           <Ionicons color={colors.primary} name="remove" size={18} />
                         </TouchableOpacity>
-                        <Text style={styles.doseValue}>{entry.doseAmount}</Text>
-                        <TouchableOpacity onPress={() => updateSelected(entry.supplement.id, "doseAmount", entry.doseAmount + 1)} style={styles.stepperButton}>
+                        <TextInput
+                          accessibilityLabel={`${entry.supplement.name} dose amount`}
+                          keyboardType="decimal-pad"
+                          onChangeText={(value) => updateSelected(entry.supplement.id, "doseAmount", formatDoseAmountInput(value))}
+                          placeholder="1"
+                          placeholderTextColor={colors.placeholder}
+                          style={styles.doseInput}
+                          value={entry.doseAmount}
+                        />
+                        <TouchableOpacity onPress={() => updateSelected(entry.supplement.id, "doseAmount", String(normalizeDoseAmount(entry.doseAmount) + 1))} style={styles.stepperButton}>
                           <Ionicons color={colors.primary} name="add" size={18} />
                         </TouchableOpacity>
                       </View>
@@ -343,7 +362,7 @@ export default function AddSupplementScreen() {
           const active = Boolean(selected[item.id]);
           const timingCount = selected[item.id]?.timings.length ?? 0;
           return (
-            <TouchableOpacity onPress={() => toggle(item)} style={[styles.catalogRow, active && styles.catalogRowActive]}>
+            <TouchableOpacity accessibilityLabel={`Choose ${item.name}`} onPress={() => toggle(item)} style={[styles.catalogRow, active && styles.catalogRowActive]}>
               <View style={[styles.catalogIcon, active && { backgroundColor: colors.primary }]}>
                 <Ionicons color={active ? colors.surface : colors.primary} name={active ? "checkmark" : "nutrition"} size={20} />
               </View>
@@ -415,12 +434,16 @@ const styles = {
     borderRadius: radii.md,
     backgroundColor: colors.surface,
   },
-  doseValue: {
-    minWidth: 70,
+  doseInput: {
+    width: 92,
+    minHeight: 44,
+    borderRadius: radii.md,
+    backgroundColor: colors.surface,
     color: colors.text,
     fontSize: 22,
-    textAlign: "center" as const,
     fontWeight: "900" as const,
+    paddingHorizontal: spacing.sm,
+    textAlign: "center" as const,
   },
   optionRow: {
     flexDirection: "row" as const,

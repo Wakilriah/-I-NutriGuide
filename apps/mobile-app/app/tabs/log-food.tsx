@@ -4,12 +4,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
-import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 import { MobileAppShell } from "../../src/components/MobileAppShell";
 import { AddWaterCard, AppButton, AppTopBar, Badge, ErrorState, FoodSearchLogCard, LoggedFoodList } from "../../src/components/ui";
 import { searchFoodsPage, type FoodSearchItem } from "../../src/features/foods/api";
 import { listUserSupplements } from "../../src/features/supplements/api";
 import { getTodayTracking, updateTodayTracking, type FoodEntry } from "../../src/features/tracking/api";
+import { useDebouncedValue } from "../../src/hooks/useDebouncedValue";
 import { cards, colors, radii, spacing, typography } from "../../src/theme/design";
 
 function toNumber(value: number | string | null | undefined) {
@@ -56,6 +57,7 @@ export default function LogFoodScreen() {
   const [manualFat, setManualFat] = useState("0");
   const [manualTime, setManualTime] = useState("08:30");
   const [manualNotes, setManualNotes] = useState("");
+  const debouncedFoodQuery = useDebouncedValue(foodQuery.trim(), 350);
 
   useEffect(() => {
     if (today.data) {
@@ -72,14 +74,15 @@ export default function LogFoodScreen() {
   }, [params.search]);
 
   const search = useInfiniteQuery({
-    enabled: foodQuery.trim().length >= 2,
+    enabled: debouncedFoodQuery.length >= 2,
     initialPageParam: 1,
-    queryKey: ["foods", "infinite", foodQuery.trim()],
-    queryFn: ({ pageParam }) => searchFoodsPage({ page: pageParam, search: foodQuery.trim() }),
+    queryKey: ["foods", "infinite", debouncedFoodQuery],
+    queryFn: ({ pageParam }) => searchFoodsPage({ page: pageParam, search: debouncedFoodQuery }),
     getNextPageParam: (lastPage, allPages) => (lastPage.next ? allPages.length + 1 : undefined),
   });
 
   const foods = search.data?.pages.flatMap((page) => page.results) ?? [];
+  const showSearchResults = debouncedFoodQuery.length >= 2;
   const totals = useMemo(
     () =>
       foodEntries.reduce(
@@ -121,6 +124,12 @@ export default function LogFoodScreen() {
       serving_g,
       calories: nutrients.calories,
       protein_g: nutrients.protein,
+      carbs_g: nutrients.carbs,
+      fat_g: nutrients.fat,
+      meal_type: "Search",
+      unit: "g",
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      notes: "",
       timestamp: new Date().toISOString(),
     };
     const nextEntries = [...foodEntries, nextEntry];
@@ -134,13 +143,18 @@ export default function LogFoodScreen() {
       setStatus("Enter a food name before saving.");
       return;
     }
-    // TODO: connect carbs, fat, meal type, unit, time, and notes when the tracking API stores full macro entries.
     const nextEntry: FoodEntry = {
       food_id: 0,
-      food_name: `${name} (${manualMealType})`,
+      food_name: name,
       serving_g: Math.max(1, toNumber(manualQuantity)),
       calories: Math.max(0, Math.round(toNumber(manualCalories))),
       protein_g: Math.max(0, Math.round(toNumber(manualProtein) * 10) / 10),
+      carbs_g: Math.max(0, Math.round(toNumber(manualCarbs) * 10) / 10),
+      fat_g: Math.max(0, Math.round(toNumber(manualFat) * 10) / 10),
+      meal_type: manualMealType,
+      unit: manualUnit.trim() || "g",
+      time: manualTime.trim(),
+      notes: manualNotes.trim(),
       timestamp: new Date().toISOString(),
     };
     const nextEntries = [...foodEntries, nextEntry];
@@ -150,6 +164,7 @@ export default function LogFoodScreen() {
     setManualProtein("0");
     setManualCarbs("0");
     setManualFat("0");
+    setManualTime("08:30");
     setManualNotes("");
     saveMutation.mutate({ nextEntries });
   };
@@ -172,14 +187,60 @@ export default function LogFoodScreen() {
     saveMutation.mutate({ nextWaterMl: normalized });
   };
 
+  const fetchMoreFoods = () => {
+    if (showSearchResults && search.hasNextPage && !search.isFetchingNextPage) {
+      search.fetchNextPage();
+    }
+  };
+
+  const handleResultsScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    if (distanceFromBottom < 72) {
+      fetchMoreFoods();
+    }
+  };
+
+  const renderFoodResult = (item: FoodSearchItem) => {
+    const serving = Math.max(1, toNumber(gramsByFood[item.id]) || toNumber(item.serving_size_g) || 100);
+    const nutrients = scaledNutrients(item, serving);
+    return (
+      <View key={item.id} style={styles.foodResult}>
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text numberOfLines={1} style={styles.rowTitle}>{item.name}</Text>
+          <Text numberOfLines={1} style={styles.rowMeta}>{item.category || "Food"} - {Math.round(serving)}g serving</Text>
+          <View style={styles.macroChips}>
+            <MacroPill label="Cal" value={`${nutrients.calories}`} />
+            <MacroPill label="Pro" value={`${nutrients.protein}g`} />
+            <MacroPill label="Carb" value={`${nutrients.carbs}g`} />
+            <MacroPill label="Fat" value={`${nutrients.fat}g`} />
+          </View>
+          <View style={styles.gramsRow}>
+            <TextInput
+              keyboardType="numeric"
+              onChangeText={(nextValue) => setGramsByFood((current) => ({ ...current, [item.id]: nextValue }))}
+              placeholder={String(Math.round(toNumber(item.serving_size_g) || 100))}
+              placeholderTextColor={colors.placeholder}
+              style={styles.gramsInput}
+              value={gramsByFood[item.id] ?? ""}
+            />
+            <Text style={styles.rowMeta}>grams</Text>
+          </View>
+        </View>
+        <TouchableOpacity accessibilityLabel={`Add ${item.name}`} onPress={() => addFood(item)} style={styles.addButton}>
+          <Ionicons color={colors.surface} name="add" size={20} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <MobileAppShell>
       <AppTopBar title="Add food" subtitle="Log meal" />
       <FlatList
-        data={foods}
+        data={[] as FoodSearchItem[]}
         keyExtractor={(item) => String(item.id)}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 156 }}
         ListHeaderComponent={
           <View style={{ gap: spacing.xl, padding: spacing.md }}>
             <AddWaterCard onAdd={() => saveWater(toNumber(waterMl) + 250)} onRemove={() => saveWater(toNumber(waterMl) - 250)} valueMl={toNumber(waterMl)} />
@@ -187,19 +248,43 @@ export default function LogFoodScreen() {
             <FoodSearchLogCard onSearchChange={setFoodQuery} searchValue={foodQuery}>
               <Text style={typography.body}>Search foods, choose quantity, and keep today's nutrition totals accurate.</Text>
             </FoodSearchLogCard>
-            {foodQuery.trim().length >= 2 ? <Text style={typography.section}>Search results</Text> : null}
+
+            {showSearchResults ? (
+              <View style={styles.resultsPanel}>
+                <View style={styles.resultsHeader}>
+                  <Text style={typography.section}>Search results</Text>
+                  <View style={styles.resultsHeaderActions}>
+                    <Text style={styles.resultsCount}>{foods.length.toLocaleString()} loaded</Text>
+                    <TouchableOpacity accessibilityLabel="Clear food search" onPress={() => setFoodQuery("")} style={styles.clearResultsButton}>
+                      <Ionicons color={colors.muted} name="close" size={17} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                {foods.length ? (
+                  <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    nestedScrollEnabled
+                    onMomentumScrollEnd={handleResultsScroll}
+                    onScroll={handleResultsScroll}
+                    scrollEventThrottle={120}
+                    showsVerticalScrollIndicator
+                    style={styles.resultsScroller}
+                  >
+                    {foods.map(renderFoodResult)}
+                    {search.isFetchingNextPage ? <ActivityIndicator color={colors.primary} style={{ paddingVertical: spacing.md }} /> : null}
+                    {!search.hasNextPage && foods.length ? <Text style={styles.endText}>End of results</Text> : null}
+                  </ScrollView>
+                ) : (
+                  <View style={styles.emptyResults}>
+                    {search.isLoading ? <ActivityIndicator color={colors.primary} /> : <Text style={typography.body}>No foods found.</Text>}
+                  </View>
+                )}
+              </View>
+            ) : null}
           </View>
         }
-        ListEmptyComponent={
-          foodQuery.trim().length < 2 ? null : (
-            <View style={{ paddingHorizontal: spacing.md, paddingBottom: spacing.lg }}>
-              {search.isLoading ? <ActivityIndicator color={colors.primary} /> : <Text style={typography.body}>No foods found.</Text>}
-            </View>
-          )
-        }
         ListFooterComponent={
-          <View style={{ minHeight: 120, gap: spacing.xl, padding: spacing.md }}>
-            {search.isFetchingNextPage ? <ActivityIndicator color={colors.primary} /> : null}
+          <View style={{ gap: spacing.xl, padding: spacing.md, paddingBottom: 156 }}>
             <LoggedFoodList entries={foodEntries} onEdit={(index) => setStatus(`Edit ${foodEntries[index]?.food_name ?? "food"} from today's log.`)} onRemove={removeFood} title="Logged food list" />
 
             <View style={styles.summary}>
@@ -270,44 +355,7 @@ export default function LogFoodScreen() {
             {status ? <Text style={styles.statusText}>{status}</Text> : null}
           </View>
         }
-        onEndReached={() => {
-          if (search.hasNextPage && !search.isFetchingNextPage) {
-            search.fetchNextPage();
-          }
-        }}
-        onEndReachedThreshold={0.45}
-        renderItem={({ item }) => {
-          const serving = Math.max(1, toNumber(gramsByFood[item.id]) || toNumber(item.serving_size_g) || 100);
-          const nutrients = scaledNutrients(item, serving);
-          return (
-          <View style={styles.foodResult}>
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text style={styles.rowTitle}>{item.name}</Text>
-              <Text style={styles.rowMeta}>{item.category || "Food"} - {Math.round(serving)}g serving</Text>
-              <View style={styles.macroChips}>
-                <MacroPill label="Calories" value={`${nutrients.calories} kcal`} />
-                <MacroPill label="Protein" value={`${nutrients.protein}g`} />
-                <MacroPill label="Carbs" value={`${nutrients.carbs}g`} />
-                <MacroPill label="Fats" value={`${nutrients.fat}g`} />
-              </View>
-              <View style={styles.gramsRow}>
-                <TextInput
-                  keyboardType="numeric"
-                  onChangeText={(value) => setGramsByFood((current) => ({ ...current, [item.id]: value }))}
-                  placeholder={String(Math.round(toNumber(item.serving_size_g) || 100))}
-                  placeholderTextColor={colors.placeholder}
-                  style={styles.gramsInput}
-                  value={gramsByFood[item.id] ?? ""}
-                />
-                <Text style={styles.rowMeta}>grams eaten</Text>
-              </View>
-            </View>
-            <TouchableOpacity accessibilityLabel={`Add ${item.name}`} onPress={() => addFood(item)} style={styles.addButton}>
-              <Ionicons color={colors.surface} name="add" size={22} />
-            </TouchableOpacity>
-          </View>
-          );
-        }}
+        renderItem={() => null}
         showsVerticalScrollIndicator={false}
       />
     </MobileAppShell>
@@ -450,6 +498,53 @@ const styles = {
     gap: spacing.sm,
     padding: spacing.md,
   },
+  resultsPanel: {
+    ...cards.default,
+    gap: spacing.sm,
+    padding: spacing.sm,
+  },
+  resultsScroller: {
+    maxHeight: 292,
+  },
+  resultsHeader: {
+    minHeight: 36,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
+  resultsCount: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "900" as const,
+  },
+  resultsHeaderActions: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: spacing.xs,
+  },
+  clearResultsButton: {
+    width: 30,
+    height: 30,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surfaceContainerLow,
+  },
+  endText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800" as const,
+    paddingVertical: spacing.sm,
+    textAlign: "center" as const,
+  },
+  emptyResults: {
+    minHeight: 96,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    padding: spacing.md,
+  },
   waterRow: {
     minHeight: 52,
     flexDirection: "row" as const,
@@ -496,17 +591,16 @@ const styles = {
     padding: spacing.sm,
   },
   foodResult: {
-    marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
-    minHeight: 94,
+    minHeight: 78,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: spacing.sm,
-    borderRadius: radii.lg,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.borderSoft,
     backgroundColor: colors.surface,
-    padding: spacing.md,
+    padding: spacing.sm,
   },
   rowTitle: {
     color: colors.text,
@@ -519,24 +613,24 @@ const styles = {
     fontWeight: "700" as const,
   },
   gramsRow: {
-    minHeight: 38,
+    minHeight: 32,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: spacing.xs,
-    marginTop: spacing.xs,
   },
   gramsInput: {
-    width: 86,
-    height: 38,
+    width: 74,
+    height: 32,
     borderRadius: radii.md,
     backgroundColor: colors.surfaceContainerLow,
     color: colors.text,
+    fontSize: 13,
     fontWeight: "900" as const,
     paddingHorizontal: spacing.sm,
   },
   addButton: {
-    width: 48,
-    height: 48,
+    width: 42,
+    height: 42,
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderRadius: radii.md,
@@ -546,22 +640,21 @@ const styles = {
     flexDirection: "row" as const,
     flexWrap: "wrap" as const,
     gap: spacing.xs,
-    marginTop: spacing.xs,
   },
   macroPill: {
     borderRadius: radii.sm,
     backgroundColor: colors.primarySoft,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
   macroPillLabel: {
     color: colors.primary,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "900" as const,
   },
   macroPillValue: {
     color: colors.text,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "900" as const,
     marginTop: 1,
   },

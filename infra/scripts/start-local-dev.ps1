@@ -1,7 +1,3 @@
-param(
-    [switch]$WithMobile
-)
-
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 Set-Location $root
@@ -33,9 +29,6 @@ if (Test-Path $dockerDesktop) {
 }
 
 $services = @("postgres", "redis", "backend", "admin_panel")
-if ($WithMobile) {
-    $services += "mobile_app"
-}
 
 docker compose -f docker-compose.dev.yml up -d $services
 
@@ -56,10 +49,6 @@ for ($i = 0; $i -lt 20; $i++) {
 
             Write-Host "Backend healthy: http://localhost:8000"
             Write-Host "Admin panel: http://localhost:5173"
-            if ($WithMobile) {
-                Write-Host "Expo app: http://localhost:8081"
-                Write-Host "Expo logs: docker compose -f docker-compose.dev.yml logs -f mobile_app"
-            }
             exit 0
         }
     } catch {

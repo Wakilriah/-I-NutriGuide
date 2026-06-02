@@ -6,6 +6,12 @@ export type FoodEntry = {
   serving_g: number;
   calories: number;
   protein_g: number;
+  carbs_g?: number;
+  fat_g?: number;
+  meal_type?: string;
+  unit?: string;
+  time?: string;
+  notes?: string;
   timestamp: string;
 };
 

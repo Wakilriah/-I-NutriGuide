@@ -3,13 +3,9 @@
 # This file is for physical-device LAN testing. It defaults to localhost so
 # browser-based admin testing does not accidentally bake in an old Wi-Fi IP.
 #
-# For phone/Expo testing, set your current Windows Wi-Fi IPv4 address first:
+# For physical-device LAN testing, set your current Windows Wi-Fi IPv4 address first:
 #   $env:WINDOWS_HOST_IP="YOUR_WIFI_IPV4"
 #   docker compose -f docker-compose.lan.yml up -d --build
-#
-# Mobile app should be run manually on the host machine:
-#   cd apps/mobile-app
-#   $env:REACT_NATIVE_PACKAGER_HOSTNAME=$env:WINDOWS_HOST_IP; npx expo start --host lan
 
 services:
   postgres:
@@ -37,8 +33,8 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       WINDOWS_HOST_IP: "${WINDOWS_HOST_IP:-localhost}"
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,${WINDOWS_HOST_IP:-localhost}"
-      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-localhost}:5173,http://${WINDOWS_HOST_IP:-localhost}:8081,http://${WINDOWS_HOST_IP:-localhost}:3000"
-      CSRF_TRUSTED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-localhost}:5173,http://${WINDOWS_HOST_IP:-localhost}:8081,http://${WINDOWS_HOST_IP:-localhost}:3000"
+      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-localhost}:5173,http://${WINDOWS_HOST_IP:-localhost}:3000"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-localhost}:5173,http://${WINDOWS_HOST_IP:-localhost}:3000"
     command: sh -c "pip install -r requirements/dev.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./apps/backend:/app

@@ -5,6 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
+    "start:lan": "powershell -ExecutionPolicy Bypass -File ./scripts/start-lan.ps1",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",

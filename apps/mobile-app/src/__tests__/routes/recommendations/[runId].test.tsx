@@ -79,7 +79,7 @@ describe("RecommendationDetailScreen", () => {
     render(<RecommendationDetailScreen />);
 
     expect(screen.getByText("This is educational and not medical advice.")).toBeTruthy();
-    expect(screen.getByText("Spinach")).toBeTruthy();
+    expect(screen.getAllByText("Spinach").length).toBeGreaterThan(0);
     expect(screen.getByText("Spinach fits your current supplement routine.")).toBeTruthy();
     expect(screen.getByText("high-fiber")).toBeTruthy();
     expect(screen.getByText("Check supplement timing")).toBeTruthy();

@@ -67,17 +67,17 @@ describe("ProfileScreen", () => {
     expect(screen.getAllByText("Demo User").length).toBeGreaterThan(0);
     expect(screen.getAllByText("user@example.com").length).toBeGreaterThan(0);
     expect(screen.getByText("general health")).toBeTruthy();
-    expect(screen.getByText("Personal info")).toBeTruthy();
-    expect(screen.getByText("Graphs and statistics")).toBeTruthy();
-    expect(screen.getByText("Settings")).toBeTruthy();
-    expect(screen.getByText("Notification history")).toBeTruthy();
+    expect(screen.getByText("Dietary Preferences")).toBeTruthy();
+    expect(screen.getByText("Saved Foods & Recipes")).toBeTruthy();
+    expect(screen.getByText("Recommendation History")).toBeTruthy();
+    expect(screen.getByText("Account Settings")).toBeTruthy();
   });
 
   it("logs out and returns to welcome", async () => {
     render(<ProfileScreen />);
 
     expect(screen.getAllByText("user@example.com").length).toBeGreaterThan(0);
-    fireEvent.press(screen.getByText("Log out"));
+    fireEvent.press(screen.getByText("Log Out"));
 
     await waitFor(() => {
       expect(useAuthStore.getState().accessToken).toBeNull();

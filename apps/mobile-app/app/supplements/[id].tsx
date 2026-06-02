@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Switch, Text, TouchableOpacity, View } from "react-native";
+import { Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppTopBar, Badge, ErrorState, LoadingState, NutrientCard, PageHeader, SectionHeader, SupplementCard } from "../../src/components/ui";
 import { deleteUserSupplement, listUserSupplements, updateUserSupplement } from "../../src/features/supplements/api";
@@ -26,13 +26,24 @@ function parseDose(value: string) {
   };
 }
 
+function normalizeDoseAmount(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function formatDoseAmountInput(value: string) {
+  const normalized = value.replace(",", ".").replace(/[^\d.]/g, "");
+  const [whole, ...rest] = normalized.split(".");
+  return rest.length ? `${whole}.${rest.join("").slice(0, 3)}` : whole;
+}
+
 export default function EditSupplementScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const supplementId = Number(id);
   const queryClient = useQueryClient();
   const list = useQuery({ queryKey: ["user-supplements"], queryFn: listUserSupplements });
   const item = list.data?.find((entry) => entry.id === supplementId);
-  const [doseAmount, setDoseAmount] = useState(1);
+  const [doseAmount, setDoseAmount] = useState("1");
   const [doseUnit, setDoseUnit] = useState("mg");
   const [frequency, setFrequency] = useState("daily");
   const [timeOfDay, setTimeOfDay] = useState("morning");
@@ -43,7 +54,7 @@ export default function EditSupplementScreen() {
       return;
     }
     const parsed = parseDose(item.dose);
-    setDoseAmount(parsed.amount);
+    setDoseAmount(String(parsed.amount));
     setDoseUnit(parsed.unit);
     setFrequency(item.frequency || "daily");
     setTimeOfDay(item.time_of_day || "morning");
@@ -54,7 +65,7 @@ export default function EditSupplementScreen() {
     mutationFn: () =>
       updateUserSupplement(supplementId, {
         active,
-        dose: `${doseAmount} ${doseUnit}`,
+        dose: `${normalizeDoseAmount(doseAmount)} ${doseUnit}`,
         frequency,
         time_of_day: timeOfDay,
       }),
@@ -97,11 +108,19 @@ export default function EditSupplementScreen() {
           <View style={{ gap: spacing.xs }}>
             <Text style={styles.label}>Dose</Text>
             <View style={styles.doseRow}>
-              <TouchableOpacity onPress={() => setDoseAmount((value) => Math.max(1, value - 1))} style={styles.stepperButton}>
+              <TouchableOpacity onPress={() => setDoseAmount((value) => String(Math.max(1, normalizeDoseAmount(value) - 1)))} style={styles.stepperButton}>
                 <Ionicons color={colors.primary} name="remove" size={18} />
               </TouchableOpacity>
-              <Text style={styles.doseValue}>{doseAmount}</Text>
-              <TouchableOpacity onPress={() => setDoseAmount((value) => value + 1)} style={styles.stepperButton}>
+              <TextInput
+                accessibilityLabel="dose"
+                keyboardType="decimal-pad"
+                onChangeText={(value) => setDoseAmount(formatDoseAmountInput(value))}
+                placeholder="1"
+                placeholderTextColor={colors.placeholder}
+                style={styles.doseInput}
+                value={doseAmount}
+              />
+              <TouchableOpacity onPress={() => setDoseAmount((value) => String(normalizeDoseAmount(value) + 1))} style={styles.stepperButton}>
                 <Ionicons color={colors.primary} name="add" size={18} />
               </TouchableOpacity>
             </View>
@@ -175,12 +194,16 @@ const styles = {
     borderRadius: radii.md,
     backgroundColor: colors.surfaceContainerLow,
   },
-  doseValue: {
-    minWidth: 70,
+  doseInput: {
+    width: 92,
+    minHeight: 44,
+    borderRadius: radii.md,
+    backgroundColor: colors.surfaceContainerLow,
     color: colors.text,
     fontSize: 22,
-    textAlign: "center" as const,
     fontWeight: "900" as const,
+    paddingHorizontal: spacing.sm,
+    textAlign: "center" as const,
   },
   optionRow: {
     flexDirection: "row" as const,
