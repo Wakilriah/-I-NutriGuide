@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 import { AdminLayout } from "../components/AdminLayout";
 import { LoginPage } from "../features/auth/LoginPage";
 import { ChatsPage, UserChatsPage } from "../features/chats/ChatsPage";
+import { DataQualityPage } from "../features/data-quality/DataQualityPage";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { FeedbackPage } from "../features/feedback/FeedbackPage";
 import { FoodFormPage, FoodsPage } from "../features/knowledge/FoodsPage";
@@ -35,6 +36,7 @@ function AppRoutes() {
         path="/"
       >
         <Route index element={<DashboardPage />} />
+        <Route path="data-quality" element={<DataQualityPage />} />
         <Route path="foods" element={<FoodsPage />} />
         <Route path="foods/new" element={<FoodFormPage />} />
         <Route path="foods/:slug/edit" element={<FoodFormPage />} />

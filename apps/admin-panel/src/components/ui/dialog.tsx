@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,33 +11,18 @@ type DialogProps = {
 };
 
 function Dialog({ children, onOpenChange, open }: DialogProps) {
-  React.useEffect(() => {
-    if (!open) {
-      return undefined;
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onOpenChange(false);
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onOpenChange, open]);
-
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div aria-modal="true" className="dialog-overlay" role="dialog">
-      <button aria-label="Close dialog" className="dialog-backdrop" onClick={() => onOpenChange(false)} type="button" />
-      {children}
-    </div>
+    <DialogPrimitive.Root onOpenChange={onOpenChange} open={open}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="dialog-backdrop" />
+        {children}
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
 
 const DialogContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("dialog-content", className)} {...props} />
+  <DialogPrimitive.Content ref={ref} className={cn("dialog-content", className)} {...props} />
 ));
 DialogContent.displayName = "DialogContent";
 
@@ -45,18 +31,20 @@ function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 }
 
 function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn("dialog-title", className)} {...props} />;
+  return <DialogPrimitive.Title className={cn("dialog-title", className)} {...props} />;
 }
 
 function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("dialog-description", className)} {...props} />;
+  return <DialogPrimitive.Description className={cn("dialog-description", className)} {...props} />;
 }
 
 function DialogClose({ onClose }: { onClose: () => void }) {
   return (
-    <Button aria-label="Close" onClick={onClose} size="icon" type="button" variant="ghost">
-      <X aria-hidden="true" size={17} />
-    </Button>
+    <DialogPrimitive.Close asChild>
+      <Button aria-label="Close" onClick={onClose} size="icon" type="button" variant="ghost">
+        <X aria-hidden="true" size={17} />
+      </Button>
+    </DialogPrimitive.Close>
   );
 }
 

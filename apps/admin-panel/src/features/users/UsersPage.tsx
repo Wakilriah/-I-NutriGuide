@@ -15,6 +15,7 @@ import {
   type AdminUserPayload,
   updateAdminUser,
 } from "../../api/users";
+import { ConfirmDialog } from "../../components/admin/ConfirmDialog";
 import { AdminPagination } from "../../components/admin/AdminPagination";
 import { MetricSkeletonGrid, TableSkeleton } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
@@ -25,6 +26,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { invalidateDashboard } from "../../lib/query-keys";
+import { getPositiveIntegerParam, updateUrlSearchParams } from "../../lib/url-state";
 import { useAuthStore } from "../../store/auth-store";
 
 const PAGE_SIZE = 10;
@@ -87,9 +89,10 @@ export function UsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const page = Number(searchParams.get("page") || "1");
+  const page = getPositiveIntegerParam(searchParams.get("page"));
   const search = searchParams.get("search") || "";
   const statusFilter = searchParams.get("active") || "";
   const roleFilter = searchParams.get("role") || "";
@@ -139,15 +142,7 @@ export function UsersPage() {
   }, [editingUser, form]);
 
   const updateSearch = (updates: Record<string, string | number | null>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === "" || value === null) {
-        next.delete(key);
-      } else {
-        next.set(key, String(value));
-      }
-    });
-    setSearchParams(next);
+    setSearchParams(updateUrlSearchParams(searchParams, updates));
   };
 
   const syncCurrentUser = (user: AdminUser) => {
@@ -216,6 +211,7 @@ export function UsersPage() {
     onError: (_error, _id, context) => {
       context?.previousPages.forEach(([queryKey, oldData]) => queryClient.setQueryData(queryKey, oldData));
     },
+    onSuccess: () => setUserToDelete(null),
     onSettled: refreshUsers,
   });
 
@@ -380,7 +376,7 @@ export function UsersPage() {
                       <Button
                         aria-label={`Delete ${user.email}`}
                         disabled={isDeletingUser || isCurrentUser}
-                        onClick={() => deleteMutation.mutate(user.id)}
+                        onClick={() => setUserToDelete(user)}
                         size="icon"
                         title={isCurrentUser ? "You cannot delete your own account." : undefined}
                         type="button"
@@ -474,6 +470,15 @@ export function UsersPage() {
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        confirmLabel="Delete user"
+        description={userToDelete ? `Delete ${userToDelete.email}? This cannot be undone.` : "Delete this user?"}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => userToDelete && deleteMutation.mutate(userToDelete.id)}
+        onOpenChange={(open) => !open && setUserToDelete(null)}
+        open={Boolean(userToDelete)}
+        title="Delete user"
+      />
     </section>
   );
 }

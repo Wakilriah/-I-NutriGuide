@@ -15,6 +15,7 @@ import {
   updateFood,
 } from "../../api/foods";
 import { fetchNutrients } from "../../api/nutrients";
+import { ConfirmDialog } from "../../components/admin/ConfirmDialog";
 import { MetricSkeletonGrid, TableSkeleton } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
 import { Badge } from "../../components/ui/badge";
@@ -116,6 +117,7 @@ export function FoodsPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [foodToDelete, setFoodToDelete] = useState<{ name: string; slug: string } | null>(null);
 
   const page = getPositiveNumber(searchParams.get("page"), 1);
   const pageSize = getPageSize(searchParams.get("page_size"));
@@ -172,6 +174,7 @@ export function FoodsPage() {
     mutationKey: ["foods", "delete"],
     mutationFn: deleteFood,
     onSuccess: async () => {
+      setFoodToDelete(null);
       await Promise.all([queryClient.invalidateQueries({ queryKey: ["foods"] }), invalidateDashboard(queryClient)]);
     },
   });
@@ -328,7 +331,7 @@ export function FoodsPage() {
                         <Button
                           aria-label={`Delete ${food.name}`}
                           disabled={deleteMutation.isPending && deleteMutation.variables === food.slug}
-                          onClick={() => deleteMutation.mutate(food.slug)}
+                          onClick={() => setFoodToDelete({ name: food.name, slug: food.slug })}
                           size="icon"
                           type="button"
                           variant="destructive"
@@ -400,6 +403,16 @@ export function FoodsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        confirmLabel="Delete food"
+        description={foodToDelete ? `Delete ${foodToDelete.name}? This cannot be undone.` : "Delete this food?"}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => foodToDelete && deleteMutation.mutate(foodToDelete.slug)}
+        onOpenChange={(open) => !open && setFoodToDelete(null)}
+        open={Boolean(foodToDelete)}
+        title="Delete food"
+      />
     </section>
   );
 }
