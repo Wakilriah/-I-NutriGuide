@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import permissions
 from rest_framework import serializers
@@ -7,11 +7,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.feedback.models import RecommendationFeedback
-from apps.foods.models import Food
-from apps.nutrients.models import Nutrient
+from apps.foods.models import Food, FoodCategory, FoodNutrient
+from apps.nutrients.models import Nutrient, NutrientInteraction
 from apps.recommendations.models import RecommendationItem, RecommendationRun, SavedRecommendationItem
 from apps.rules.models import AssociationRule
-from apps.supplements.models import Supplement, UserSupplement
+from apps.supplements.models import Supplement, SupplementNutrient, UserSupplement
 
 
 dashboard_response = inline_serializer(
@@ -74,6 +74,15 @@ feedback_analytics_response = inline_serializer(
         "most_liked_foods": serializers.ListField(child=serializers.DictField()),
         "most_disliked_foods": serializers.ListField(child=serializers.DictField()),
         "acceptance_rate": serializers.FloatField(),
+    },
+)
+
+data_quality_response = inline_serializer(
+    name="DataQualityAnalytics",
+    fields={
+        "total_issues": serializers.IntegerField(),
+        "issue_categories": serializers.IntegerField(),
+        "issues": serializers.ListField(child=serializers.DictField()),
     },
 )
 
@@ -211,6 +220,21 @@ class FeedbackAnalyticsView(APIView):
         )
 
 
+class DataQualityView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @extend_schema(responses=data_quality_response)
+    def get(self, request):
+        issues = _get_data_quality_issues()
+        return Response(
+            {
+                "total_issues": sum(issue["count"] for issue in issues),
+                "issue_categories": len([issue for issue in issues if issue["count"]]),
+                "issues": issues,
+            }
+        )
+
+
 def _get_rule_usage():
     usage = {}
     items = RecommendationItem.objects.exclude(matched_rules=[]).values_list("matched_rules", flat=True)
@@ -240,3 +264,166 @@ def _acceptance_rate():
         return 0
     accepted = RecommendationFeedback.objects.filter(feedback_type__in=["liked", "saved", "tried", "helpful"]).count()
     return round(accepted / total, 4)
+
+
+def _get_data_quality_issues():
+    food_without_nutrients = Food.objects.filter(is_active=True).annotate(nutrient_count=Count("nutrients")).filter(nutrient_count=0)
+    supplement_without_nutrients = Supplement.objects.filter(is_active=True).annotate(nutrient_count=Count("nutrients")).filter(nutrient_count=0)
+    interactions_missing_context = NutrientInteraction.objects.filter(active=True).filter(Q(mechanism="") | Q(evidence_level=""))
+    rules_with_missing_entities = _rules_with_missing_entities()
+
+    return [
+        _issue(
+            "foods_without_nutrients",
+            "Active foods without nutrients",
+            "high",
+            food_without_nutrients.count(),
+            _entity_samples(food_without_nutrients, ["id", "name", "slug", "source", "ciqual_code"]),
+        ),
+        _issue(
+            "inactive_foods",
+            "Inactive foods",
+            "medium",
+            Food.objects.filter(is_active=False).count(),
+            _entity_samples(Food.objects.filter(is_active=False), ["id", "name", "slug", "source", "ciqual_code"]),
+        ),
+        _issue(
+            "foods_with_zero_or_negative_nutrients",
+            "Food nutrient links with non-positive amounts",
+            "medium",
+            FoodNutrient.objects.filter(amount__lte=0).count(),
+            _food_nutrient_samples(FoodNutrient.objects.filter(amount__lte=0)),
+        ),
+        _issue(
+            "supplements_without_nutrients",
+            "Active supplements without nutrient links",
+            "high",
+            supplement_without_nutrients.count(),
+            _entity_samples(supplement_without_nutrients, ["id", "name", "slug", "source", "source_id"]),
+        ),
+        _issue(
+            "inactive_supplements",
+            "Inactive supplements",
+            "medium",
+            Supplement.objects.filter(is_active=False).count(),
+            _entity_samples(Supplement.objects.filter(is_active=False), ["id", "name", "slug", "source", "source_id"]),
+        ),
+        _issue(
+            "supplement_nutrients_missing_amount_or_unit",
+            "Supplement nutrient links missing amount or unit",
+            "medium",
+            SupplementNutrient.objects.filter(Q(amount__isnull=True) | Q(unit="")).count(),
+            _supplement_nutrient_samples(SupplementNutrient.objects.filter(Q(amount__isnull=True) | Q(unit=""))),
+        ),
+        _issue(
+            "association_rules_missing_entities",
+            "Association rules referencing missing entities",
+            "high",
+            len(rules_with_missing_entities),
+            rules_with_missing_entities[:5],
+        ),
+        _issue(
+            "inactive_association_rules",
+            "Inactive association rules",
+            "medium",
+            AssociationRule.objects.filter(is_active=False).count(),
+            _rule_samples(AssociationRule.objects.filter(is_active=False)),
+        ),
+        _issue(
+            "nutrient_interactions_missing_context",
+            "Active nutrient interactions missing mechanism or evidence",
+            "medium",
+            interactions_missing_context.count(),
+            _interaction_samples(interactions_missing_context),
+        ),
+    ]
+
+
+def _issue(key, label, severity, count, samples):
+    return {"key": key, "label": label, "severity": severity, "count": count, "samples": samples}
+
+
+def _entity_samples(queryset, fields):
+    return list(queryset.order_by("name").values(*fields)[:5])
+
+
+def _food_nutrient_samples(queryset):
+    return list(
+        queryset.order_by("food__name", "nutrient__name").values(
+            "id",
+            "food__name",
+            "food__slug",
+            "nutrient__name",
+            "nutrient__slug",
+            "amount",
+            "unit",
+        )[:5]
+    )
+
+
+def _supplement_nutrient_samples(queryset):
+    return list(
+        queryset.order_by("supplement__name", "nutrient__name").values(
+            "id",
+            "supplement__name",
+            "supplement__slug",
+            "nutrient__name",
+            "nutrient__slug",
+            "amount",
+            "unit",
+        )[:5]
+    )
+
+
+def _rule_samples(queryset):
+    return list(
+        queryset.order_by("antecedent_type", "antecedent_slug", "consequent_type", "consequent_slug").values(
+            "id",
+            "antecedent_type",
+            "antecedent_slug",
+            "consequent_type",
+            "consequent_slug",
+        )[:5]
+    )
+
+
+def _interaction_samples(queryset):
+    return list(
+        queryset.order_by("source_type", "source_key", "target_type", "target_key").values(
+            "id",
+            "source_type",
+            "source_key",
+            "target_type",
+            "target_key",
+            "interaction_type",
+            "evidence_level",
+        )[:5]
+    )
+
+
+def _rules_with_missing_entities():
+    slugs_by_type = {
+        AssociationRule.EntityType.FOOD: set(Food.objects.values_list("slug", flat=True)),
+        AssociationRule.EntityType.CATEGORY: set(FoodCategory.objects.values_list("slug", flat=True)),
+        AssociationRule.EntityType.NUTRIENT: set(Nutrient.objects.values_list("slug", flat=True)),
+        AssociationRule.EntityType.SUPPLEMENT: set(Supplement.objects.values_list("slug", flat=True)),
+    }
+    missing_rules = []
+    for rule in AssociationRule.objects.order_by("antecedent_type", "antecedent_slug", "consequent_type", "consequent_slug"):
+        missing = []
+        if rule.antecedent_slug not in slugs_by_type.get(rule.antecedent_type, set()):
+            missing.append("antecedent")
+        if rule.consequent_slug not in slugs_by_type.get(rule.consequent_type, set()):
+            missing.append("consequent")
+        if missing:
+            missing_rules.append(
+                {
+                    "id": rule.id,
+                    "antecedent_type": rule.antecedent_type,
+                    "antecedent_slug": rule.antecedent_slug,
+                    "consequent_type": rule.consequent_type,
+                    "consequent_slug": rule.consequent_slug,
+                    "missing": missing,
+                }
+            )
+    return missing_rules

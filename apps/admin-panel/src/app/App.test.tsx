@@ -994,6 +994,7 @@ describe("App", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /clear chats/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /^clear chats$/i }));
     await waitFor(() => {
       expect(chatsApi.clearAdminUserChatSessions).toHaveBeenCalledWith(2);
     });

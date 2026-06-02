@@ -4,9 +4,10 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.foods.models import Food, FoodCategory, FoodNutrient
-from apps.nutrients.models import Nutrient
+from apps.nutrients.models import Nutrient, NutrientInteraction
 from apps.feedback.models import RecommendationFeedback
 from apps.recommendations.models import RecommendationItem, SavedRecommendationItem
+from apps.rules.models import AssociationRule
 from apps.supplements.models import Supplement, SupplementNutrient, UserSupplement
 
 
@@ -144,3 +145,69 @@ def test_admin_dashboard_and_analytics(admin_api_client, authenticated_client, r
     assert recommendation_analytics.json()["total_items"] == 1
     assert feedback_analytics.status_code == 200
     assert feedback_analytics.json()["average_rating"] == 5
+
+
+def test_data_quality_is_admin_only(admin_api_client, authenticated_client):
+    user_response = authenticated_client.get(reverse("admin-data-quality"))
+    admin_response = admin_api_client.get(reverse("admin-data-quality"))
+
+    assert user_response.status_code == 403
+    assert admin_response.status_code == 200
+
+
+def test_admin_data_quality_reports_import_issues(admin_api_client):
+    category = FoodCategory.objects.create(name="Vegetables", slug="vegetables")
+    Food.objects.create(name="Nutrientless Kale", slug="nutrientless-kale", category=category)
+    Food.objects.create(name="Hidden Pear", slug="hidden-pear", category=category, is_active=False)
+    vitamin_c = Nutrient.objects.create(name="Vitamin C", slug="vitamin-c", unit="mg")
+    food_with_bad_amount = Food.objects.create(name="Zero Orange", slug="zero-orange", category=category)
+    FoodNutrient.objects.create(food=food_with_bad_amount, nutrient=vitamin_c, amount=0, unit="mg")
+    Supplement.objects.create(name="Nutrientless Supplement", slug="nutrientless-supplement")
+    Supplement.objects.create(name="Inactive Supplement", slug="inactive-supplement", is_active=False)
+    supplement = Supplement.objects.create(name="Incomplete Supplement", slug="incomplete-supplement")
+    SupplementNutrient.objects.create(supplement=supplement, nutrient=vitamin_c, amount=None, unit="")
+    AssociationRule.objects.create(
+        antecedent_type=AssociationRule.EntityType.SUPPLEMENT,
+        antecedent_slug="missing-supplement",
+        consequent_type=AssociationRule.EntityType.FOOD,
+        consequent_slug="nutrientless-kale",
+        support=0.1,
+        confidence=0.2,
+        lift=1.1,
+        explanation="Missing antecedent should be reported.",
+    )
+    AssociationRule.objects.create(
+        antecedent_type=AssociationRule.EntityType.NUTRIENT,
+        antecedent_slug="vitamin-c",
+        consequent_type=AssociationRule.EntityType.FOOD,
+        consequent_slug="hidden-pear",
+        support=0.1,
+        confidence=0.2,
+        lift=1.1,
+        explanation="Inactive rule should be reported.",
+        is_active=False,
+    )
+    NutrientInteraction.objects.create(
+        source_type=NutrientInteraction.EntityType.NUTRIENT,
+        source_key="vitamin-c",
+        target_type=NutrientInteraction.EntityType.FOOD,
+        target_key="nutrientless-kale",
+        interaction_type=NutrientInteraction.InteractionType.SUPPORTS,
+        mechanism="",
+        evidence_level=NutrientInteraction.EvidenceLevel.MEDIUM,
+    )
+
+    response = admin_api_client.get(reverse("admin-data-quality"))
+
+    assert response.status_code == 200
+    issues = {issue["key"]: issue for issue in response.json()["issues"]}
+    assert issues["foods_without_nutrients"]["count"] == 1
+    assert issues["inactive_foods"]["count"] == 1
+    assert issues["foods_with_zero_or_negative_nutrients"]["count"] == 1
+    assert issues["supplements_without_nutrients"]["count"] == 1
+    assert issues["inactive_supplements"]["count"] == 1
+    assert issues["supplement_nutrients_missing_amount_or_unit"]["count"] == 1
+    assert issues["association_rules_missing_entities"]["count"] == 1
+    assert issues["inactive_association_rules"]["count"] == 1
+    assert issues["nutrient_interactions_missing_context"]["count"] == 1
+    assert response.json()["issue_categories"] == 9
