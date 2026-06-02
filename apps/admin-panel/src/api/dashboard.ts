@@ -50,7 +50,26 @@ export type DashboardMetrics = {
   safety_constraint_type_counts: Array<{ constraint_type: string; count: number }>;
 };
 
+export type DataQualityIssue = {
+  key: string;
+  label: string;
+  severity: "high" | "medium" | "low" | string;
+  count: number;
+  samples: Array<Record<string, string | number | boolean | null | Array<string>>>;
+};
+
+export type DataQualityReport = {
+  total_issues: number;
+  issue_categories: number;
+  issues: DataQualityIssue[];
+};
+
 export async function fetchDashboardMetrics() {
   const response = await apiClient.get<DashboardMetrics>("/admin/dashboard/");
+  return response.data;
+}
+
+export async function fetchDataQualityReport() {
+  const response = await apiClient.get<DataQualityReport>("/analytics/data-quality/");
   return response.data;
 }

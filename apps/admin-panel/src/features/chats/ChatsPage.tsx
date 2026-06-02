@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Bot, MessageSquare, Search, Trash2, User, Utensils } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   clearAdminUserChatSessions,
@@ -10,12 +10,14 @@ import {
   type AdminChatSession,
   type AdminChatUser,
 } from "../../api/chats";
+import { ConfirmDialog } from "../../components/admin/ConfirmDialog";
 import { AdminPagination } from "../../components/admin/AdminPagination";
 import { ListSkeleton, MetricSkeletonGrid } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { getPositiveIntegerParam, updateUrlSearchParams } from "../../lib/url-state";
 
 const USER_PAGE_SIZE = 12;
 const SESSION_PAGE_SIZE = 8;
@@ -33,7 +35,7 @@ function formatDate(value?: string | null) {
 export function ChatsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
+  const page = getPositiveIntegerParam(searchParams.get("page"));
   const search = searchParams.get("search") || "";
   const queryParams = useMemo(
     () => ({
@@ -56,15 +58,7 @@ export function ChatsPage() {
   const visibleMessages = users.reduce((total, user) => total + user.chat_message_count, 0);
 
   const updateSearch = (updates: Record<string, string | number | null>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === "" || value === null) {
-        next.delete(key);
-      } else {
-        next.set(key, String(value));
-      }
-    });
-    setSearchParams(next);
+    setSearchParams(updateUrlSearchParams(searchParams, updates));
   };
 
   return (
@@ -132,9 +126,10 @@ export function UserChatsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { userId = "" } = useParams();
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
   const parsedUserId = Number(userId);
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
+  const page = getPositiveIntegerParam(searchParams.get("page"));
   const search = searchParams.get("search") || "";
   const queryParams = useMemo(
     () => ({
@@ -155,6 +150,7 @@ export function UserChatsPage() {
   const clearMutation = useMutation({
     mutationFn: () => clearAdminUserChatSessions(parsedUserId),
     onSuccess: async () => {
+      setIsClearConfirmOpen(false);
       await queryClient.invalidateQueries({ queryKey: ["admin-user-chats"] });
       await queryClient.invalidateQueries({ queryKey: ["admin-chat-users"] });
     },
@@ -170,15 +166,7 @@ export function UserChatsPage() {
   const assistantMessageCount = pageMessages.filter((message) => message.role === "assistant").length;
 
   const updateSearch = (updates: Record<string, string | number | null>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === "" || value === null) {
-        next.delete(key);
-      } else {
-        next.set(key, String(value));
-      }
-    });
-    setSearchParams(next);
+    setSearchParams(updateUrlSearchParams(searchParams, updates));
   };
 
   return (
@@ -193,7 +181,7 @@ export function UserChatsPage() {
             <ArrowLeft aria-hidden="true" size={17} />
             Back
           </Button>
-          <Button disabled={clearMutation.isPending || !Number.isFinite(parsedUserId)} onClick={() => clearMutation.mutate()} type="button" variant="destructive">
+          <Button disabled={clearMutation.isPending || !Number.isFinite(parsedUserId)} onClick={() => setIsClearConfirmOpen(true)} type="button" variant="destructive">
             <Trash2 aria-hidden="true" size={17} />
             {clearMutation.isPending ? "Clearing" : "Clear chats"}
           </Button>
@@ -248,6 +236,15 @@ export function UserChatsPage() {
           </div>
         </CardContent>
       </Card>
+      <ConfirmDialog
+        confirmLabel="Clear chats"
+        description={selectedUser ? `Clear all chat sessions for ${selectedUser.email}? This cannot be undone.` : "Clear all chat sessions for this user?"}
+        isLoading={clearMutation.isPending}
+        onConfirm={() => clearMutation.mutate()}
+        onOpenChange={setIsClearConfirmOpen}
+        open={isClearConfirmOpen}
+        title="Clear user chats"
+      />
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import {
   Activity,
   Apple,
+  ClipboardCheck,
   Database,
   LayoutDashboard,
   MessageSquare,
@@ -12,10 +13,23 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type AdminRouteId = "dashboard" | "foods" | "food-form" | "knowledge" | "rules" | "rule-dataset" | "recommendations" | "evaluation" | "feedback" | "chats" | "users";
+export type AdminRouteId =
+  | "dashboard"
+  | "data-quality"
+  | "foods"
+  | "food-form"
+  | "knowledge"
+  | "rules"
+  | "rule-dataset"
+  | "recommendations"
+  | "evaluation"
+  | "feedback"
+  | "chats"
+  | "users";
 
 export const adminRoutes = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
+  { id: "data-quality", label: "Data Quality", icon: ClipboardCheck, path: "/data-quality" },
   { id: "foods", label: "Foods", icon: Apple, path: "/foods" },
   { id: "food-form", label: "Add Food", icon: Plus, path: "/foods/new" },
   { id: "knowledge", label: "Knowledge Base", icon: Database, path: "/knowledge" },

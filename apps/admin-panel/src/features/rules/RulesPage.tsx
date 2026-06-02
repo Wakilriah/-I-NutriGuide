@@ -14,6 +14,7 @@ import {
   type EntityType,
   updateAssociationRule,
 } from "../../api/rules";
+import { ConfirmDialog } from "../../components/admin/ConfirmDialog";
 import { AdminPagination } from "../../components/admin/AdminPagination";
 import { MetricSkeletonGrid, TableSkeleton } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
@@ -24,6 +25,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { invalidateDashboard } from "../../lib/query-keys";
+import { getPositiveIntegerParam, updateUrlSearchParams } from "../../lib/url-state";
 
 const PAGE_SIZE = 10;
 const entityTypes: EntityType[] = ["supplement", "nutrient", "food", "category"];
@@ -59,8 +61,9 @@ export function RulesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [editingRule, setEditingRule] = useState<AssociationRule | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState<AssociationRule | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const page = Number(searchParams.get("rules_page") || "1");
+  const page = getPositiveIntegerParam(searchParams.get("rules_page"));
   const search = searchParams.get("rules_search") || "";
   const statusFilter = searchParams.get("rules_active") || "";
   const entityFilter = searchParams.get("rules_entity") || "";
@@ -114,15 +117,7 @@ export function RulesPage() {
   }, [editingRule, form]);
 
   const updateSearch = (updates: Record<string, string | number | null>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === "" || value === null) {
-        next.delete(key);
-      } else {
-        next.set(key, String(value));
-      }
-    });
-    setSearchParams(next);
+    setSearchParams(updateUrlSearchParams(searchParams, updates));
   };
 
   const refreshRules = async () => {
@@ -141,7 +136,14 @@ export function RulesPage() {
     },
   });
 
-  const deleteMutation = useMutation({ mutationKey: ["association-rules", "delete"], mutationFn: deleteAssociationRule, onSuccess: refreshRules });
+  const deleteMutation = useMutation({
+    mutationKey: ["association-rules", "delete"],
+    mutationFn: deleteAssociationRule,
+    onSuccess: async () => {
+      setRuleToDelete(null);
+      await refreshRules();
+    },
+  });
 
   const openCreateDialog = () => {
     setFormError(null);
@@ -264,7 +266,7 @@ export function RulesPage() {
                   <Button
                     aria-label={`Delete rule ${rule.id}`}
                     disabled={deleteMutation.isPending && deleteMutation.variables === rule.id}
-                    onClick={() => deleteMutation.mutate(rule.id)}
+                    onClick={() => setRuleToDelete(rule)}
                     size="icon"
                     type="button"
                     variant="destructive"
@@ -349,6 +351,15 @@ export function RulesPage() {
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        confirmLabel="Delete rule"
+        description={ruleToDelete ? `Delete rule ${ruleToDelete.antecedent_slug} -> ${ruleToDelete.consequent_slug}? This cannot be undone.` : "Delete this rule?"}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => ruleToDelete && deleteMutation.mutate(ruleToDelete.id)}
+        onOpenChange={(open) => !open && setRuleToDelete(null)}
+        open={Boolean(ruleToDelete)}
+        title="Delete association rule"
+      />
     </section>
   );
 }
