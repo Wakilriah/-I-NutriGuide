@@ -11,8 +11,12 @@ class RecommendationFeedback(models.Model):
         NOT_INTERESTED = "not_interested", "Not interested"
         UNSAFE_FOR_ME = "unsafe_for_me", "Unsafe for me"
         TOO_EXPENSIVE = "too_expensive", "Too expensive"
+        NOT_AVAILABLE = "not_available", "Not available"
         BAD_TASTE = "bad_taste", "Bad taste"
         ALLERGY_ISSUE = "allergy_issue", "Allergy issue"
+        DO_NOT_EAT = "do_not_eat", "I do not eat this food"
+        ALREADY_TRIED = "already_tried", "Already tried"
+        GOOD_RECOMMENDATION = "good_recommendation", "Good recommendation"
         HELPFUL = "helpful", "Helpful"
         NOT_HELPFUL = "not_helpful", "Not helpful"
 
@@ -26,6 +30,8 @@ class RecommendationFeedback(models.Model):
     feedback_type = models.CharField(max_length=30, choices=FeedbackType.choices, default=FeedbackType.HELPFUL)
     rating = models.PositiveSmallIntegerField(null=True, blank=True)
     is_helpful = models.BooleanField(default=True)
+    reason = models.CharField(max_length=120, blank=True)
+    supplement_context = models.JSONField(default=list, blank=True)
     comment = models.TextField(blank=True)
     context = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

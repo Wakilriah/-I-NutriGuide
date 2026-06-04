@@ -14,6 +14,8 @@ export type Supplement = {
   slug: string;
   description: string;
   common_dose: string;
+  source: string;
+  source_id: string;
   is_active: boolean;
   nutrients: SupplementNutrient[];
   created_at: string;

@@ -3,9 +3,9 @@ from apps.feedback.models import RecommendationFeedback
 from .normalizer import clamp
 
 
-POSITIVE_FEEDBACK = {"liked", "saved", "tried", "helpful"}
-NEGATIVE_FEEDBACK = {"disliked", "not_interested", "bad_taste", "not_helpful", "too_expensive"}
-BLOCKING_FEEDBACK = {"unsafe_for_me", "allergy_issue"}
+POSITIVE_FEEDBACK = {"liked", "saved", "tried", "helpful", "already_tried", "good_recommendation"}
+NEGATIVE_FEEDBACK = {"disliked", "not_interested", "bad_taste", "not_helpful", "too_expensive", "not_available"}
+BLOCKING_FEEDBACK = {"unsafe_for_me", "allergy_issue", "do_not_eat"}
 
 
 def feedback_score_for_food(user, food) -> tuple[float, bool]:

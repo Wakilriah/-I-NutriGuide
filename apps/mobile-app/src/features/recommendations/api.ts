@@ -1,11 +1,27 @@
-import { apiClient } from "../../lib/api";
+import { apiClient, getBackendMediaUrl } from "../../lib/api";
+
+export function resolveFoodImageUri(imagePath?: string | null) {
+  return getBackendMediaUrl(imagePath);
+}
 
 export type RecommendationItem = {
   id: number;
   recommendation_id?: number;
   run_id: string;
   rank: number;
-  food: { id: number; name: string; slug: string; category: string; nutrients?: string[] };
+  food: {
+    id: number;
+    name: string;
+    food_name?: string;
+    slug: string;
+    category: string;
+    image_path?: string;
+    image_alt?: string;
+    nutrient_tags?: string[];
+    synergy_reason?: string;
+    avoid_or_caution?: string;
+    nutrients?: string[];
+  };
   matched_supplement: { id: number; name: string; slug: string } | null;
   score: string | number;
   confidence_score?: number;
@@ -15,8 +31,14 @@ export type RecommendationItem = {
   rule_score: string | number;
   preference_score: string | number;
   matched_nutrients: string[];
+  matched_rules: RecommendationRuleMatch[];
   tags: string[];
   warnings: RecommendationWarning[];
+  safety_status?: "SAFE" | "WARNING" | "BLOCKED";
+  safety_level?: "LOW" | "MEDIUM" | "HIGH";
+  safety_message?: string;
+  blocked_reason?: string;
+  alternatives?: Array<RecommendationItem["food"] & { match_score?: number; reason?: string }>;
   explanation: RecommendationExplanation | string;
   feedback?: {
     user_feedback: null | {
@@ -29,6 +51,23 @@ export type RecommendationItem = {
   };
 };
 
+export type RecommendationRuleMatch = {
+  antecedent?: string;
+  consequent?: string;
+  antecedent_items?: string[];
+  consequent_items?: string[];
+  support?: number;
+  confidence?: number;
+  lift?: number;
+  explanation?: string;
+  score?: number;
+  source?: string;
+  rule_type?: string;
+  food_slug?: string;
+  image_path?: string;
+  image_alt?: string;
+};
+
 export type RecommendationReason = {
   type: string;
   title: string;
@@ -39,10 +78,13 @@ export type RecommendationReason = {
 export type RecommendationExplanation = {
   summary: string;
   reasons: RecommendationReason[];
+  alternatives?: Array<RecommendationItem["food"] & { match_score?: number; reason?: string }>;
+  score_details?: Record<string, unknown>;
 };
 
 export type RecommendationWarning = string | {
-  level: "info" | "caution" | "warning";
+  level: "info" | "caution" | "warning" | "LOW" | "MEDIUM" | "HIGH";
+  safety_level?: "LOW" | "MEDIUM" | "HIGH";
   type: string;
   title: string;
   message: string;
@@ -54,6 +96,11 @@ export type RecommendationRun = {
   created_at: string;
   disclaimer: string;
   items: RecommendationItem[];
+};
+
+export type RecommendationGenerationJob = {
+  status: "queued";
+  task_id: string;
 };
 
 export type SavedRecommendationItem = {
@@ -70,8 +117,12 @@ export type FeedbackType =
   | "not_interested"
   | "unsafe_for_me"
   | "too_expensive"
+  | "not_available"
   | "bad_taste"
   | "allergy_issue"
+  | "do_not_eat"
+  | "already_tried"
+  | "good_recommendation"
   | "helpful"
   | "not_helpful";
 
@@ -82,11 +133,38 @@ export type FeedbackPayload = {
   rating?: number;
   is_helpful?: boolean;
   comment?: string;
+  reason?: string;
+  supplement_context?: unknown[];
   context?: Record<string, unknown>;
+};
+
+export type TimingPlanItem = {
+  supplement: { id: number; name: string; slug: string };
+  best_time: string;
+  recommended_foods: RecommendationItem[];
+  avoid_near_intake: string[];
+  explanation: string;
+  warnings: Array<{ level: string; message: string }>;
+};
+
+export type MealPlan = {
+  meals: Record<string, {
+    slot: string;
+    foods: Array<Partial<RecommendationItem> & { food_name?: string; name?: string }>;
+    supplement_connection: string;
+    explanation: string;
+    warnings: RecommendationWarning[];
+  }>;
+  warnings: RecommendationWarning[];
 };
 
 export async function generateRecommendations(limit = 10) {
   const response = await apiClient.post<RecommendationRun>("/recommendations/generate/", { limit });
+  return response.data;
+}
+
+export async function queueRecommendationGeneration(limit = 10) {
+  const response = await apiClient.post<RecommendationGenerationJob>("/recommendations/generate/", { limit, async_generate: true });
   return response.data;
 }
 
@@ -97,6 +175,16 @@ export async function listRecommendationHistory() {
 
 export async function getRecommendationRun(runId: string) {
   const response = await apiClient.get<RecommendationRun>(`/recommendations/history/${runId}/`);
+  return response.data;
+}
+
+export async function getTimingPlan() {
+  const response = await apiClient.get<{ items: TimingPlanItem[] }>("/recommendations/timing-plan/");
+  return response.data;
+}
+
+export async function getMealPlan() {
+  const response = await apiClient.get<MealPlan>("/recommendations/meal-plan/");
   return response.data;
 }
 

@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { router } from "expo-router";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -26,7 +27,11 @@ export function usePushNotifications() {
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+      const url = response.notification.request.content.data?.url;
+      if (typeof url === "string") {
+        const path = url.replace("inutriguide://", "/");
+        router.push(path as never);
+      }
     });
 
     return () => {
@@ -51,6 +56,18 @@ async function registerForPushNotificationsAsync() {
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
+    });
+    Notifications.setNotificationChannelAsync('supplements', {
+      name: 'Supplement reminders',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250],
+      lightColor: '#1F6F43',
+    });
+    Notifications.setNotificationChannelAsync('recommendations', {
+      name: 'Recommendation updates',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250],
+      lightColor: '#935A12',
     });
   }
 

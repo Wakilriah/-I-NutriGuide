@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide | Daily Meal Plan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&amp;family=Plus+Jakarta+Sans:wght@200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;family=Quicksand:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "tertiary-container": "#418340",
+                  "primary-container": "#098730",
+                  "on-surface-variant": "#3f4a3d",
+                  "tertiary-fixed-dim": "#91d78a",
+                  "primary-fixed-dim": "#71dd7a",
+                  "outline": "#6f7a6c",
+                  "on-primary-container": "#f7fff1",
+                  "background": "#f7f9ff",
+                  "error-container": "#ffdad6",
+                  "surface-container-low": "#edf4ff",
+                  "surface-container-highest": "#d9e3f1",
+                  "on-secondary-fixed-variant": "#643f00",
+                  "secondary": "#845400",
+                  "on-surface": "#121d26",
+                  "inverse-surface": "#27313c",
+                  "surface-tint": "#006e24",
+                  "surface-variant": "#d9e3f1",
+                  "surface": "#f7f9ff",
+                  "on-primary-fixed-variant": "#005319",
+                  "on-tertiary-container": "#f7fff1",
+                  "on-primary-fixed": "#002106",
+                  "secondary-container": "#fda611",
+                  "on-background": "#121d26",
+                  "primary": "#006b23",
+                  "surface-bright": "#f7f9ff",
+                  "surface-dim": "#d1dbe8",
+                  "on-error-container": "#93000a",
+                  "secondary-fixed-dim": "#ffb95b",
+                  "on-tertiary-fixed-variant": "#0c5216",
+                  "inverse-primary": "#71dd7a",
+                  "inverse-on-surface": "#e8f2ff",
+                  "surface-container-lowest": "#ffffff",
+                  "error": "#ba1a1a",
+                  "on-error": "#ffffff",
+                  "secondary-fixed": "#ffddb6",
+                  "tertiary-fixed": "#acf4a4",
+                  "surface-container": "#e4effd",
+                  "on-tertiary": "#ffffff",
+                  "on-tertiary-fixed": "#002203",
+                  "on-primary": "#ffffff",
+                  "on-secondary": "#ffffff",
+                  "outline-variant": "#becab9",
+                  "on-secondary-container": "#684100",
+                  "surface-container-high": "#dfe9f7",
+                  "tertiary": "#276929",
+                  "primary-fixed": "#8dfa94",
+                  "on-secondary-fixed": "#2a1800"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "section-gap": "40px",
+                  "stack-gap": "16px",
+                  "base": "8px",
+                  "container-padding": "24px",
+                  "gutter": "16px"
+          },
+          "fontFamily": {
+                  "body-md": ["Plus Jakarta Sans"],
+                  "body-lg": ["Plus Jakarta Sans"],
+                  "headline-lg": ["Quicksand"],
+                  "label-md": ["Plus Jakarta Sans"],
+                  "headline-md": ["Quicksand"],
+                  "headline-lg-mobile": ["Quicksand"],
+                  "display-lg": ["Quicksand"]
+          },
+          "fontSize": {
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                  "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #f7f9ff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .meal-card-image {
+      transition: transform 0.5s ease;
+    }
+    .meal-card:hover .meal-card-image {
+      transform: scale(1.05);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top App Bar (Shared Component) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-on-primary/20">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a smiling woman with a clear complexion, radiating health and vitality. The lighting is soft and natural, against a clean, warm beige background. She represents the target audience of health-conscious individuals seeking a modern, approachable wellness partnership. The overall aesthetic is minimalist and high-end." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNVex4jyrkky8uBkAtQS8UQUxCq_jBxUMBaFyhMruGhMtmCITuiI4LwUxER1BOkM8NxBoh0kYabevD5obwbWxCvC7tytKRuvPY8TDaSaDwv5ZnGW-WfbNyBaXLZsaHvwDSqQ3JPwvztoDKfXGSXdKWbzP-1y0ubdRw9cdVCmqyOVKMkBcrCmqESNCNqsJsrvqYeOg3NUA9TI1FG0AIU9HK-QdInbMRUQs5ybJ38HGhH_KVs-8TUfn_Q0cIlcsUoa96u6iPgSo14BE"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</h1>
+</div>
+<button class="material-symbols-outlined text-on-primary hover:opacity-90 transition-opacity active:scale-95">notifications</button>
+</header>
+<main class="mt-20 px-container-padding max-w-[1200px] mx-auto">
+<!-- Date & Daily Summary Header -->
+<section class="mb-section-gap">
+<div class="flex justify-between items-end mb-stack-gap">
+<div>
+<p class="font-label-md text-label-md text-primary font-bold tracking-wider uppercase">Today's Plan</p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Monday, June 12</h2>
+</div>
+<div class="bg-secondary-container/10 px-4 py-2 rounded-lg border border-secondary-container/20">
+<p class="font-label-md text-label-md text-secondary">Target: 2,100 kcal</p>
+</div>
+</div>
+<!-- Quick Stats / Progress Rings Micro-section -->
+<div class="grid grid-cols-3 gap-gutter">
+<div class="bg-white p-4 rounded-lg shadow-sm border border-surface-variant flex flex-col items-center">
+<div class="relative w-12 h-12 mb-2">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-variant" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="37" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center font-label-md text-[10px]">70%</span>
+</div>
+<span class="font-label-md text-[12px] text-outline">Protein</span>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm border border-surface-variant flex flex-col items-center">
+<div class="relative w-12 h-12 mb-2">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-variant" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-secondary" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="62" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center font-label-md text-[10px]">50%</span>
+</div>
+<span class="font-label-md text-[12px] text-outline">Carbs</span>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm border border-surface-variant flex flex-col items-center">
+<div class="relative w-12 h-12 mb-2">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-variant" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-tertiary" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="88" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center font-label-md text-[10px]">30%</span>
+</div>
+<span class="font-label-md text-[12px] text-outline">Fats</span>
+</div>
+</div>
+</section>
+<!-- Meal Plan Vertical List -->
+<div class="flex flex-col gap-stack-gap">
+<!-- Breakfast Card -->
+<article class="meal-card group bg-white rounded-lg overflow-hidden shadow-sm border border-surface-variant transition-all hover:shadow-md">
+<div class="relative h-48 md:h-64 overflow-hidden">
+<img class="meal-card-image w-full h-full object-cover" data-alt="A vibrant, top-down shot of a nutrient-dense breakfast bowl featuring quinoa, avocado slices, a soft-boiled egg, and microgreens. The scene is bright and airy with natural morning sunlight creating soft shadows. The color palette is fresh with greens, whites, and earthy tones, aligning with the modern organic minimalism of the design system. High-resolution food photography that inspires appetite and wellness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH0LI29kPRswiumGXGUCZc9Ymu1be8LbDNgJBaqmJGNRK89Mx2DhTbhOUcn9wgBQbxRSQoA_JLj2jD-YHYSbneHPbSrXkmc0ZUVQAN46VZPLRwSbZnmtzrbwPAMBZ4yQdpvel9ewqcVyruILrfcpeR8nEuNslsVefbt-0RMPgndWz85AHx5mxkjxRL9vFiIUaOiFwlRCC3hBWe2IKP_LGdvlLFL3au5Zz_q0dFYrHa1_8HqAkBiiFUf7CjjeFcncmn5G2HH5KrDFI"/>
+<div class="absolute top-4 left-4 glass-pill px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">wb_sunny</span>
+<span class="font-label-md text-label-md text-on-surface">Breakfast</span>
+</div>
+<div class="absolute bottom-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-[12px] font-bold">
+            08:30 AM
+          </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Protein Power Morning Bowl</h3>
+<div class="bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">pill</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Supports B12</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-outline mb-4 italic">Quinoa base, sliced avocado, poached egg, pumpkin seeds, and nutritional yeast sprinkles.</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-surface-container text-primary font-label-md text-[12px] px-3 py-1 rounded-full border border-primary/10">High Protein</span>
+<span class="bg-surface-container text-primary font-label-md text-[12px] px-3 py-1 rounded-full border border-primary/10">Fiber Rich</span>
+</div>
+<div class="bg-surface p-4 rounded-lg border-l-4 border-primary">
+<p class="font-body-md text-body-md text-on-surface-variant">The nutritional yeast provides a natural savory flavor while significantly boosting your Vitamin B12 levels for early morning cognitive clarity.</p>
+</div>
+</div>
+</article>
+<!-- Lunch Card -->
+<article class="meal-card group bg-white rounded-lg overflow-hidden shadow-sm border border-surface-variant transition-all hover:shadow-md">
+<div class="relative h-48 md:h-64 overflow-hidden">
+<img class="meal-card-image w-full h-full object-cover" data-alt="A gourmet salad bowl featuring grilled salmon, roasted sweet potatoes, and kale, drizzled with a light tahini dressing. The presentation is clean and professional, set on a light wood surface. The lighting is warm and inviting, emphasizing the textures of the fresh ingredients. The color palette incorporates rich oranges and deep greens, consistent with the living wellness philosophy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSYy_Uj5n-WFBeDYndXYAT3TmV0Kh3UIVc_7fJgqPIBdJJtCLf1lHn6jrxQMQe9R0jMBZ6hNl2KOQ5MosQzXG3Wam7651g5D6zMFGYTfAozXImA3QsdczNzZCLm86rxRa5jrW-Zs-AgvH8iv_FI0I_B4WGZcIFxxAxuy1uZFNRq9ogtm3W6CEpOl248yYQGxOwEMrb3SCynwVgTZlpesFAZpFABAbR4Gd1EK_yOkbtSpjIvWJHQ87cU4imAWCbZlwPty86gyRV6dU"/>
+<div class="absolute top-4 left-4 glass-pill px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">lunch_dining</span>
+<span class="font-label-md text-label-md text-on-surface">Lunch</span>
+</div>
+<div class="absolute bottom-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-[12px] font-bold">
+            01:00 PM
+          </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Omega-3 Zest Salmon Salad</h3>
+<div class="bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">pill</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Supports D3</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-outline mb-4 italic">Grilled wild salmon, baby spinach, roasted sweet potato cubes, walnut halves, and lemon-tahini dressing.</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-surface-container text-primary font-label-md text-[12px] px-3 py-1 rounded-full border border-primary/10">Omega-3</span>
+<span class="bg-surface-container text-primary font-label-md text-[12px] px-3 py-1 rounded-full border border-primary/10">Low Glycemic</span>
+</div>
+<div class="bg-surface p-4 rounded-lg border-l-4 border-secondary">
+<p class="font-body-md text-body-md text-on-surface-variant">The healthy fats in salmon and walnuts enhance the absorption of fat-soluble vitamins like D3 from your midday supplements.</p>
+</div>
+</div>
+</article>
+<!-- Snack Card -->
+<article class="meal-card group bg-white rounded-lg overflow-hidden shadow-sm border border-surface-variant transition-all hover:shadow-md">
+<div class="relative h-48 md:h-64 overflow-hidden">
+<img class="meal-card-image w-full h-full object-cover" data-alt="A minimalist close-up of Greek yogurt topped with fresh blueberries and a drizzle of honey in a small ceramic bowl. The lighting is soft and focused, creating a tactile and approachable feel. The background is a clean white marble, reinforcing the sense of purity and health. The blue and white tones create a calm and refreshing visual experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHnvaoHzu6MswYxB-QNETZT4hw1mxvSH8RZTQK_OutXnEpOYhU_GT1SXeF80Bmvt_R_hc1xspa3ROBOJEYn6Z1xkHBMPfYbD9Je4aNbeywwUVw1zgKqJ6YAI_PQs-d4ksUcvm4-DEUp_zD7Jk8IfAffEAJzzv2yAka4W9cEKDYSFdiBJ6P92m7Bi9fTB1FCNPo767hcvBAavGXgO7jYKce-3MEwAZQ4Zq6aGhWbMRSmMZlKbKbeYAgKcwM865VELW2yJHyB3AfW3k"/>
+<div class="absolute top-4 left-4 glass-pill px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary">bakery_dining</span>
+<span class="font-label-md text-label-md text-on-surface">Snack</span>
+</div>
+<div class="absolute bottom-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-[12px] font-bold">
+            04:30 PM
+          </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Antioxidant Berry Crunch</h3>
+<div class="bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">pill</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Supports Zinc</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-outline mb-4 italic">Greek yogurt, fresh blueberries, hemp seeds, and a dash of cinnamon.</p>
+<div class="bg-surface p-4 rounded-lg border-l-4 border-tertiary">
+<p class="font-body-md text-body-md text-on-surface-variant">Hemp seeds are a rich plant-based source of zinc, working synergistically with yogurt's probiotics to support immune health.</p>
+</div>
+</div>
+</article>
+<!-- Dinner Card -->
+<article class="meal-card group bg-white rounded-lg overflow-hidden shadow-sm border border-surface-variant transition-all hover:shadow-md">
+<div class="relative h-48 md:h-64 overflow-hidden">
+<img class="meal-card-image w-full h-full object-cover" data-alt="An elegant evening dinner scene featuring a roasted vegetable medley with chickpeas and a side of steamed broccoli. The lighting is warm and dim, creating a calm and relaxing mood for the end of the day. The food is beautifully plated on a dark ceramic dish, making the vibrant colors of the vegetables pop. The aesthetic is sophisticated yet comforting, promoting restful digestion." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0hXjNLd2xzH3Z6dOYhywbyunuBHGamTmJNiHW_POL0SoxMwD5C4vfRgfUxSem_PegbWR_JzZjoT39VsjRiyGGGooUTfjqjizEgRhr29B5V3rPNDs0KTCDSxpzSVbmKrlxvFmeVmgVjc5xNnxYP3rYTa0TfET1UJZuDnUhSIqZ6JKtBLhKEkKD6p_-arA98hCITc7hcS-MgSjvXqVCR13lsROXaNiE_KAtlhyhxFxvAPXRlUBdIuJOib7vTyF8JGEh4rHnt6nYryM"/>
+<div class="absolute top-4 left-4 glass-pill px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">nights_stay</span>
+<span class="font-label-md text-label-md text-on-surface">Dinner</span>
+</div>
+<div class="absolute bottom-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-[12px] font-bold">
+            07:30 PM
+          </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Calming Mediterranean Roast</h3>
+<div class="bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">pill</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Supports Magnesium</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-outline mb-4 italic">Roasted cauliflower, chickpeas, garlic-steamed broccoli, and tahini drizzle.</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-surface-container text-primary font-label-md text-[12px] px-3 py-1 rounded-full border border-primary/10">Easy Digest</span>
+<span class="bg-surface-container text-primary font-label-md text-[12px] px-3 py-1 rounded-full border border-primary/10">Anti-Inflammatory</span>
+</div>
+<div class="bg-surface p-4 rounded-lg border-l-4 border-outline">
+<p class="font-body-md text-body-md text-on-surface-variant">Broccoli and chickpeas provide natural magnesium, which helps relax your muscles and prepare your body for deep, restorative sleep.</p>
+</div>
+</div>
+</article>
+</div>
+<!-- AI Guide Floating Tooltip -->
+<div class="mt-section-gap mb-8">
+<div class="bg-gradient-to-br from-primary to-tertiary p-6 rounded-lg shadow-lg relative overflow-hidden">
+<div class="absolute -right-4 -top-4 opacity-20 transform rotate-12">
+<span class="material-symbols-outlined text-[120px] text-white">auto_awesome</span>
+</div>
+<div class="flex gap-4 items-start relative z-10">
+<div class="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white">smart_toy</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-white mb-2">Guide Insight</h4>
+<p class="font-body-md text-body-md text-white/90">Your meal plan today is optimized to maximize the bioavailability of your current supplement stack. Ensure you drink 500ml of water with your lunch for optimal hydration.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Shared Component) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<!-- ACTIVE TAB: Recs (Daily Meal Plan) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 scale-95 shadow-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+    // Micro-interactions for meal cards
+    document.querySelectorAll('.meal-card').forEach(card => {
+      card.addEventListener('click', () => {
+        card.classList.add('scale-[0.98]');
+        setTimeout(() => {
+          card.classList.remove('scale-[0.98]');
+        }, 150);
+      });
+    });
+
+    // Simple scroll behavior for top app bar
+    let lastScroll = 0;
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll > lastScroll && currentScroll > 100) {
+        header.style.transform = 'translateY(-100%)';
+      } else {
+        header.style.transform = 'translateY(0)';
+      }
+      header.style.transition = 'transform 0.3s ease';
+      lastScroll = currentScroll;
+    });
+  </script>
+</body></html>

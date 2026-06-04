@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide | Home Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Quicksand:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "tertiary-container": "#418340",
+                  "primary-container": "#098730",
+                  "on-surface-variant": "#3f4a3d",
+                  "tertiary-fixed-dim": "#91d78a",
+                  "primary-fixed-dim": "#71dd7a",
+                  "outline": "#6f7a6c",
+                  "on-primary-container": "#f7fff1",
+                  "background": "#f7f9ff",
+                  "error-container": "#ffdad6",
+                  "surface-container-low": "#edf4ff",
+                  "surface-container-highest": "#d9e3f1",
+                  "on-secondary-fixed-variant": "#643f00",
+                  "secondary": "#845400",
+                  "on-surface": "#121d26",
+                  "inverse-surface": "#27313c",
+                  "surface-tint": "#006e24",
+                  "surface-variant": "#d9e3f1",
+                  "surface": "#f7f9ff",
+                  "on-primary-fixed-variant": "#005319",
+                  "on-tertiary-container": "#f7fff1",
+                  "on-primary-fixed": "#002106",
+                  "secondary-container": "#fda611",
+                  "on-background": "#121d26",
+                  "primary": "#006b23",
+                  "surface-bright": "#f7f9ff",
+                  "surface-dim": "#d1dbe8",
+                  "on-error-container": "#93000a",
+                  "secondary-fixed-dim": "#ffb95b",
+                  "on-tertiary-fixed-variant": "#0c5216",
+                  "inverse-primary": "#71dd7a",
+                  "inverse-on-surface": "#e8f2ff",
+                  "surface-container-lowest": "#ffffff",
+                  "error": "#ba1a1a",
+                  "on-error": "#ffffff",
+                  "secondary-fixed": "#ffddb6",
+                  "tertiary-fixed": "#acf4a4",
+                  "surface-container": "#e4effd",
+                  "on-tertiary": "#ffffff",
+                  "on-tertiary-fixed": "#002203",
+                  "on-primary": "#ffffff",
+                  "on-secondary": "#ffffff",
+                  "outline-variant": "#becab9",
+                  "on-secondary-container": "#684100",
+                  "surface-container-high": "#dfe9f7",
+                  "tertiary": "#276929",
+                  "primary-fixed": "#8dfa94",
+                  "on-secondary-fixed": "#2a1800"
+          },
+          "borderRadius": {
+                  "DEFAULT": "1rem",
+                  "lg": "2rem",
+                  "xl": "3rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "section-gap": "40px",
+                  "stack-gap": "16px",
+                  "base": "8px",
+                  "container-padding": "24px",
+                  "gutter": "16px"
+          },
+          "fontFamily": {
+                  "body-md": ["Plus Jakarta Sans"],
+                  "body-lg": ["Plus Jakarta Sans"],
+                  "headline-lg": ["Quicksand"],
+                  "label-md": ["Plus Jakarta Sans"],
+                  "headline-md": ["Quicksand"],
+                  "headline-lg-mobile": ["Quicksand"],
+                  "display-lg": ["Quicksand"]
+          },
+          "fontSize": {
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                  "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #f7f9ff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-on-primary/20 transition-transform active:scale-95">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a friendly man with a warm smile, set against a soft-focus garden background. The lighting is bright and natural, reflecting a healthy and vibrant lifestyle. The overall aesthetic is clean, modern, and trustworthy, perfectly fitting a high-end health and wellness application interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf7ZReVG18_ByyQnMJ8n1CEOjmJoFtjlsmysaImp9agyV2u86H-k_H5Re_yIzH45yX0KImfTYx145eE6FIHCU8Tywn_qkHdicpdKkYixxsVkpNzvRFMf7LKLPFjT4eMIDK9UAVMBkFXUdGZw6lEt6NTvKDAAxXG5IRKdeV4fBufqSz00ii2zeVp-hMDmkNWLyntoSJOcbrGsZCriWVZ0g09kUtFLLPc1GXCrWcEWcTsXyLk7Rb6mJJ7D8ym0RLgOL37r2CgA1HWQ0"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</h1>
+</div>
+<button class="text-on-primary hover:opacity-90 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-[28px]" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="mt-20 px-container-padding max-w-[1200px] mx-auto">
+<!-- Greeting Section -->
+<section class="mb-section-gap">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Good morning, Alex!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Ready to fuel your body with intent today?</p>
+</section>
+<!-- Bento Grid Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap mb-section-gap">
+<!-- Card 1: Supplement Plan -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-[0_4px_20px_rgba(0,107,35,0.08)] flex flex-col justify-between min-h-[180px] transition-transform hover:scale-[1.01]">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="pill">pill</span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wider">Next Supplement</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Vitamin D3</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Scheduled for 9:00 AM</p>
+</div>
+<button class="mt-4 bg-secondary-container text-on-secondary-container py-2 px-6 rounded-full font-label-md text-label-md w-fit hover:opacity-90 transition-opacity active:scale-95">
+          Mark as Taken
+        </button>
+</div>
+<!-- Card 2: Daily Nutrition Tip -->
+<div class="bg-tertiary-container text-on-tertiary-container p-6 rounded-lg shadow-lg relative overflow-hidden transition-transform hover:scale-[1.01]">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Daily Nutrition Tip</span>
+</div>
+<p class="font-headline-md text-headline-md leading-tight">Pair your Iron with Vitamin C for better absorption.</p>
+</div>
+<div class="absolute -bottom-4 -right-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="restaurant">restaurant</span>
+</div>
+</div>
+</div>
+<!-- Safety Reminder -->
+<section class="mb-section-gap">
+<div class="bg-error-container/40 border border-error/10 p-4 rounded-lg flex items-start gap-4">
+<div class="bg-error text-on-error p-1 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-error-container">Interaction Alert</h4>
+<p class="font-body-md text-body-md text-on-error-container/80">Calcium may reduce the efficacy of your current antibiotic. Space them by 4 hours.</p>
+</div>
+</div>
+</section>
+<!-- Quick Actions Grid -->
+<section class="mb-section-gap">
+<div class="grid grid-cols-3 gap-4">
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all active:scale-90">
+<span class="material-symbols-outlined text-[32px]" data-icon="add_circle">add_circle</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Add Supp</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all active:scale-90">
+<span class="material-symbols-outlined text-[32px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Generate</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all active:scale-90">
+<span class="material-symbols-outlined text-[32px]" data-icon="visibility">visibility</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">View Recs</span>
+</button>
+</div>
+</section>
+<!-- Horizontal Scroll: Top Recommended Foods -->
+<section class="mb-section-gap">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Top Recommended</h2>
+<button class="font-label-md text-label-md text-primary">See All</button>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 custom-scroll snap-x">
+<!-- Food Card 1 -->
+<div class="min-w-[260px] snap-start group cursor-pointer">
+<div class="h-[180px] rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A vibrant spinach salad bowl with fresh green leaves, bright red pomegranate seeds, and toasted almonds, captured from a top-down perspective. The lighting is soft and airy, emphasizing the freshness of the ingredients. The background is a clean white marble surface, creating a modern, high-end organic aesthetic that inspires healthy eating." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRXzJ30jcMfUL46RtN2lKfbhLDJtHVNO-owOCTnXKTz1iIjQhB8oYEi3ZM8NLucRiS8zr1grEiJHXZkJVcd_6NTvh_FqWTMDL2W7ehuCV3He6f_56trSU5OotqgworOAA_OuAVAwtmqsnlcHQl1KIWXL95HS1F4A7rfhS4C-3zN4sfK6KTI3Mnk8Vl8Sl73cphaUPtfOgXTouyYPwEl0I_WiyQjkEGQw9sEt5Yt4ytf4mxIb7dYoLd-QdDRmLG9CJdsiF7OoLbK6M"/>
+<div class="absolute top-3 left-3 bg-primary text-on-primary font-label-md text-[10px] px-2 py-1 rounded-full uppercase tracking-tighter">High Fiber</div>
+</div>
+<h3 class="font-label-md text-body-lg font-semibold text-on-surface">Spinach Salad</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Perfect for Vitamin K boost</p>
+</div>
+<!-- Food Card 2 -->
+<div class="min-w-[260px] snap-start group cursor-pointer">
+<div class="h-[180px] rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A refreshing citrus bowl with slices of orange, grapefruit, and fresh mint leaves in a handmade ceramic bowl. The lighting is warm and sunny, casting soft shadows that suggest a peaceful morning setting. The colors are vibrant and saturated, following a modern organic minimalism style that feels life-affirming and fresh." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4-zf_ZMvPQhatQv6nV6McFgOvmyeb74dI7QLh6ns_055_XG4BTWnMXiLpAsp0DLkQjIBfbtLU5rEFwupXzFJ8Z_sqlDH0XI2tkTJNshQcu_9opANjUNs8RmOdtAU5asDtlbB_0isQz7w2hIn2hu9F8mhGebmZ0PfwnxR3uwKdwTNLRQLZjDzvisQTyEQXAItAL5QdAfMv5PrpKNPd39UBTacOI5wJKl658V1JogcY8M6Zg0PHCHtJEdqixzZyUBLUsCqhKHEJJh8"/>
+<div class="absolute top-3 left-3 bg-secondary-container text-on-secondary-container font-label-md text-[10px] px-2 py-1 rounded-full uppercase tracking-tighter">Vitamin C</div>
+</div>
+<h3 class="font-label-md text-body-lg font-semibold text-on-surface">Citrus Bowl</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Boosts iron absorption</p>
+</div>
+<!-- Food Card 3 -->
+<div class="min-w-[260px] snap-start group cursor-pointer">
+<div class="h-[180px] rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A gourmet salmon poke bowl featuring fresh avocado, edamame, and pickled ginger over a bed of quinoa. The composition is artistic and minimalist, with a focus on color harmony and fresh textures. The setting is a bright, modern kitchen environment with plenty of white space to emphasize a healthy, balanced lifestyle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgGPgDlNIJLAgDdhKxEY8_iNSNf66aEmqg3kWvAwYfnnxCbSHcgcQx0p-h7S5IHxhTg9NZezFcgNZ676X8eQPYgKkKJRLgH0WA_jn2wdGWQMgeLa6_n-8hKumD68I0epgYRjKZxVV-IqKuFu6MsQA36ZhCSSHnc7ffQJaVQyDRUItuoStEnSOqse3L-tCQcAAS5EqzykJnJkI1PtrfP9deiXDPzeF7IF1NRysvVwgxnp-Fl9FgPiYCuoA4qYPnvzuacy2HKGimxrw"/>
+<div class="absolute top-3 left-3 bg-tertiary text-on-tertiary font-label-md text-[10px] px-2 py-1 rounded-full uppercase tracking-tighter">Omega-3</div>
+</div>
+<h3 class="font-label-md text-body-lg font-semibold text-on-surface">Salmon Quinoa</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Supports brain health</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<!-- Recs -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<!-- Supps -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</a>
+<!-- Chat -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+    // Interaction logic for buttons
+    document.querySelectorAll('button, a').forEach(el => {
+      el.addEventListener('mousedown', () => {
+        el.style.transform = 'scale(0.95)';
+      });
+      el.addEventListener('mouseup', () => {
+        el.style.transform = '';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+      });
+    });
+
+    // Subtle parallax effect for food cards on scroll
+    const scrollContainer = document.querySelector('.custom-scroll');
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', () => {
+        const cards = scrollContainer.querySelectorAll('img');
+        cards.forEach(img => {
+          const rect = img.getBoundingClientRect();
+          const offset = (rect.left / window.innerWidth) * 20;
+          img.style.objectPosition = `${50 + offset}% center`;
+        });
+      });
+    }
+  </script>
+</body></html>

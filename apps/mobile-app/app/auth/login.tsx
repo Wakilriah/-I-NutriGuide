@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
@@ -9,9 +9,8 @@ import { getAuthErrorMessage } from "../../src/features/auth/errors";
 import { loginSchema, type LoginValues } from "../../src/features/auth/schemas";
 import { getProfile, isProfileComplete } from "../../src/features/profile/api";
 import { useAuthStore } from "../../src/stores/auth-store";
-import { Screen } from "../../src/components/Screen";
-import { AppButton, AppCard, AppInput, PageHeader } from "../../src/components/ui";
-import { colors, spacing } from "../../src/theme/design";
+import { AppButton, AppInput, AuthBackgroundScreen, AuthGlassCard, Badge, PageHeader } from "../../src/components/ui";
+import { colors, radii, spacing } from "../../src/theme/design";
 
 const LOGIN_FAILED_MESSAGE = "Please verify your email and password and try again.";
 
@@ -44,18 +43,21 @@ export default function LoginScreen() {
   });
 
   return (
-    <Screen>
-      <View style={{ flex: 1, justifyContent: "center", gap: spacing.lg }}>
+    <AuthBackgroundScreen>
+      <AuthGlassCard style={{ alignSelf: "center", width: "100%", maxWidth: 430, gap: spacing.lg, padding: spacing.xl }}>
         <View style={{ alignItems: "center", gap: spacing.sm }}>
-          <View style={{ width: 64, height: 64, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: colors.primary }}>
+          <View style={{ width: 64, height: 64, alignItems: "center", justifyContent: "center", borderRadius: radii.hero, backgroundColor: colors.primary }}>
             <Ionicons color={colors.surface} name="nutrition" size={32} />
           </View>
           <Text style={{ color: colors.primary, fontSize: 28, fontWeight: "900" }}>I-NutriGuide</Text>
         </View>
 
-        <PageHeader eyebrow="Welcome back" title="Sign in" subtitle="Use your I-NutriGuide account to continue your food and supplement plan." />
+        <View style={{ gap: spacing.sm }}>
+          <Badge label="Welcome back" tone="orange" />
+          <PageHeader title="Sign in" subtitle="Use your I-NutriGuide account to continue your food and supplement plan." />
+        </View>
 
-        <AppCard style={{ gap: spacing.md, borderRadius: 32, padding: spacing.xl }}>
+        <View style={{ gap: spacing.md }}>
           <Controller
             control={control}
             name="email"
@@ -99,12 +101,10 @@ export default function LoginScreen() {
           />
 
           <AppButton accessibilityLabel="Submit login" disabled={isSubmitting} icon="log-in" label={isSubmitting ? "Signing in" : "Sign in"} onPress={onSubmit} />
-        </AppCard>
+        </View>
 
-        <Link href="/auth/register" style={{ color: colors.primary, fontWeight: "800", textAlign: "center" }}>
-          Create an account
-        </Link>
-      </View>
-    </Screen>
+        <AppButton accessibilityLabel="Create an account" icon="person-add" label="Create an account" onPress={() => router.push("/auth/register" as never)} />
+      </AuthGlassCard>
+    </AuthBackgroundScreen>
   );
 }

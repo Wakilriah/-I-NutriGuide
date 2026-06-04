@@ -57,6 +57,88 @@ class SupplementNutrient(models.Model):
         return f"{self.supplement} - {self.nutrient}"
 
 
+class SupplementAlias(models.Model):
+    supplement = models.ForeignKey(
+        Supplement, related_name="aliases", on_delete=models.CASCADE
+    )
+    alias = models.CharField(max_length=180)
+    slug = models.SlugField(max_length=200)
+    source = models.CharField(max_length=80, blank=True)
+    source_url = models.URLField(max_length=500, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["alias"]
+        indexes = [
+            models.Index(fields=["slug"], name="supp_alias_slug_idx"),
+            models.Index(fields=["active"], name="supp_alias_active_idx"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["supplement", "slug"], name="unique_alias_per_supplement"
+            ),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.alias)
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.alias} -> {self.supplement.name}"
+
+
+class SupplementSafetyRule(models.Model):
+    class RuleType(models.TextChoices):
+        ABSORPTION = "absorption", "Absorption"
+        DRUG_INTERACTION = "drug_interaction", "Drug interaction"
+        CONDITION_CAUTION = "condition_caution", "Condition caution"
+        PREGNANCY_CAUTION = "pregnancy_caution", "Pregnancy caution"
+        UPPER_LIMIT = "upper_limit", "Upper limit"
+        SIDE_EFFECT = "side_effect", "Side effect"
+
+    class Severity(models.TextChoices):
+        INFO = "info", "Info"
+        CAUTION = "caution", "Caution"
+        WARNING = "warning", "Warning"
+
+    supplement = models.ForeignKey(
+        Supplement, related_name="safety_rules", on_delete=models.CASCADE
+    )
+    rule_type = models.CharField(max_length=40, choices=RuleType.choices)
+    interacting_entity = models.CharField(max_length=180, blank=True)
+    severity = models.CharField(
+        max_length=20, choices=Severity.choices, default=Severity.CAUTION
+    )
+    title = models.CharField(max_length=220)
+    description = models.TextField()
+    recommendation = models.TextField(blank=True)
+    source = models.CharField(max_length=80, blank=True)
+    source_url = models.URLField(max_length=500, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["supplement__name", "severity", "rule_type", "title"]
+        indexes = [
+            models.Index(fields=["rule_type"], name="supp_safety_type_idx"),
+            models.Index(fields=["severity"], name="supp_safety_severity_idx"),
+            models.Index(fields=["active"], name="supp_safety_active_idx"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["supplement", "rule_type", "interacting_entity", "title"],
+                name="unique_supplement_safety_rule",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.supplement.name}: {self.title}"
+
+
 class SupplementFactSheet(models.Model):
     class Audience(models.TextChoices):
         CONSUMER = "consumer", "Consumer"

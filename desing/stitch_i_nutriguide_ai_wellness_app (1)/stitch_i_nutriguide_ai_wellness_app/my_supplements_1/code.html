@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Supplements - I-NutriGuide</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#418340",
+                    "primary-container": "#098730",
+                    "on-surface-variant": "#3f4a3d",
+                    "tertiary-fixed-dim": "#91d78a",
+                    "primary-fixed-dim": "#71dd7a",
+                    "outline": "#6f7a6c",
+                    "on-primary-container": "#f7fff1",
+                    "background": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#edf4ff",
+                    "surface-container-highest": "#d9e3f1",
+                    "on-secondary-fixed-variant": "#643f00",
+                    "secondary": "#845400",
+                    "on-surface": "#121d26",
+                    "inverse-surface": "#27313c",
+                    "surface-tint": "#006e24",
+                    "surface-variant": "#d9e3f1",
+                    "surface": "#f7f9ff",
+                    "on-primary-fixed-variant": "#005319",
+                    "on-tertiary-container": "#f7fff1",
+                    "on-primary-fixed": "#002106",
+                    "secondary-container": "#fda611",
+                    "on-background": "#121d26",
+                    "primary": "#006b23",
+                    "surface-bright": "#f7f9ff",
+                    "surface-dim": "#d1dbe8",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#ffb95b",
+                    "on-tertiary-fixed-variant": "#0c5216",
+                    "inverse-primary": "#71dd7a",
+                    "inverse-on-surface": "#e8f2ff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#ffddb6",
+                    "tertiary-fixed": "#acf4a4",
+                    "surface-container": "#e4effd",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#002203",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "outline-variant": "#becab9",
+                    "on-secondary-container": "#684100",
+                    "surface-container-high": "#dfe9f7",
+                    "tertiary": "#276929",
+                    "primary-fixed": "#8dfa94",
+                    "on-secondary-fixed": "#2a1800"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "40px",
+                    "stack-gap": "16px",
+                    "base": "8px",
+                    "container-padding": "24px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Quicksand"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Quicksand"],
+                    "headline-lg-mobile": ["Quicksand"],
+                    "display-lg": ["Quicksand"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        background-color: #f7f9ff; /* Soft Mint / Light Background */
+      }
+      .pill-gradient {
+        background: linear-gradient(135deg, #098730 0%, #276929 100%);
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top AppBar (JSON Driven) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-on-primary/20">
+<img alt="User Profile" data-alt="A professional close-up headshot of a smiling young nutritionist in a bright, airy office filled with green plants. The image is captured in high-key, soft natural lighting, emphasizing a clean and welcoming atmosphere. The overall style is modern organic minimalism with a soft color palette of mint green and warm white, creating a sense of calm empowerment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWn-F1MmmOEsMMP-3wujyW-cm7IiI6FuQnexUlyfO_Z3FcTsmx6b6Z7ljlsaZvY-gomJyuDoAOB2d_Sxs_1hz3fpgxY8fe2wCTnHN0TTF2kCMONExHit02u3SITW15q_fK60PAGkPjZSnSDTiLsN8a5fT_WoELbDUzz8hMyZZ_OXYbRz4XRdxngXP6mqZiH_-wxZtx4ULfOzlQbQOl2bEs1Tgeu1U3dQqWrtMlu4BN7jwC-cqWqCHKh7I_imeqXlgre7eq0LUUsMI"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-container-padding max-w-[1200px] mx-auto min-h-screen">
+<!-- Header Section -->
+<div class="mb-section-gap">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-2">My Supplements</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your daily wellness routine and track bio-interactions.</p>
+</div>
+<!-- Supplements Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Magnesium Card -->
+<div class="glass-card rounded-lg p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary-container/10 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="pill">pill</span>
+</div>
+<span class="font-label-md text-label-md bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full">Evening</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Magnesium Glycinate</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Promotes muscle relaxation and better sleep quality.</p>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary-container" data-icon="restaurant">restaurant</span>
+<div class="text-on-surface">
+<p class="font-label-md text-label-md opacity-60">Recommended Foods</p>
+<p class="font-body-md text-body-md">Leafy greens, almonds</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error" data-icon="block">block</span>
+<div class="text-on-surface">
+<p class="font-label-md text-label-md opacity-60">Avoid</p>
+<p class="font-body-md text-body-md">Caffeine</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6">
+<div class="bg-surface-container rounded-lg p-3 flex gap-2 items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5" data-icon="info">info</span>
+<p class="font-label-md text-label-md text-on-surface-variant text-[12px] leading-tight">Interaction: High doses of zinc can interfere with absorption. Keep 2h apart.</p>
+</div>
+</div>
+</div>
+<!-- Omega-3 Card -->
+<div class="glass-card rounded-lg p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-secondary-fixed/30 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-secondary text-[32px]" data-icon="water_drop">water_drop</span>
+</div>
+<span class="font-label-md text-label-md bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full">Morning</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Omega-3 Fish Oil</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Essential for heart health and cognitive function.</p>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary-container" data-icon="restaurant">restaurant</span>
+<div class="text-on-surface">
+<p class="font-label-md text-label-md opacity-60">Recommended Foods</p>
+<p class="font-body-md text-body-md">Avocado, walnuts</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error" data-icon="block">block</span>
+<div class="text-on-surface">
+<p class="font-label-md text-label-md opacity-60">Avoid</p>
+<p class="font-body-md text-body-md">Large dairy meals</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6">
+<div class="bg-surface-container rounded-lg p-3 flex gap-2 items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5" data-icon="info">info</span>
+<p class="font-label-md text-label-md text-on-surface-variant text-[12px] leading-tight">Interaction: May have blood-thinning effects. Consult if taking anticoagulants.</p>
+</div>
+</div>
+</div>
+<!-- Vitamin D3 Card -->
+<div class="glass-card rounded-lg p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary-fixed-dim/20 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="light_mode">light_mode</span>
+</div>
+<span class="font-label-md text-label-md bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full">Lunch</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Vitamin D3</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Supports immune system and bone density.</p>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary-container" data-icon="restaurant">restaurant</span>
+<div class="text-on-surface">
+<p class="font-label-md text-label-md opacity-60">Recommended Foods</p>
+<p class="font-body-md text-body-md">Fatty fish, eggs</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error" data-icon="block">block</span>
+<div class="text-on-surface">
+<p class="font-label-md text-label-md opacity-60">Avoid</p>
+<p class="font-body-md text-body-md">High fiber meals (can reduce absorption)</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6">
+<div class="bg-surface-container rounded-lg p-3 flex gap-2 items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5" data-icon="info">info</span>
+<p class="font-label-md text-label-md text-on-surface-variant text-[12px] leading-tight">Interaction: Works synergistically with Vitamin K2 for bone health.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Safety Section (Asymmetric Banner) -->
+<section class="mt-section-gap bg-primary-container/5 rounded-lg p-8 relative overflow-hidden">
+<div class="relative z-10 max-w-2xl">
+<div class="flex items-center gap-2 text-primary mb-4">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<h4 class="font-headline-md text-headline-md">Safety First</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                    Supplements are intended to enhance your diet, not replace it. Always consult with a healthcare professional before starting new supplements, especially if you are pregnant, nursing, or taking prescription medications.
+                </p>
+<div class="flex flex-wrap gap-4">
+<div class="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full border border-primary/10">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="verified">verified</span>
+<span class="font-label-md text-label-md text-primary">USP Verified</span>
+</div>
+<div class="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full border border-primary/10">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="eco">eco</span>
+<span class="font-label-md text-label-md text-primary">Non-GMO</span>
+</div>
+</div>
+</div>
+<!-- Decorative abstract element -->
+<div class="absolute -right-10 -bottom-10 w-64 h-64 bg-primary-container/10 rounded-full blur-3xl"></div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed right-6 bottom-24 w-16 h-16 rounded-full bg-secondary-container text-on-secondary-container shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40">
+<span class="material-symbols-outlined text-[32px]" data-icon="add">add</span>
+</button>
+<!-- Bottom Navigation Bar (JSON Driven) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<!-- Recs -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<!-- Supps (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="pill" style="font-variation-settings: 'FILL' 1;">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</a>
+<!-- Chat -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<!-- Visual Scripting for subtle animations -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body></html>

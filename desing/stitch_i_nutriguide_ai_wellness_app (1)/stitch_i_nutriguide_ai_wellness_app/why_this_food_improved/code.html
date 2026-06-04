@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide - Food Recommendation Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Quicksand:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+    }
+    .score-ring {
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-container": "#f7fff1",
+            "surface": "#f7f9ff",
+            "on-surface": "#121d26",
+            "on-secondary": "#ffffff",
+            "tertiary-container": "#418340",
+            "on-error": "#ffffff",
+            "secondary-container": "#fda611",
+            "surface-variant": "#d9e3f1",
+            "error": "#ba1a1a",
+            "secondary-fixed": "#ffddb6",
+            "surface-container-low": "#edf4ff",
+            "surface-dim": "#d1dbe8",
+            "outline-variant": "#becab9",
+            "on-secondary-fixed": "#2a1800",
+            "surface-tint": "#006e24",
+            "on-surface-variant": "#3f4a3d",
+            "surface-bright": "#f7f9ff",
+            "tertiary-fixed": "#acf4a4",
+            "primary-container": "#098730",
+            "on-error-container": "#93000a",
+            "surface-container-lowest": "#ffffff",
+            "on-primary": "#ffffff",
+            "outline": "#6f7a6c",
+            "on-tertiary": "#ffffff",
+            "on-background": "#121d26",
+            "on-primary-container": "#f7fff1",
+            "inverse-surface": "#27313c",
+            "tertiary-fixed-dim": "#91d78a",
+            "inverse-primary": "#71dd7a",
+            "on-tertiary-fixed": "#002203",
+            "primary": "#006b23",
+            "on-secondary-fixed-variant": "#643f00",
+            "background": "#f7f9ff",
+            "on-tertiary-fixed-variant": "#0c5216",
+            "secondary-fixed-dim": "#ffb95b",
+            "on-primary-fixed-variant": "#005319",
+            "on-secondary-container": "#684100",
+            "primary-fixed-dim": "#71dd7a",
+            "inverse-on-surface": "#e8f2ff",
+            "surface-container": "#e4effd",
+            "tertiary": "#276929",
+            "primary-fixed": "#8dfa94",
+            "secondary": "#845400",
+            "on-primary-fixed": "#002106",
+            "surface-container-high": "#dfe9f7",
+            "error-container": "#ffdad6",
+            "surface-container-highest": "#d9e3f1"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "base": "8px",
+            "container-padding": "24px",
+            "gutter": "16px",
+            "stack-gap": "16px",
+            "section-gap": "40px"
+          },
+          "fontFamily": {
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-md": ["Quicksand"],
+            "headline-lg": ["Quicksand"],
+            "display-lg": ["Quicksand"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Quicksand"],
+            "body-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen pb-40">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-on-primary">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApLsdu7wMZz1L1wvBzXL668K_L-EHuBkCZB53VXIa4bv8BM2xZHhd7tctFlRCmTB5aghwgQm9Vm24LD1vfNPyHXsEswHPpx6-oEqYK4hyRibOJ1eC0CkYBUyt_Ug165My5bB_iEHXVo_pp6duSY5Cw_d8dCeXGCxk3SP9zPKVlO2H-P2uBHOzW_UIMmngN1kKa-MFpuwWSfpUAxiMH3kaWxdeGOEHckQAQPU5y2Zz1qPxirCnR68NWpW5rRsy8aa95721SMYzwwig"/>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</span>
+</div>
+<button class="material-symbols-outlined text-on-primary hover:opacity-90 transition-opacity active:scale-95 transition-transform">notifications</button>
+</header>
+<main class="mt-16 max-w-[1200px] mx-auto">
+<!-- Hero Image Section -->
+<section class="relative h-[350px] w-full md:rounded-b-lg overflow-hidden shadow-sm">
+<img alt="Mediterranean Quinoa Salad" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGNr1AZNW9CqXwb59jHOsnFOa8OMqOvSup4d3EWUkQ0M4kKY-M8zldN4h8PwXKxVekFRTKBXkKITfSmVMblQnZEcHkg4mvASQF2mIHD-JP-50vd8nClbJ-aKngbQwalpCPlcSpiZW9x6FHlipumgGrtz7bUjpuX3hlGMgUszR10a0gnfqC8VY7tOqy_EzjUKUPUbyGN5W4fQGmCoR3xRwbmylyazVxmrlkaXhgccTaCwP2rIEBWPe2-KBWqO2J8ALWOopkL1tcjE4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-container-padding">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary text-on-primary text-label-md font-label-md px-3 py-1 rounded-full">Top Recommendation</span>
+<span class="bg-tertiary text-on-tertiary text-label-md font-label-md px-3 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> Confidence Level: High
+          </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white">Mediterranean Quinoa Salad</h1>
+</div>
+<button class="absolute top-4 left-4 w-10 h-10 rounded-full glass-effect flex items-center justify-center shadow-md active:scale-90 transition-all" onclick="history.back()">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+</section>
+<!-- Main Content Canvas -->
+<div class="px-container-padding -mt-8 relative z-10">
+<!-- Match Score & Core Recommendation Card -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-xl flex flex-col items-center gap-6 border border-outline-variant/30">
+<!-- Premium Match Score -->
+<div class="relative w-40 h-40 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="80" cy="80" fill="transparent" r="74" stroke="currentColor" stroke-width="10"></circle>
+<circle class="text-primary score-ring" cx="80" cy="80" fill="transparent" r="74" stroke="currentColor" stroke-dasharray="465" stroke-dashoffset="18" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display-lg text-[56px] text-primary leading-none">96%</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Match</span>
+</div>
+</div>
+<div class="text-center w-full max-w-2xl">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-3">Perfect synergy for your Iron supplement</h2>
+<div class="bg-primary-container/10 border border-primary/20 rounded-lg p-4 mb-6">
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+<span class="font-bold text-primary">Iron + Vitamin C (from Lemon)</span> synergy increases your absorption <span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold italic">up to 3x</span>.
+            </p>
+</div>
+<!-- Reason Chips -->
+<div class="flex flex-wrap gap-2 justify-center">
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-4 py-1.5 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">bolt</span> Rich in Iron
+            </span>
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-4 py-1.5 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">eco</span> Supports Absorption
+            </span>
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-4 py-1.5 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">check_circle</span> Matches Diet
+            </span>
+<span class="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed-variant px-4 py-1.5 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">verified_user</span> Safe for Profile
+            </span>
+</div>
+</div>
+</div>
+<!-- Bento-style Breakdown Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap mt-section-gap">
+<!-- Redesigned Score Breakdown Section -->
+<div class="bg-surface-container rounded-lg p-6 flex flex-col gap-5">
+<h3 class="font-headline-md text-headline-md text-on-surface">Precision Score Breakdown</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Content Score</span>
+<span class="font-label-md text-label-md text-primary font-bold">98%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 98%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Association Rule</span>
+<span class="font-label-md text-label-md text-primary font-bold">92%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Collaborative Filter</span>
+<span class="font-label-md text-label-md text-primary font-bold">85%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Preference Match</span>
+<span class="font-label-md text-label-md text-primary font-bold">88%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Safety Score</span>
+<span class="font-label-md text-label-md text-primary font-bold">100%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Dietary Notes & Updated Safety -->
+<div class="flex flex-col gap-4">
+<div class="bg-secondary-fixed/20 border border-secondary-fixed/50 rounded-lg p-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1">info</span>
+<h3 class="font-headline-md text-headline-md text-secondary">Dietary Notes</h3>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-2"></span>
+<p class="font-body-md text-body-md text-on-surface-variant">Avoid adding excessive salt to keep sodium levels within your tracked limit for today.</p>
+</div>
+<div class="flex gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary shrink-0 mt-2"></span>
+<p class="font-body-md text-body-md text-on-surface-variant">Rinse canned chickpeas thoroughly to reduce phytic acid, which can hinder iron uptake.</p>
+</div>
+</div>
+</div>
+<!-- New Safety Wording -->
+<div class="bg-surface-container-highest/40 rounded-lg p-4 flex gap-3 italic">
+<span class="material-symbols-outlined text-on-surface-variant shrink-0">health_and_safety</span>
+<p class="font-label-md text-label-md text-on-surface-variant">
+              This recommendation is based on known nutrient synergies and your profile. Consult a professional for specific medical advice.
+            </p>
+</div>
+</div>
+</div>
+<!-- Alternatives Section -->
+<section class="mt-section-gap mb-12">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4 px-2">Similar Alternatives</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeuI1U3FCxlDRRXvnz-80KjfatgxTY9JeK29ippCIgUPaEfRFzu_ASX7BnG0qn3Ar7pnVGvMCoPt-rzAb3SLHVU7jq3D4wsQWebqVd7W8pvFAZEpHqKq5KOr9UlaptoyaPnnvXegNk-jejwWRnom6wM6VAWzpVVZvfzb-QAqejcjJt1SIz3e4cQdVHODQPVjSTIaRmnp9RbfrSMHRGT7pVab9dw_erE21AUgXyNp7RALCWRu1ulFy10bLoEkqMW6VGT6i8GVs_tuA"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Spinach Smoothie</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">92% Match</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2ZDKivSG3Im13-ZIiUjkJ0_vx2bX_rCe9hQCN8_6tGOWAQgg7TGF4FxVIKE3nZ2KoUTyAmjGnVRFnczX5sCVMdNR6hFUBZ791RJ6QqytmA89BXFbt_Iuk2LBOyRhoyx3Dv-ITMRjFRezZFtnhJrHhvg_q8erfwG0yWIPOBzlCQq_zJJ0ICIApDXBrPpHRbbV1h8u14y0hhGgBdbBzQzQYjsLgaLJOBhcZhCafWcQPjwWXpCTPsWMbHHCRwhb7eS7Od73W0FWBH1k"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Lentil Stew</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">89% Match</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZY2dVwe-W5iyfceMor9Sebh-HwIz-JC04UV7-2rh1iXlyzOnGw5JNs_DIVs2ici4qoUZUQlwlvGqANIvuU30MQZaOtg99h29wdaj4wohaX24YuLaIyUPDITuzFojRzbK_7NQFzQ1IjTb_kiExjQnXbXGiw6ZwwRV1ezsFadIwX7q_1jBMk7e5bv2Qa9QB7G7LHga5pQjDb2VatwvwT-xcDoA6oZfHcBJSe_WYXmU1nwa7Mk14oSTrZ09swJAaKwHl9kon1XHrE5c"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Spiced Chickpeas</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">85% Match</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+<div class="h-24 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDMkVcARiC2-xwEif2APXmUsMCHs9Q2vjp5btkdi7xXOR3DXyytYqgHSosOA_6rryFq-TY0lO99MxdI9SBGkhUSSUQEk3fESmZVz3O4bI6hZ6mL_kHUx3g0uK0D2A3Y5o0PtumAaHKhXAeO8YptaYG_le3R2sOSHbKOIYD9AnRO4D3z864mVnVSZ-t1Dxmt4pwt1rLPNPRn72C8U5P5pNU4ktIqNI3ufZGU05f18T6ToemP4gzfl8B5ZbLSi5lJoXpSk2z75AfhMI"/>
+</div>
+<div class="p-3">
+<p class="font-label-md text-label-md text-on-surface truncate">Beetroot Power</p>
+<div class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">grade</span>
+<span class="text-[12px] font-bold">82% Match</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Fixed Action & Feedback Container -->
+<div class="fixed bottom-24 left-0 w-full px-container-padding z-50">
+<div class="max-w-[1200px] mx-auto flex flex-col items-center gap-4">
+<!-- Feedback Buttons -->
+<div class="flex gap-4 p-2 glass-effect rounded-full shadow-lg border border-outline-variant/30">
+<button class="w-12 h-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors active:scale-90">
+<span class="material-symbols-outlined">thumb_up</span>
+</button>
+<button class="w-12 h-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors active:scale-90">
+<span class="material-symbols-outlined">thumb_down</span>
+</button>
+<div class="w-px h-8 bg-outline-variant/30 my-auto"></div>
+<button class="flex items-center gap-2 px-6 rounded-full bg-secondary-container text-on-secondary-container font-headline-md hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">bookmark</span>
+              Save
+            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const elements = document.querySelectorAll('.bg-surface-container-low, .bg-surface-container, .bg-secondary-fixed\\/20, .bg-surface-container-lowest');
+      elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.5s ease-out';
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, 100 * index);
+      });
+    });
+  </script>
+</body></html>

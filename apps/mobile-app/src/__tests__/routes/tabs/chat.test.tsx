@@ -101,10 +101,10 @@ describe("ChatScreen", () => {
     );
 
     renderWithClient(<ChatScreen />);
-    fireEvent.press(screen.getByText("Recommend foods for my supplements"));
+    fireEvent.press(screen.getByText("What should I eat with iron?"));
 
     await waitFor(() => {
-      expect(screen.getByTestId("chat-loading-skeleton")).toBeTruthy();
+      expect(screen.getByText("I-NutriGuide AI is thinking...")).toBeTruthy();
     });
 
     await act(async () => {
@@ -136,7 +136,7 @@ describe("ChatScreen", () => {
     await waitFor(() => {
       expect(mockClearChatSessions).toHaveBeenCalledTimes(1);
       expect(screen.queryByText("Try orange with your iron supplement.")).toBeNull();
-      expect(screen.getByText("Hi, I am your nutrition assistant. Ask about food pairings, supplement timing, allergies, or recommendation ideas.")).toBeTruthy();
+      expect(screen.getByText("Hi! I can help with food pairings, supplement timing, allergies, water, calories, and recommendation explanations.")).toBeTruthy();
     });
   });
 });

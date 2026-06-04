@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit3, Pill, Plus, Search, Trash2, X } from "lucide-react";
+import { Database, Edit3, Pill, Plus, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { fetchNutrients } from "../../api/nutrients";
+import { fetchSupplementCategories, fetchSupplementNormalizations, type SupplementCategory, type SupplementNormalization } from "../../api/association-dataset";
 import {
   createSupplement,
   deleteSupplement,
@@ -82,11 +83,32 @@ export function SupplementsPage() {
     queryFn: () => fetchNutrients(),
   });
 
+  const { data: normalizationData } = useQuery({
+    queryKey: ["association-dataset", "normalizations", "supplement-catalog", search, statusFilter],
+    queryFn: () =>
+      fetchSupplementNormalizations({
+        page: 1,
+        page_size: 12,
+        search: search || undefined,
+        is_active: statusFilter ? (statusFilter as "true" | "false") : undefined,
+      }),
+  });
+  const { data: categoryData } = useQuery({
+    queryKey: ["association-dataset", "categories", "supplement-catalog", search],
+    queryFn: () => fetchSupplementCategories({ page: 1, page_size: 12, search: search || undefined }),
+  });
+
   const supplements = data?.results ?? [];
+  const normalizations = normalizationData?.results ?? [];
+  const categories = categoryData?.results ?? [];
+  const normalizationBySupplement = useMemo(() => buildNormalizationLookup(normalizations), [normalizations]);
   const totalSupplements = data?.count ?? 0;
+  const totalNormalizations = normalizationData?.count ?? 0;
+  const totalCategories = categoryData?.count ?? 0;
   const pageCount = Math.max(1, Math.ceil(totalSupplements / PAGE_SIZE));
   const activeSupplements = supplements.filter((supplement) => supplement.is_active).length;
   const nutrientLinks = supplements.reduce((total, supplement) => total + supplement.nutrients.length, 0);
+  const activeNormalizations = normalizations.filter((normalization) => normalization.is_active).length;
 
   const form = useForm<SupplementFormValues>({
     resolver: zodResolver(supplementSchema),
@@ -190,7 +212,9 @@ export function SupplementsPage() {
         <MetricSkeletonGrid count={3} />
       ) : (
         <div className="metric-grid compact-metric-grid">
-          <StatCard icon={Pill} label="Supplements" value={totalSupplements} />
+          <StatCard icon={Pill} label="Supplement Catalog" value={totalSupplements} helper={`${activeSupplements} active on page`} />
+          <StatCard icon={Database} label="Normalization Map" value={totalNormalizations} helper={`${activeNormalizations} active on page`} />
+          <StatCard icon={Database} label="Canonical Categories" value={totalCategories} helper="Association rule items" />
           <StatCard icon={Pill} label="Active On Page" value={activeSupplements} />
           <StatCard icon={Pill} label="Nutrient Links" value={nutrientLinks} />
         </div>
@@ -236,32 +260,14 @@ export function SupplementsPage() {
         ) : (
           <div className="card-list-grid">
             {supplements.map((supplement) => (
-              <article className="summary-card" key={supplement.slug}>
-                <div className="section-status-row">
-                  <div>
-                    <h3>{supplement.name}</h3>
-                    <p>{supplement.common_dose || supplement.slug}</p>
-                  </div>
-                  <Badge variant={supplement.is_active ? "secondary" : "destructive"}>{supplement.is_active ? "Active" : "Inactive"}</Badge>
-                </div>
-                <p>{supplement.description || "No description yet."}</p>
-                <p>{supplement.nutrients.length ? supplement.nutrients.map((nutrient) => nutrient.name).join(", ") : "No linked nutrients"}</p>
-                <div className="row-actions">
-                  <Button aria-label={`Edit ${supplement.name}`} onClick={() => openEditDialog(supplement)} size="icon" type="button" variant="outline">
-                    <Edit3 aria-hidden="true" size={16} />
-                  </Button>
-                  <Button
-                    aria-label={`Delete ${supplement.name}`}
-                    disabled={deleteMutation.isPending && deleteMutation.variables === supplement.slug}
-                    onClick={() => setSupplementToDelete(supplement)}
-                    size="icon"
-                    type="button"
-                    variant="destructive"
-                  >
-                    <Trash2 aria-hidden="true" size={16} />
-                  </Button>
-                </div>
-              </article>
+              <SupplementCard
+                key={supplement.slug}
+                normalization={getSupplementNormalization(supplement, normalizationBySupplement)}
+                onDelete={() => setSupplementToDelete(supplement)}
+                onEdit={() => openEditDialog(supplement)}
+                isDeleting={deleteMutation.isPending && deleteMutation.variables === supplement.slug}
+                supplement={supplement}
+              />
             ))}
           </div>
         )}
@@ -270,6 +276,44 @@ export function SupplementsPage() {
           <div className="pagination-meta">Page {page} of {pageCount}</div>
           <AdminPagination disabled={isLoading} onPageChange={(nextPage) => updateSearch({ supplements_page: nextPage })} page={page} pageCount={pageCount} />
         </div>
+      </section>
+
+      <section className="panel">
+        <div className="table-header table-header-split">
+          <div>
+            <h2>Imported Supplement Normalization</h2>
+            <p>Original supplement names from the association dataset mapped to canonical rule items.</p>
+          </div>
+          <Badge variant="outline">{totalNormalizations} aliases</Badge>
+        </div>
+        {normalizations.length === 0 ? (
+          <p className="empty-line">No imported normalization rows found.</p>
+        ) : (
+          <div className="card-list-grid">
+            {normalizations.map((normalization) => (
+              <NormalizationCard key={normalization.id} normalization={normalization} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <div className="table-header table-header-split">
+          <div>
+            <h2>Canonical Supplement Categories</h2>
+            <p>Stable association-rule categories used by mining, scoring, and recommendation explanations.</p>
+          </div>
+          <Badge variant="outline">{totalCategories} categories</Badge>
+        </div>
+        {categories.length === 0 ? (
+          <p className="empty-line">No canonical supplement categories found.</p>
+        ) : (
+          <div className="card-list-grid compact-card-list-grid">
+            {categories.map((category) => (
+              <CategoryCard category={category} key={category.id} />
+            ))}
+          </div>
+        )}
       </section>
 
       <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
@@ -365,4 +409,120 @@ export function SupplementsPage() {
       />
     </>
   );
+}
+
+function NormalizationCard({ normalization }: { normalization: SupplementNormalization }) {
+  return (
+    <article className="summary-card">
+      <div className="section-status-row">
+        <div>
+          <h3>Alias: {normalization.original_supplement_name}</h3>
+          <p>{normalization.notes || "Mapped from the imported association dataset."}</p>
+        </div>
+        <Badge variant={normalization.is_active ? "secondary" : "outline"}>{normalization.is_active ? "Active" : "Inactive"}</Badge>
+      </div>
+      <div className="tag-list">
+        <Badge variant="secondary">Maps to {normalization.normalized_category}</Badge>
+        {normalization.canonical_item ? <Badge variant="outline">supp:{normalization.canonical_item}</Badge> : null}
+        {normalization.main_nutrient ? <Badge variant="outline">Nutrient: {normalization.main_nutrient}</Badge> : null}
+      </div>
+    </article>
+  );
+}
+
+function CategoryCard({ category }: { category: SupplementCategory }) {
+  return (
+    <article className="summary-card">
+      <div className="section-status-row">
+        <div>
+          <h3>Category: {category.category}</h3>
+          <p>{category.main_nutrient ? `Main nutrient: ${category.main_nutrient}` : "Canonical supplement category"}</p>
+        </div>
+        <Badge variant={category.is_active ? "secondary" : "outline"}>{category.is_active ? "Active" : "Inactive"}</Badge>
+      </div>
+      <div className="tag-list">
+        <Badge variant="secondary">{category.association_item}</Badge>
+        {category.keywords.slice(0, 3).map((keyword) => (
+          <Badge key={keyword} variant="outline">{keyword}</Badge>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function SupplementCard({
+  isDeleting,
+  normalization,
+  onDelete,
+  onEdit,
+  supplement,
+}: {
+  isDeleting: boolean;
+  normalization?: SupplementNormalization;
+  onDelete: () => void;
+  onEdit: () => void;
+  supplement: Supplement;
+}) {
+  const associationItem = normalization?.canonical_item ? `supp:${normalization.canonical_item}` : "";
+  return (
+    <article className="summary-card">
+      <div className="section-status-row">
+        <div>
+          <h3>{supplement.name}</h3>
+          <p>{supplement.common_dose || supplement.slug}</p>
+        </div>
+        <Badge variant={supplement.is_active ? "secondary" : "destructive"}>{supplement.is_active ? "Active" : "Inactive"}</Badge>
+      </div>
+      <p>{supplement.description || "No description yet."}</p>
+      <div className="tag-list">
+        <Badge variant="outline">{supplement.source || "Manual"}</Badge>
+        {normalization ? <Badge variant="secondary">Normalized: {normalization.normalized_category}</Badge> : <Badge variant="outline">No normalization</Badge>}
+        {associationItem ? <Badge variant="outline">{associationItem}</Badge> : null}
+      </div>
+      <p>{supplement.nutrients.length ? supplement.nutrients.map((nutrient) => nutrient.name).join(", ") : "No linked nutrients"}</p>
+      <div className="row-actions">
+        <Button aria-label={`Edit ${supplement.name}`} onClick={onEdit} size="icon" type="button" variant="outline">
+          <Edit3 aria-hidden="true" size={16} />
+        </Button>
+        <Button
+          aria-label={`Delete ${supplement.name}`}
+          disabled={isDeleting}
+          onClick={onDelete}
+          size="icon"
+          type="button"
+          variant="destructive"
+        >
+          <Trash2 aria-hidden="true" size={16} />
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function buildNormalizationLookup(normalizations: SupplementNormalization[]) {
+  const lookup = new Map<string, SupplementNormalization>();
+  normalizations.forEach((normalization) => {
+    const canonicalItem = normalization.canonical_item ?? "";
+    [
+      normalization.original_supplement_slug,
+      normalization.original_supplement_name,
+      normalization.normalized_category,
+      canonicalItem,
+      canonicalItem.replace(/_/g, "-"),
+    ].forEach((value) => {
+      const key = canonicalKey(value);
+      if (key && !lookup.has(key)) {
+        lookup.set(key, normalization);
+      }
+    });
+  });
+  return lookup;
+}
+
+function getSupplementNormalization(supplement: Supplement, lookup: Map<string, SupplementNormalization>) {
+  return lookup.get(canonicalKey(supplement.slug)) ?? lookup.get(canonicalKey(supplement.name));
+}
+
+function canonicalKey(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }

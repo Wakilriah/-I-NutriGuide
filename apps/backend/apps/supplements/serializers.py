@@ -140,8 +140,4 @@ class UserSupplementSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate_frequency(self, value):
-        if value != "daily":
-            raise serializers.ValidationError(
-                "Only daily supplement routines are supported."
-            )
-        return value
+        return (value or "").strip() or "daily"

@@ -1,5 +1,20 @@
 import { apiClient } from "../../lib/api";
 
+export type FoodEntry = {
+  food_id: number;
+  food_name: string;
+  serving_g: number;
+  calories: number;
+  protein_g: number;
+  carbs_g?: number;
+  fat_g?: number;
+  meal_type?: string;
+  unit?: string;
+  time?: string;
+  notes?: string;
+  timestamp: string;
+};
+
 export type DailyTracking = {
   id: number;
   date: string;
@@ -11,6 +26,7 @@ export type DailyTracking = {
   steps: number;
   notes: string;
   supplements_taken: string[];
+  food_entries: FoodEntry[];
   goals_completed: boolean;
 };
 
@@ -23,6 +39,7 @@ export type DailyTrackingUpdatePayload = Partial<{
   steps: number;
   notes: string;
   supplements_taken: string[];
+  food_entries: FoodEntry[];
   goals_completed: boolean;
 }>;
 

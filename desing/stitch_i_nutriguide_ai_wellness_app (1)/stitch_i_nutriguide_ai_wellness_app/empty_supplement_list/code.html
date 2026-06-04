@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Supplements - I-NutriGuide</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#f7fff1",
+                        "surface": "#f7f9ff",
+                        "on-surface": "#121d26",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#418340",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#fda611",
+                        "surface-variant": "#d9e3f1",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#ffddb6",
+                        "surface-container-low": "#edf4ff",
+                        "surface-dim": "#d1dbe8",
+                        "outline-variant": "#becab9",
+                        "on-secondary-fixed": "#2a1800",
+                        "surface-tint": "#006e24",
+                        "on-surface-variant": "#3f4a3d",
+                        "surface-bright": "#f7f9ff",
+                        "tertiary-fixed": "#acf4a4",
+                        "primary-container": "#098730",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline": "#6f7a6c",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#121d26",
+                        "on-primary-container": "#f7fff1",
+                        "inverse-surface": "#27313c",
+                        "tertiary-fixed-dim": "#91d78a",
+                        "inverse-primary": "#71dd7a",
+                        "on-tertiary-fixed": "#002203",
+                        "primary": "#006b23",
+                        "on-secondary-fixed-variant": "#643f00",
+                        "background": "#f7f9ff",
+                        "on-tertiary-fixed-variant": "#0c5216",
+                        "secondary-fixed-dim": "#ffb95b",
+                        "on-primary-fixed-variant": "#005319",
+                        "on-secondary-container": "#684100",
+                        "primary-fixed-dim": "#71dd7a",
+                        "inverse-on-surface": "#e8f2ff",
+                        "surface-container": "#e4effd",
+                        "tertiary": "#276929",
+                        "primary-fixed": "#8dfa94",
+                        "secondary": "#845400",
+                        "on-primary-fixed": "#002106",
+                        "surface-container-high": "#dfe9f7",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d9e3f1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "container-padding": "24px",
+                        "gutter": "16px",
+                        "stack-gap": "16px",
+                        "section-gap": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Quicksand"],
+                        "headline-lg": ["Quicksand"],
+                        "display-lg": ["Quicksand"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Quicksand"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f7f9ff;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .active-nav-interaction {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .active-nav-interaction:active {
+            transform: scale(0.9);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-on-primary overflow-hidden shadow-sm">
+<img alt="User Profile" class="w-full h-auto" data-alt="A close-up professional portrait of a healthy, smiling man in a clean, modern wellness-themed setting. The lighting is soft and natural, emphasizing a bright and welcoming atmosphere. The color palette is composed of soft whites and organic greens, aligning with a high-end minimalist digital health application design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMbCQo-9ZTIRPER8HtcAEviDQnXN6_vB7lBC4gubDQq7g4Dc45pkzRVcnuyd6saHBjP_WUuagpivpqMUbtjg8Y-rCWRxyCi43aGIuYIUqiqF-TvBTNFApt5XzDmdzs-5KZUQ7nphj_qG3feuJbe6LoUWZ9dN5uUzG23oFCXLcxzKgdRRMTeH2BzI5v1pIHnm0nNtAdgd5FDKtvcJWqCUzLhNhzj60tQ-jLjVC8OPE_vFsHjZDuGzwVmDfFr7RpNvItWQ1NvbJVaoU"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary dark:text-on-primary-container">I-NutriGuide</h1>
+</div>
+<button aria-label="Notifications" class="w-10 h-10 flex items-center justify-center rounded-full text-on-primary/80 hover:opacity-90 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="min-h-screen pt-24 pb-32 px-container-padding flex flex-col items-center justify-center max-w-[1200px] mx-auto">
+<!-- Empty State Container -->
+<div class="w-full max-w-md text-center flex flex-col items-center">
+<!-- Illustration Area -->
+<div class="relative w-full aspect-square max-w-[320px] mb-8 animate-fade-in">
+<!-- Background decorative element -->
+<div class="absolute inset-0 bg-primary-container/10 rounded-full blur-3xl -z-10"></div>
+<img alt="Empty Supplement List illustration" class="w-full h-full object-contain" data-alt="A friendly, minimalist illustration of an empty supplement bottle with a single green leaf growing inside. Soft colors, clean lines, professional health tech style. For an 'Empty Supplement List' state. #2f9e44, #eaf7ef." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRUxL6xMbP88JwvPT4rnuOsv1wCJoi741c0cbgidubpWeZQ99rKU3doU5zlJN8tZliABKoAzVZ-LLl6V2OzB5FP_ovftrAHQUswX3k1faQOz7C6JfMKw5QhI-M5n-15WteKGeM8fPfPB9ompin-a87s1ql-prKZy_uaD-2ySZTnzt-IJN6SENuvA673KOIyW62Gvi7rJQBrjchNMYVhZ87fdo1BlzWCgs4sVOaQPmyMbWuAvvCD8oxek4X-2MVr23-SruciYdqzUc"/>
+</div>
+<!-- Content Area -->
+<div class="space-y-4 mb-10">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
+                    Your Stack is Empty
+                </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[300px] mx-auto leading-relaxed">
+                    Add your current supplements to start getting personalized food recommendations that boost your health.
+                </p>
+</div>
+<!-- Action Area -->
+<button class="group relative inline-flex items-center justify-center px-8 py-4 bg-secondary-container text-on-secondary-container font-label-md text-label-md rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 overflow-hidden">
+<span class="relative z-10 flex items-center gap-2">
+<span class="material-symbols-outlined font-bold" data-icon="add">add</span>
+                    Add Your First Supplement
+                </span>
+<!-- Subtle shimmer effect -->
+<div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+</button>
+<!-- Guide Tooltip (AI Interaction) -->
+<div class="mt-12 p-4 bg-gradient-to-br from-primary/5 to-tertiary/5 border border-primary/10 rounded-lg flex items-start gap-4 text-left shadow-sm">
+<div class="p-2 bg-primary-container rounded-full text-on-primary-container">
+<span class="material-symbols-outlined text-[20px]" data-icon="lightbulb">lightbulb</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-primary mb-1">AI Insight</p>
+<p class="text-[13px] text-on-surface-variant leading-tight">
+                        I'll use your supplement data to ensure your meals provide the perfect synergistic nutrients without over-supplementing.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface dark:bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-lg md:hidden">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors active-nav-interaction" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<!-- Recs -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors active-nav-interaction" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-label-md text-label-md">Recs</span>
+</a>
+<!-- Supps (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-2xl px-4 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="pill" style="font-variation-settings: 'FILL' 1;">pill</span>
+<span class="font-label-md text-label-md">Supps</span>
+</a>
+<!-- Chat -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors active-nav-interaction" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:bg-surface-container-high transition-colors active-nav-interaction" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<!-- Simple animations script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const illustration = document.querySelector('.animate-fade-in');
+            illustration.style.opacity = '0';
+            illustration.style.transform = 'translateY(20px)';
+            illustration.style.transition = 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+            
+            setTimeout(() => {
+                illustration.style.opacity = '1';
+                illustration.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body></html>

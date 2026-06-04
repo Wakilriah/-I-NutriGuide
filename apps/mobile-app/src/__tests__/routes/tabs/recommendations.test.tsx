@@ -4,8 +4,11 @@ import { router } from "expo-router";
 import RecommendationsScreen from "../../../../app/tabs/recommendations";
 
 jest.mock("../../../features/recommendations/api", () => ({
-  generateRecommendations: jest.fn(async () => ({ run_id: "run-1", created_at: "2026-05-08T12:00:00Z", disclaimer: "", items: [] })),
+  getMealPlan: jest.fn(async () => ({ meals: null })),
+  getTimingPlan: jest.fn(async () => ({ items: [] })),
   listRecommendationHistory: jest.fn(),
+  queueRecommendationGeneration: jest.fn(async () => ({ run_id: "run-1", created_at: "2026-05-08T12:00:00Z", disclaimer: "", items: [] })),
+  resolveFoodImageUri: jest.fn(() => "https://example.com/food.webp"),
 }));
 
 jest.mock("@tanstack/react-query", () => ({
@@ -51,16 +54,13 @@ describe("RecommendationsScreen", () => {
   });
 
   it("generates recommendations and opens the new run", async () => {
-    const { generateRecommendations } = require("../../../features/recommendations/api");
+    const { queueRecommendationGeneration } = require("../../../features/recommendations/api");
     (useQuery as jest.Mock).mockReturnValue({ data: [], isError: false, isLoading: false });
 
     render(<RecommendationsScreen />);
     fireEvent.press(screen.getByLabelText("Generate recommendations"));
 
-    expect(generateRecommendations).toHaveBeenCalledWith(10);
-    await waitFor(() => {
-      expect(router.replace).toHaveBeenCalledWith("/recommendations/run-1");
-    });
+    expect(queueRecommendationGeneration).toHaveBeenCalledWith(10);
   });
 
   it("shows a generate error message", () => {

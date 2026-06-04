@@ -9,13 +9,13 @@ npm install
 npm run start
 ```
 
-Or run it with the Docker dev stack from the repository root:
+For testing on a physical phone over the same Wi-Fi/LAN, start Expo with the host machine LAN IP:
 
 ```sh
-docker compose -f docker-compose.dev.yml up mobile_app
+npm run start:lan
 ```
 
-The Expo web app is published on `http://localhost:8081`. Production API calls should use the API subdomain, not a raw IP address.
+The LAN starter writes `.env.local` with `EXPO_PUBLIC_API_BASE_URL=http://<lan-ip>:8000/api/v1`, sets `REACT_NATIVE_PACKAGER_HOSTNAME`, and starts Expo on port `8081`. Production API calls should use the API subdomain, not a raw IP address.
 
 The app includes:
 
@@ -56,7 +56,7 @@ npm audit --omit=dev --audit-level=moderate
 
 Current verified state:
 
-- Tests: 54 passed
+- Tests: 72 passed
 - Typecheck: passed
 - Expo dependency check: passed
 - Production dependency audit: 0 vulnerabilities

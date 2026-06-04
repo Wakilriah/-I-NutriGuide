@@ -1,0 +1,1396 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R 12 0 R] /Count 4 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Length 4608 >>
+stream
+q
+0.184 0.490 0.196 RG
+2 w
+54 704 m 558 704 l S
+BT
+/F2 25 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 675.00 Tm
+(I-NutriGuide Application Analysis Handoff) Tj
+ET
+BT
+/F1 12 Tf
+0.360 0.410 0.470 rg
+1 0 0 1 54.00 650.00 Tm
+(Architecture, data, recommendation, admin, and mobile handoff) Tj
+ET
+BT
+/F1 10.5 Tf
+0.360 0.410 0.470 rg
+1 0 0 1 54.00 628.00 Tm
+(Generated: May 30, 2026) Tj
+ET
+BT
+/F1 11.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 590.00 Tm
+(Audience: another ChatGPT or reviewer analyzing the current I-NutriGuide application) Tj
+ET
+BT
+/F1 11.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 574.00 Tm
+(without first reading the entire repository.) Tj
+ET
+BT
+/F1 11.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 550.00 Tm
+(Scope: local development build, Docker services, Django backend, React admin panel,) Tj
+ET
+BT
+/F1 11.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 534.00 Tm
+(Expo mobile app, food image metadata, supplement normalization, association rules,) Tj
+ET
+BT
+/F1 11.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 518.00 Tm
+(safety constraints, and recent UI/runtime fixes.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 476.00 Tm
+(Purpose) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 458.00 Tm
+(This PDF is a compact handoff for another ChatGPT session to analyze the current I-NutriGuide) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 444.00 Tm
+(application. It summarizes the architecture, runtime services, data imports, recommendation) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 430.00 Tm
+(engine, admin panel, mobile app, and recent changes.) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 411.00 Tm
+(Sensitive local credentials are intentionally omitted. Use the repository and environment) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 397.00 Tm
+(files on the local machine for private operational details.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 362.00 Tm
+(Project Shape) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 344.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 344.00 Tm
+(Monorepo root: c:/Users/hp/Desktop/inutriguide_codex_docs) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 327.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 327.50 Tm
+(Backend: apps/backend, Django 5.1 + Django REST Framework.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 311.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 311.00 Tm
+(Admin panel: apps/admin-panel, React + Vite.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 294.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 294.50 Tm
+(Mobile app: apps/mobile-app, Expo Router + React Native Web.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 278.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 278.00 Tm
+(Shared packages: packages/shared-types and packages/config.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 261.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 261.50 Tm
+(Infrastructure: Docker Compose with PostgreSQL, Redis, Neo4j, backend, admin panel, mobile) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 248.00 Tm
+(app, Celery worker/beat, and Dozzle.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 215.50 Tm
+(Local Runtime) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 197.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 197.50 Tm
+(Backend API: http://localhost:8000) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 181.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 181.00 Tm
+(Backend health: http://localhost:8000/api/v1/health/) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 164.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 164.50 Tm
+(Admin panel: http://localhost:5173) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 148.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 148.00 Tm
+(Mobile web / Expo: http://localhost:8081) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 131.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 131.50 Tm
+(PostgreSQL: localhost:5432) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 115.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 115.00 Tm
+(Redis: localhost:6379) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 98.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 98.50 Tm
+(Neo4j browser: http://localhost:7474) Tj
+ET
+BT
+/F1 8 Tf
+0.360 0.410 0.470 rg
+1 0 0 1 518 30 Tm
+(1) Tj
+ET
+Q
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 6670 >>
+stream
+q
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 738.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 738.00 Tm
+(Main startup command used during development: docker compose -f docker-compose.dev.yml up -d) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 724.50 Tm
+(--build backend admin_panel mobile_app) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 692.00 Tm
+(Current Database Snapshot) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 674.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 674.00 Tm
+(Foods: 3,263 active of 3,263 total.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 657.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 657.50 Tm
+(Supplements: 106 catalog rows.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 641.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 641.00 Tm
+(Nutrients: 84.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 624.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 624.50 Tm
+(Supplement normalizations: 105.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 608.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 608.00 Tm
+(Canonical supplement categories: 24.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 591.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 591.50 Tm
+(Food-supplement seed synergy rules: 161.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 575.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 575.00 Tm
+(Safety constraints: 8.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 558.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 558.50 Tm
+(Association transactions: 1,200 with 9,029 transaction items.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 542.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 542.00 Tm
+(Mined association rules: 80.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 525.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 525.50 Tm
+(Synced scoring rules: 170.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 509.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 509.00 Tm
+(Nutrient interactions: 10.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 492.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 492.50 Tm
+(Recommendation runs: 29 with 191 recommendation items.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 476.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 476.00 Tm
+(Saved recommendation foods: 1.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 443.50 Tm
+(Backend Domain Model) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 425.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 425.50 Tm
+(Food catalog models include FoodCategory, Food, and FoodNutrient.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 409.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 409.00 Tm
+(Food now stores image_path, image_alt, recommended_for_supplements, nutrient_tags,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 395.50 Tm
+(synergy_reason, avoid_or_caution, allergen_tags, diet_tags, association_rule_items, and) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 382.00 Tm
+(is_active.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 365.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 365.50 Tm
+(Recommendation history is stored in RecommendationRun, RecommendationItem, and) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 352.00 Tm
+(SavedRecommendationItem.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 335.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 335.50 Tm
+(Association-rule dataset models include SupplementCategory, SupplementNormalization,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 322.00 Tm
+(FoodSupplementSynergyRule, SafetyConstraint, AssociationTransaction,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 308.50 Tm
+(AssociationTransactionItem, and MinedAssociationRule.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 292.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 292.00 Tm
+(Legacy/synced scoring rules are stored in AssociationRule.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 275.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 275.50 Tm
+(Safety constraints are stored separately from positive synergy rules and should not become) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 262.00 Tm
+(positive recommendations.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 229.50 Tm
+(Recommendation Logic) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 211.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 211.50 Tm
+(Do not replace the current recommendation engine. The active logic is a hybrid recommender.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 195.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 195.00 Tm
+(Core ranking blends content-based filtering, nutrient/supplement matching, association-rule) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 181.50 Tm
+(scoring, and collaborative preference signals from recommendation/feedback history.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 165.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 165.00 Tm
+(User supplements are normalized before rule matching using SupplementNormalization and) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 151.50 Tm
+(SupplementCategory canonical items such as supp:iron or supp:vitamin_c.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 135.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 135.00 Tm
+(Positive association seed rules and mined rules can raise rule_score and add explanations.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 118.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 118.50 Tm
+(Medical/allergy/safety filters must remain stronger than positive association scores.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 102.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 102.00 Tm
+(Responses include food image metadata, score breakdown, confidence, matched supplement/rule) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 88.50 Tm
+(metadata, synergy explanation, warnings, and feedback actions.) Tj
+ET
+BT
+/F1 8 Tf
+0.360 0.410 0.470 rg
+1 0 0 1 518 30 Tm
+(2) Tj
+ET
+Q
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 6392 >>
+stream
+q
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 722.00 Tm
+(Data Import Commands) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 704.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 704.00 Tm
+(Food images CSV command: python manage.py import_food_images_seed) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 690.50 Tm
+(data/i_nutriguide_food_images_seed.csv) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 674.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 674.00 Tm
+(Association Excel import: python manage.py import_association_dataset) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 660.50 Tm
+("data/I-NutriGuide_association_rule_dataset that i creat.xlsx") Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 644.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 644.00 Tm
+(Mining command: python manage.py mine_association_rules) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 627.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 627.50 Tm
+(Rule refresh command: python manage.py refresh_recommendation_rules) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 611.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 611.00 Tm
+(Recommended post-import flow: makemigrations, migrate, import dataset, mine rules, refresh) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 597.50 Tm
+(rules, run tests.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 565.00 Tm
+(API Surface To Inspect) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 547.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 547.00 Tm
+(Authentication: /api/v1/auth/login/, /api/v1/auth/me/, /api/v1/auth/refresh/.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 530.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 530.50 Tm
+(Recommendations: /api/v1/recommendations/foods/?n=10, /api/v1/recommendations/generate/,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 517.00 Tm
+(/api/v1/recommendations/preview/.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 500.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 500.50 Tm
+(Admin dashboard: /api/v1/admin/dashboard/.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 484.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 484.00 Tm
+(Admin recommendation review: /api/v1/admin/recommendations/.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 467.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 467.50 Tm
+(Rule dataset admin APIs: association supplement categories, supplement normalizations,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 454.00 Tm
+(synergy seed rules, safety constraints, mined association rules, and association) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 440.50 Tm
+(transactions.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 424.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 424.00 Tm
+(Knowledge APIs: foods, nutrients, supplements, nutrition interactions.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 391.50 Tm
+(Admin Panel) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 373.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 373.50 Tm
+(Routes include Dashboard, Foods, Add Food, Knowledge Base, Rules, Rule Dataset,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 360.00 Tm
+(Recommendations, Feedback, Chats, and Users.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 343.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 343.50 Tm
+(Dashboard now emphasizes Supplement Knowledge, normalization map, seed rules, mined rules,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 330.00 Tm
+(safety constraints, transactions, interactions, recommended foods, and saved foods.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 313.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 313.50 Tm
+(Knowledge Base supplements page now shows the supplement catalog plus imported normalization) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 300.00 Tm
+(aliases and canonical supplement categories.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 283.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 283.50 Tm
+(Knowledge Base interactions page now combines nutrient interactions and imported supplement) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 270.00 Tm
+(safety constraints.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 253.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 253.50 Tm
+(Food admin supports image preview and image metadata fields.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 237.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 237.00 Tm
+(The admin frontend API base is local: http://localhost:8000/api/v1.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 204.50 Tm
+(Mobile App) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 186.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 186.50 Tm
+(Expo Router tab bar includes Home, Recs, Supps, Chat, and Profile.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 170.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 170.00 Tm
+(Supps tab uses a medkit icon and opens /tabs/supplements.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 153.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 153.50 Tm
+(Add supplement flow remains hidden at /tabs/supplements-new.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 137.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 137.00 Tm
+(Profile screen includes a bottom Log out button that clears session storage and routes to the) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 123.50 Tm
+(welcome screen.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 107.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 107.00 Tm
+(Recommendation cards display food images, food name, match percentage, synergy reason,) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 93.50 Tm
+(supplement connection, and safety note when available.) Tj
+ET
+BT
+/F1 8 Tf
+0.360 0.410 0.470 rg
+1 0 0 1 518 30 Tm
+(3) Tj
+ET
+Q
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 5324 >>
+stream
+q
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 738.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 738.00 Tm
+(Relative media paths from the backend should be prefixed with the backend media URL, with) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 724.50 Tm
+(fallback image support.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 692.00 Tm
+(Brand And UI Direction) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 674.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 674.00 Tm
+(App identity: clean wellness/nutrition style, green primary color, orange accents, rounded) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 660.50 Tm
+(translucent cards, soft shadows, healthy food photography.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 644.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 644.00 Tm
+(Auth screens should reuse the welcome/get-started healthy-food background image with) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 630.50 Tm
+(resizeMode cover and a soft overlay.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 614.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 614.00 Tm
+(Avoid creating disconnected designs for onboarding/auth/admin/mobile surfaces.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 597.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 597.50 Tm
+(Mobile pages should avoid overflow on small screens and keep forms readable.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 565.00 Tm
+(Recent Fixes) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 547.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 547.00 Tm
+(Removed stale API URL pointing to 10.245.156.116 and rebuilt local services.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 530.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 530.50 Tm
+(Started backend, admin panel, and mobile app on localhost ports 8000, 5173, and 8081.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 514.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 514.00 Tm
+(Updated admin dashboard and knowledge-base UI for imported association data.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 497.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 497.50 Tm
+(Added the mobile Supps bottom-tab medkit icon.) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 481.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 481.00 Tm
+(Added a bottom Log out button on the mobile Profile screen.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 448.50 Tm
+(Suggested Analysis Prompt) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 430.50 Tm
+(Use this prompt with another ChatGPT:) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 411.50 Tm
+(Analyze the I-NutriGuide application from this handoff. Focus on architecture quality,) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 397.50 Tm
+(recommendation correctness, safety handling, data model consistency, admin usability, mobile) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 383.50 Tm
+(UX, API completeness, test gaps, deployment risks, and next best improvements. Do not propose) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 369.50 Tm
+(replacing the hybrid recommender; suggest incremental fixes that fit the current) Tj
+ET
+BT
+/F1 10.5 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 54.00 355.50 Tm
+(Django/React/Expo stack.) Tj
+ET
+BT
+/F2 15 Tf
+0.184 0.490 0.196 rg
+1 0 0 1 54.00 320.50 Tm
+(High-Value Review Questions) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 302.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 302.50 Tm
+(Are supplement normalizations used consistently in all recommendation entry points?) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 286.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 286.00 Tm
+(Do safety constraints and allergy checks always override positive association rules?) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 269.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 269.50 Tm
+(Are image_path and fallback media handling consistent across backend, admin, and mobile?) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 253.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 253.00 Tm
+(Are admin counts and page labels clear enough for non-technical data management?) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 236.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 236.50 Tm
+(Are mobile navigation, logout, supplement routines, and recommendation details ergonomic on) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 223.00 Tm
+(small screens?) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 206.50 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 206.50 Tm
+(Which tests should be added first for the highest risk paths?) Tj
+ET
+BT
+/F2 10.5 Tf
+0.930 0.420 0.090 rg
+1 0 0 1 56.00 190.00 Tm
+(-) Tj
+ET
+BT
+/F1 10.2 Tf
+0.090 0.121 0.160 rg
+1 0 0 1 70.00 190.00 Tm
+(What production security settings need review before deployment?) Tj
+ET
+BT
+/F1 8 Tf
+0.360 0.410 0.470 rg
+1 0 0 1 518 30 Tm
+(4) Tj
+ET
+Q
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 11 0 R >>
+endobj
+xref
+0 13
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000135 00000 n 
+0000000205 00000 n 
+0000000280 00000 n 
+0000004940 00000 n 
+0000005076 00000 n 
+0000011798 00000 n 
+0000011934 00000 n 
+0000018378 00000 n 
+0000018515 00000 n 
+0000023892 00000 n 
+trailer
+<< /Size 13 /Root 1 0 R >>
+startxref
+24030
+%%EOF

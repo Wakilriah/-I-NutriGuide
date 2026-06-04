@@ -31,20 +31,24 @@ class CollaborativeFilter:
         weight_sum = 0.0
         for user_id, similarity in sorted(similarities, key=lambda item: item[1], reverse=True)[:10]:
             value = self.artifacts.food_scores.get(user_id, {}).get(food_slug, 0.0)
-            if value <= 0:
+            if value == 0:
                 continue
             weighted_total += similarity * value
             weight_sum += similarity
-        return round(min(weighted_total / weight_sum, 1.0), 4) if weight_sum else 0.0
+        return round(max(min(weighted_total / weight_sum, 1.0), -1.0), 4) if weight_sum else 0.0
 
 
 def build_feature_order(profiles: list[dict]) -> list[str]:
     features = set()
     for profile in profiles:
-        for key in ("supplements", "goals", "maladies"):
+        for key in ("supplements", "goals", "maladies", "allergies", "aliments_exclus", "liked_foods", "liked_categories"):
             for value in profile.get(key, []):
                 features.add(f"{key}:{normalize_token(value)}")
-    features.update({"numeric:activite", "numeric:imc_norm"})
+        if profile.get("gender"):
+            features.add(f"gender:{normalize_token(profile.get('gender'))}")
+        if profile.get("bmi_range"):
+            features.add(f"bmi_range:{normalize_token(profile.get('bmi_range'))}")
+    features.update({"numeric:activite", "numeric:imc_norm", "numeric:age_norm"})
     return sorted(features)
 
 
@@ -54,6 +58,12 @@ def build_user_vector(profile: dict, feature_order: list[str]) -> list[float]:
         "supplements": {normalize_token(item) for item in profile.get("supplements", [])},
         "goals": {normalize_token(item) for item in profile.get("goals", [])},
         "maladies": {normalize_token(item) for item in profile.get("maladies", [])},
+        "allergies": {normalize_token(item) for item in profile.get("allergies", [])},
+        "aliments_exclus": {normalize_token(item) for item in profile.get("aliments_exclus", [])},
+        "liked_foods": {normalize_token(item) for item in profile.get("liked_foods", [])},
+        "liked_categories": {normalize_token(item) for item in profile.get("liked_categories", [])},
+        "gender": {normalize_token(profile.get("gender"))},
+        "bmi_range": {normalize_token(profile.get("bmi_range"))},
     }
     for feature in feature_order:
         group, value = feature.split(":", 1)
@@ -61,6 +71,8 @@ def build_user_vector(profile: dict, feature_order: list[str]) -> list[float]:
             values.append(float(profile.get("activite", 0) or 0))
         elif group == "numeric" and value == "imc_norm":
             values.append(float(profile.get("imc_norm", 0.5) or 0.5))
+        elif group == "numeric" and value == "age_norm":
+            values.append(float(profile.get("age_norm", 0.0) or 0.0))
         else:
             values.append(1.0 if value in profile_sets.get(group, set()) else 0.0)
     return values

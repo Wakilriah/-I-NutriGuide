@@ -40,7 +40,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           {adminRoutes.map((route) => (
             <NavLink
               className={({ isActive }) => (isActiveRoute(route.path, isActive) ? "nav-button nav-button-active" : "nav-button")}
-              end={route.path === "/" || route.path === "/foods"}
+              end={route.path === "/" || route.path === "/foods" || route.path === "/rules"}
               key={route.id}
               to={route.path}
             >

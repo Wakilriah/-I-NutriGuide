@@ -28,6 +28,7 @@ CORS_ALLOWED_ORIGINS
 CSRF_TRUSTED_ORIGINS
 API_HOST
 ADMIN_HOST
+MOBILE_WEB_HOST
 LANDING_HOST
 DOZZLE_HOST
 NEO4J_HOST
@@ -111,13 +112,13 @@ if [ "${EXPO_PUBLIC_API_BASE_URL%/}" != "$expected_api_base" ]; then
 fi
 
 case "$CORS_ALLOWED_ORIGINS" in
-  *"${expected_scheme}://${ADMIN_HOST}"*) ;;
-  *) echo "CORS_ALLOWED_ORIGINS must include ${expected_scheme}://${ADMIN_HOST}." >&2; exit 1 ;;
+  *"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${MOBILE_WEB_HOST}"*|*"${expected_scheme}://${MOBILE_WEB_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*) ;;
+  *) echo "CORS_ALLOWED_ORIGINS must include ${expected_scheme}://${ADMIN_HOST} and ${expected_scheme}://${MOBILE_WEB_HOST}." >&2; exit 1 ;;
 esac
 
 case "$CSRF_TRUSTED_ORIGINS" in
-  *"${expected_scheme}://${API_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*|*"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${API_HOST}"*) ;;
-  *) echo "CSRF_TRUSTED_ORIGINS must include ${expected_scheme}://${API_HOST} and ${expected_scheme}://${ADMIN_HOST}." >&2; exit 1 ;;
+  *"${expected_scheme}://${API_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${MOBILE_WEB_HOST}"*|*"${expected_scheme}://${API_HOST}"*"${expected_scheme}://${MOBILE_WEB_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*|*"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${API_HOST}"*"${expected_scheme}://${MOBILE_WEB_HOST}"*|*"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${MOBILE_WEB_HOST}"*"${expected_scheme}://${API_HOST}"*|*"${expected_scheme}://${MOBILE_WEB_HOST}"*"${expected_scheme}://${API_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*|*"${expected_scheme}://${MOBILE_WEB_HOST}"*"${expected_scheme}://${ADMIN_HOST}"*"${expected_scheme}://${API_HOST}"*) ;;
+  *) echo "CSRF_TRUSTED_ORIGINS must include ${expected_scheme}://${API_HOST}, ${expected_scheme}://${ADMIN_HOST}, and ${expected_scheme}://${MOBILE_WEB_HOST}." >&2; exit 1 ;;
 esac
 
 echo "Production env validation passed: $env_file"

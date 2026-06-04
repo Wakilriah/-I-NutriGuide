@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 from apps.nutrients.models import NutrientInteraction
+from apps.rules.models import SafetyConstraint
+from apps.rules.services import canonical_key, supplement_item_variants
 from apps.supplements.fact_sheets import excerpt, matching_fact_sheets
 
 from .normalizer import normalize_token
@@ -24,7 +26,7 @@ class WarningsEngine:
         food_terms = self._food_terms(food)
 
         for allergy in self._tokens(user_profile.get("allergies", [])):
-            if allergy and any(allergy in term or term in allergy for term in food_terms):
+            if self._matches_food_term(allergy, food_terms):
                 warnings.append(
                     {
                         "level": "warning",
@@ -37,7 +39,7 @@ class WarningsEngine:
                 blocked = True
 
         for disliked in self._tokens(user_profile.get("aliments_exclus", [])):
-            if disliked and any(disliked in term or term in disliked for term in food_terms):
+            if self._matches_food_term(disliked, food_terms):
                 warnings.append(
                     {
                         "level": "caution",
@@ -51,6 +53,11 @@ class WarningsEngine:
 
         supplement_tokens = set(self._tokens(supplements))
         food_tokens = set(self._tokens(food_nutrients))
+        safety_context = food_terms | food_tokens | supplement_tokens | set(self._tokens(user_profile.get("maladies", [])))
+        warnings.extend(self._safety_constraint_warnings(supplements, safety_context))
+        if warnings:
+            safety_score = min(safety_score, self._constraint_safety_score(warnings))
+
         for interaction in NutrientInteraction.objects.filter(active=True):
             source = normalize_token(interaction.source_key)
             target = normalize_token(interaction.target_key)
@@ -99,6 +106,46 @@ class WarningsEngine:
 
         return WarningResult(warnings=warnings, blocked=blocked, safety_score=0.0 if blocked else safety_score)
 
+    def _safety_constraint_warnings(self, supplements, context_terms: set[str]) -> list[dict]:
+        supplement_categories = set()
+        for supplement in supplements or []:
+            supplement_categories.update(supplement_item_variants(str(supplement)))
+            supplement_categories.add(canonical_key(supplement))
+        warnings = []
+        for constraint in SafetyConstraint.objects.filter(is_active=True):
+            category_key = canonical_key(constraint.supplement_category_name)
+            category_item = f"supp:{constraint.supplement_category.canonical_item}" if constraint.supplement_category_id else ""
+            if category_key not in supplement_categories and category_item not in supplement_categories:
+                continue
+            target = canonical_key(constraint.avoid_or_review_item.replace("context", ""))
+            if target and not any(target in term or term in target for term in context_terms):
+                if constraint.constraint_type == SafetyConstraint.ConstraintType.AVOID_TIMING:
+                    continue
+                if "disease" not in constraint.avoid_or_review_item.lower() and "intake" not in constraint.avoid_or_review_item.lower():
+                    continue
+            level = "warning" if constraint.safety_level == "HIGH" or constraint.constraint_type in {"medical_review", "exclusion"} else "caution"
+            warnings.append(
+                {
+                    "level": level,
+                    "safety_level": constraint.safety_level,
+                    "type": constraint.constraint_type,
+                    "title": f"{constraint.supplement_category_name} safety note",
+                    "message": f"{constraint.reason} {constraint.how_to_use}".strip(),
+                    "related_items": [constraint.supplement_category_name, constraint.avoid_or_review_item],
+                    "source_url": constraint.source_url,
+                }
+            )
+        return warnings
+
+    def _constraint_safety_score(self, warnings: list[dict]) -> float:
+        score = 1.0
+        for warning in warnings:
+            if warning.get("type") in {"medical_review", "exclusion"}:
+                score = min(score, 0.35)
+            elif warning.get("type") == "avoid_timing":
+                score = min(score, 0.65)
+        return score
+
     def _food_terms(self, food) -> set[str]:
         terms = {
             normalize_token(food.name),
@@ -112,6 +159,18 @@ class WarningsEngine:
 
     def _tokens(self, values) -> list[str]:
         return [normalize_token(value) for value in values or [] if value]
+
+    def _matches_food_term(self, blocked_item: str, food_terms: set[str]) -> bool:
+        if not blocked_item:
+            return False
+        for term in food_terms:
+            if len(term) < 3:
+                continue
+            if blocked_item == term or blocked_item in term:
+                return True
+            if len(term) >= 4 and term in blocked_item:
+                return True
+        return False
 
     def _interaction_applies(self, source: str, target: str, supplement_tokens: set[str], food_tokens: set[str]) -> bool:
         crosses_supplement_food = (source in supplement_tokens and target in food_tokens) or (

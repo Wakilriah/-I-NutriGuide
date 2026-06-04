@@ -1,5 +1,7 @@
 from apps.foods.models import Food
 from apps.recommendations.models import DISCLAIMER, RecommendationItem, RecommendationRun
+from apps.feedback.models import RecommendationFeedback
+from apps.rules.models import AssociationRule, MinedAssociationRule
 from apps.supplements.models import UserSupplement
 
 from .cache import make_recommendation_cache_key
@@ -83,12 +85,35 @@ def get_recommendation_cache_key(user, limit):
     )
     profile_snapshot = build_user_profile(user)
     profile_snapshot.pop("n_sessions", None)
+    profile_snapshot["_cache_versions"] = _cache_versions(user)
     return make_recommendation_cache_key(
         user.id,
         profile_snapshot,
         _supplement_snapshot(user_supplements),
         limit,
     )
+
+
+def _cache_versions(user):
+    profile = getattr(user, "profile", None)
+    profile_updated = profile.updated_at.isoformat() if profile and profile.updated_at else None
+    feedback_updated = (
+        RecommendationFeedback.objects.filter(user=user).order_by("-created_at").values_list("created_at", flat=True).first()
+    )
+    food_updated = Food.objects.order_by("-updated_at").values_list("updated_at", flat=True).first()
+    rule_updated = AssociationRule.objects.order_by("-updated_at").values_list("updated_at", flat=True).first()
+    mined_rule_updated = MinedAssociationRule.objects.order_by("-updated_at").values_list("updated_at", flat=True).first()
+    return {
+        "profile_updated_at": profile_updated,
+        "feedback_updated_at": feedback_updated.isoformat() if feedback_updated else None,
+        "food_dataset_version": food_updated.isoformat() if food_updated else None,
+        "association_rules_version": max(
+            [value for value in [rule_updated, mined_rule_updated] if value],
+            default=None,
+        ).isoformat()
+        if (rule_updated or mined_rule_updated)
+        else None,
+    }
 
 
 def _supplement_snapshot(user_supplements):
