@@ -13,6 +13,7 @@ import {
   type NutrientPayload,
   updateNutrient,
 } from "../../api/nutrients";
+import { ConfirmDialog } from "../../components/admin/ConfirmDialog";
 import { AdminPagination } from "../../components/admin/AdminPagination";
 import { MetricSkeletonGrid, TableSkeleton } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
@@ -44,6 +45,7 @@ export function NutrientsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [editingNutrient, setEditingNutrient] = useState<Nutrient | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [nutrientToDelete, setNutrientToDelete] = useState<Nutrient | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const page = Number(searchParams.get("nutrients_page") || "1");
   const search = searchParams.get("nutrients_search") || "";
@@ -107,7 +109,10 @@ export function NutrientsPage() {
   const deleteMutation = useMutation({
     mutationKey: ["nutrients", "delete"],
     mutationFn: deleteNutrient,
-    onSuccess: refreshNutrients,
+    onSuccess: async () => {
+      setNutrientToDelete(null);
+      await refreshNutrients();
+    },
   });
 
   const openCreateDialog = () => {
@@ -194,7 +199,7 @@ export function NutrientsPage() {
                     <Button
                       aria-label={`Delete ${nutrient.name}`}
                       disabled={deleteMutation.isPending && deleteMutation.variables === nutrient.slug}
-                      onClick={() => deleteMutation.mutate(nutrient.slug)}
+                      onClick={() => setNutrientToDelete(nutrient)}
                       size="icon"
                       type="button"
                       variant="destructive"
@@ -252,6 +257,15 @@ export function NutrientsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        confirmLabel="Delete nutrient"
+        description={nutrientToDelete ? `Delete ${nutrientToDelete.name}? This cannot be undone.` : "Delete this nutrient?"}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => nutrientToDelete && deleteMutation.mutate(nutrientToDelete.slug)}
+        onOpenChange={(open) => !open && setNutrientToDelete(null)}
+        open={Boolean(nutrientToDelete)}
+        title="Delete nutrient"
+      />
     </>
   );
 }

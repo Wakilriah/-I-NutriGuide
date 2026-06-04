@@ -9,6 +9,7 @@ import { StatCard } from "../../components/admin/StatCard";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { getPositiveIntegerParam, updateUrlSearchParams } from "../../lib/url-state";
 
 const PAGE_SIZE = 10;
 
@@ -22,7 +23,7 @@ function formatDate(value: string) {
 export function RecommendationsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get("page") || "1");
+  const page = getPositiveIntegerParam(searchParams.get("page"));
   const search = searchParams.get("search") || "";
   const supplement = searchParams.get("supplement") || "";
   const dateFrom = searchParams.get("date_from") || "";
@@ -53,15 +54,7 @@ export function RecommendationsPage() {
   const ruleMatchedItems = allItems.filter((item) => item.matched_rules.length > 0 || item.rule_score > 0).length;
 
   const updateSearch = (updates: Record<string, string | number | null>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === "" || value === null) {
-        next.delete(key);
-      } else {
-        next.set(key, String(value));
-      }
-    });
-    setSearchParams(next);
+    setSearchParams(updateUrlSearchParams(searchParams, updates));
   };
 
   return (

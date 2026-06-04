@@ -1,18 +1,16 @@
-FROM node:20-alpine AS development
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-COPY . .
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 FROM node:20-alpine AS build
 WORKDIR /app
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-COPY package*.json ./
-RUN npm ci
+ARG EXPO_PUBLIC_API_BASE_URL
+ENV EXPO_NO_TELEMETRY=1
+ENV EXPO_PUBLIC_API_BASE_URL=${EXPO_PUBLIC_API_BASE_URL}
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run build:web
 
 FROM nginx:1.27-alpine AS production
 COPY --from=build /app/dist /usr/share/nginx/html

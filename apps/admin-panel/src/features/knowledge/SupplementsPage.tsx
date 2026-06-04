@@ -14,6 +14,7 @@ import {
   type SupplementPayload,
   updateSupplement,
 } from "../../api/supplements";
+import { ConfirmDialog } from "../../components/admin/ConfirmDialog";
 import { AdminPagination } from "../../components/admin/AdminPagination";
 import { MetricSkeletonGrid, TableSkeleton } from "../../components/admin/LoadingStates";
 import { StatCard } from "../../components/admin/StatCard";
@@ -55,6 +56,7 @@ export function SupplementsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [editingSupplement, setEditingSupplement] = useState<Supplement | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [supplementToDelete, setSupplementToDelete] = useState<Supplement | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const page = Number(searchParams.get("supplements_page") || "1");
   const search = searchParams.get("supplements_search") || "";
@@ -145,7 +147,10 @@ export function SupplementsPage() {
   const deleteMutation = useMutation({
     mutationKey: ["supplements", "delete"],
     mutationFn: deleteSupplement,
-    onSuccess: refreshSupplements,
+    onSuccess: async () => {
+      setSupplementToDelete(null);
+      await refreshSupplements();
+    },
   });
 
   const openCreateDialog = () => {
@@ -248,7 +253,7 @@ export function SupplementsPage() {
                   <Button
                     aria-label={`Delete ${supplement.name}`}
                     disabled={deleteMutation.isPending && deleteMutation.variables === supplement.slug}
-                    onClick={() => deleteMutation.mutate(supplement.slug)}
+                    onClick={() => setSupplementToDelete(supplement)}
                     size="icon"
                     type="button"
                     variant="destructive"
@@ -349,6 +354,15 @@ export function SupplementsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        confirmLabel="Delete supplement"
+        description={supplementToDelete ? `Delete ${supplementToDelete.name}? This cannot be undone.` : "Delete this supplement?"}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => supplementToDelete && deleteMutation.mutate(supplementToDelete.slug)}
+        onOpenChange={(open) => !open && setSupplementToDelete(null)}
+        open={Boolean(supplementToDelete)}
+        title="Delete supplement"
+      />
     </>
   );
 }
