@@ -39,11 +39,11 @@ services:
   backend:
     <<: [*app-env, *backend-image]
     command: >
-      sh -c "python manage.py makemigrations --noinput &&
-             python manage.py migrate --noinput &&
+      sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers $${GUNICORN_WORKERS:-3} --timeout $${GUNICORN_TIMEOUT:-60}"
     labels:
+      - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
       - traefik.http.routers.inutriguide-api-http.rule=Host(`${API_HOST:-api.matchcesoir.pro}`)
@@ -71,6 +71,8 @@ services:
   celery_worker:
     <<: [*app-env, *backend-image]
     command: celery -A config worker -l info
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     depends_on:
       backend:
         condition: service_healthy
@@ -80,6 +82,8 @@ services:
   celery_beat:
     <<: [*app-env, *backend-image]
     command: celery -A config beat -l info
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     depends_on:
       backend:
         condition: service_healthy
@@ -92,6 +96,7 @@ services:
     networks:
       - public
     labels:
+      - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
       - traefik.http.routers.inutriguide-admin-http.rule=Host(`${ADMIN_HOST:-admin.matchcesoir.pro}`)
@@ -113,6 +118,7 @@ services:
     networks:
       - public
     labels:
+      - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
       - traefik.http.routers.inutriguide-landing-http.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`)
@@ -246,6 +252,21 @@ services:
       - traefik.http.services.inutriguide-uptime.loadbalancer.server.port=3001
     volumes:
       - uptime_kuma_data:/app/data
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    environment:
+      DOCKER_API_VERSION: ${WATCHTOWER_DOCKER_API_VERSION:-1.44}
+    command:
+      - --label-enable
+      - --cleanup
+      - --interval
+      - ${WATCHTOWER_INTERVAL_SECONDS:-300}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - private
 
 networks:
   public:
