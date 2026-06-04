@@ -23,7 +23,7 @@ class WarningsEngine:
         food_terms = self._food_terms(food)
 
         for allergy in self._tokens(user_profile.get("allergies", [])):
-            if allergy and any(allergy in term or term in allergy for term in food_terms):
+            if allergy and any(self._tokens_match(allergy, term) for term in food_terms):
                 warnings.append(
                     {
                         "level": "warning",
@@ -93,6 +93,11 @@ class WarningsEngine:
 
     def _tokens(self, values) -> list[str]:
         return [normalize_token(value) for value in values or [] if value]
+
+    def _tokens_match(self, profile_token: str, food_token: str) -> bool:
+        if profile_token == food_token:
+            return True
+        return (len(profile_token) >= 3 and profile_token in food_token) or (len(food_token) >= 4 and food_token in profile_token)
 
     def _interaction_applies(self, source: str, target: str, supplement_tokens: set[str], food_tokens: set[str]) -> bool:
         crosses_supplement_food = (source in supplement_tokens and target in food_tokens) or (

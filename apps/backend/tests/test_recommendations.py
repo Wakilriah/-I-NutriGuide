@@ -79,7 +79,7 @@ def test_generate_recommendations_filters_and_ranks(authenticated_client, user, 
 
     def fake_recommend(self, user_profile, n=10, foods=None):
         return {
-            "user_id": user.id, "strategy": "GRAPH_TRAVERSAL", "weights": {}, "disclaimer": "Recommendations are nutritional suggestions",
+            "user_id": user.id, "strategy": "ASSOCIATION_RULES", "weights": {}, "disclaimer": "Recommendations are nutritional suggestions",
             "recommendations": [
                 {"food_id": recommendation_data["orange"].id, "food_name": "Orange", "food_slug": "orange", "category": "General", "final_score": 1.0, "cbf_score": 1.0, "rules_score": 1.0, "cf_score": 1.0, "reason": "This complements your supplements", "safety_notes": [], "matched_nutrients": ["vitamine_c"], "matched_rules": [], "related_supplement": None}
             ]        }
@@ -100,6 +100,44 @@ def test_generate_recommendations_filters_and_ranks(authenticated_client, user, 
     assert RecommendationItem.objects.filter(run__user=user).count() == len(body["items"])
 
 
+def test_generate_recommendations_rolls_back_partial_run(authenticated_client, user, recommendation_data, monkeypatch):
+    def fake_recommend(self, user_profile, n=10, foods=None):
+        return {
+            "user_id": user.id,
+            "strategy": "ASSOCIATION_RULES",
+            "weights": {},
+            "disclaimer": "Recommendations are nutritional suggestions",
+            "recommendations": [
+                {
+                    "food_id": recommendation_data["orange"].id,
+                    "food_name": "Orange",
+                    "food_slug": "orange",
+                    "category": "General",
+                    "final_score": 1.0,
+                    "cbf_score": 1.0,
+                    "rules_score": 1.0,
+                    "cf_score": 1.0,
+                    "reason": "This complements your supplements",
+                    "safety_notes": [],
+                    "matched_nutrients": ["vitamine_c"],
+                    "matched_rules": [],
+                    "related_supplement": None,
+                }
+            ],
+        }
+
+    def fail_create(*args, **kwargs):
+        raise RuntimeError("item creation failed")
+
+    monkeypatch.setattr("apps.recommendations.services.hybrid.HybridRecommender.recommend", fake_recommend)
+    monkeypatch.setattr(RecommendationItem.objects, "create", fail_create)
+
+    with pytest.raises(RuntimeError):
+        authenticated_client.post(reverse("recommendation-generate"), {"limit": 1}, format="json")
+
+    assert RecommendationRun.objects.filter(user=user).count() == 0
+
+
 def test_disabled_rule_is_ignored(authenticated_client, recommendation_data):
     response = authenticated_client.post(reverse("recommendation-generate"), {"limit": 5}, format="json")
 
@@ -116,8 +154,8 @@ def test_hybrid_food_endpoint_returns_subscores(authenticated_client, user, reco
 
     assert response.status_code == 200
     body = response.json()
-    assert body["strategy"] == "GRAPH_TRAVERSAL"
-    assert body["weights"] == {"alpha": 1.0, "beta": 0.0, "gamma": 0.0}
+    assert body["strategy"] == "ASSOCIATION_RULES"
+    assert body["weights"] == {"content_based": 0.25, "association_rules": 0.60, "collaborative": 0.15}
     assert body["recommendations"] == sorted(
         body["recommendations"],
         key=lambda item: item["final_score"],

@@ -115,7 +115,7 @@ def test_recommendations_use_imported_ciqual_foods_and_keep_filters(authenticate
     def fake_recommend(self, user_profile, n=10, foods=None):
         kiwi = Food.objects.get(slug="kiwi")
         return {
-            "user_id": user.id, "strategy": "GRAPH_TRAVERSAL", "weights": {}, "disclaimer": "test",
+            "user_id": user.id, "strategy": "ASSOCIATION_RULES", "weights": {}, "disclaimer": "test",
             "recommendations": [
                 {"food_id": kiwi.id, "food_name": "Kiwi", "food_slug": "kiwi", "category": "General", "final_score": 1.0, "cbf_score": 1.0, "rules_score": 1.0, "cf_score": 1.0, "reason": "Test", "safety_notes": [], "matched_nutrients": ["vitamine_c"], "matched_rules": [], "related_supplement": None}    
             ]        }

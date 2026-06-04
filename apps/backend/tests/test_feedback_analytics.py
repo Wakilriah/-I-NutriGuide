@@ -103,6 +103,19 @@ def test_user_cannot_feedback_another_users_recommendation(api_client, other_use
     assert RecommendationFeedback.objects.count() == 0
 
 
+def test_user_cannot_feedback_another_users_recommendation_with_alias(api_client, other_user, recommendation_item):
+    api_client.force_authenticate(user=other_user)
+
+    response = api_client.post(
+        reverse("feedback-list"),
+        {"recommendation_id": recommendation_item["id"], "rating": 4},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert RecommendationFeedback.objects.count() == 0
+
+
 def test_feedback_list_is_admin_only(authenticated_client, admin_api_client, recommendation_item):
     authenticated_client.post(
         reverse("feedback-list"),

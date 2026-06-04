@@ -171,7 +171,7 @@ def test_recommendation_response_contains_explainable_shape(authenticated_client
     def fake_recommend(self, user_profile, n=10, foods=None):
         return {
             "user_id": user.id,
-            "strategy": "GRAPH_TRAVERSAL",
+            "strategy": "ASSOCIATION_RULES",
             "weights": {},
             "disclaimer": "Recommendations are nutritional suggestions",
             "recommendations": [

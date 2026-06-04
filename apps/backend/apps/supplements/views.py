@@ -1,6 +1,5 @@
 from django.db.models import Q
 from rest_framework import permissions, viewsets
-from rest_framework.pagination import PageNumberPagination
 
 from apps.common.pagination import AdminPageNumberPagination
 
@@ -17,11 +16,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class SupplementPageNumberPagination(AdminPageNumberPagination):
     page_size = 20
-
-    def paginate_queryset(self, queryset, request, view=None):
-        return PageNumberPagination.paginate_queryset(
-            self, queryset, request, view=view
-        )
 
 
 class SupplementViewSet(viewsets.ModelViewSet):

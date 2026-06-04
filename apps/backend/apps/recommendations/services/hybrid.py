@@ -1,9 +1,16 @@
 from dataclasses import dataclass
+
 from apps.recommendations.models import DISCLAIMER
-from apps.common.neo4j_client import get_neo4j_driver
+
+from .association import AssociationRulesEngine
+from .cbf import ContentBasedFilter
+from .collaborative import CollaborativeArtifacts, CollaborativeFilter
+from .normalizer import clamp, normalize_token
+from .training import build_food_database, build_rules_from_database, load_artifacts
+
 
 @dataclass(frozen=True)
-class GraphRecommendation:
+class HybridRecommendation:
     food_id: int
     food_name: str
     food_slug: str
@@ -18,123 +25,96 @@ class GraphRecommendation:
     matched_rules: list[dict]
     related_supplement: str | None
 
+
 class HybridRecommender:
     def __init__(self, artifacts: dict | None = None):
-        self.driver = get_neo4j_driver()
+        self.artifacts = artifacts if artifacts is not None else load_artifacts()
+        self.cbf = ContentBasedFilter()
+        self.rules = AssociationRulesEngine(self.artifacts.get("rules") or build_rules_from_database())
+        self.cf = CollaborativeFilter(self._collaborative_artifacts())
+        self.weights = {"content_based": 0.25, "association_rules": 0.60, "collaborative": 0.15}
 
     def recommend(self, user_profile: dict, n: int = 10, foods: list[dict] | None = None) -> dict:
-        user_id = user_profile.get("user_id")
-        
-        # We use a Knowledge Graph traversal to find recommendations.
-        # Direct matches reward foods sharing nutrients with active supplements.
-        # Synergy matches reward foods containing nutrients supported by supplement nutrients.
-        cypher_query = """
-        MATCH (u:User {id: $user_id})
-        MATCH (f:Food)-[:BELONGS_TO]->(c:Category)
-        WHERE NOT (u)-[:DISLIKES]->(f)
+        food_database = foods or build_food_database()
+        scored = []
 
-        OPTIONAL MATCH (u)-[:TAKES_SUPPLEMENT]->(:Supplement)-[:CONTAINS_NUTRIENT]->(supplement_nutrient:Nutrient)
-        WITH u, f, c, collect(DISTINCT supplement_nutrient) AS supplement_nutrients
+        for food in food_database:
+            cbf_result = self.cbf.score_food(user_profile, food)
+            if cbf_result is None:
+                continue
 
-        OPTIONAL MATCH (f)-[direct:CONTAINS_NUTRIENT|RICH_IN]->(direct_nutrient:Nutrient)
-        WHERE direct_nutrient IN supplement_nutrients
-        WITH u, f, c, supplement_nutrients,
-             count(DISTINCT direct_nutrient) AS direct_matches,
-             sum(coalesce(direct.amount, 0)) AS direct_amount,
-             collect(DISTINCT direct_nutrient.slug) AS direct_slugs
+            rule_result = self.rules.score(user_profile, food)
+            cf_score = self.cf.score(user_profile, food)
+            final_score = self._final_score(cbf_result.score, rule_result.score, cf_score)
 
-        OPTIONAL MATCH (source_nutrient:Nutrient)-[support_rel]->(target_nutrient:Nutrient)<-[synergy:CONTAINS_NUTRIENT|RICH_IN]-(f)
-        WHERE source_nutrient IN supplement_nutrients
-          AND type(support_rel) IN ['ENHANCES', 'SUPPORTS', 'REQUIRES']
-        WITH f, c, direct_matches, direct_amount, direct_slugs,
-             count(DISTINCT target_nutrient) AS synergy_matches,
-             sum(coalesce(synergy.amount, 0)) AS synergy_amount,
-             collect(DISTINCT target_nutrient.slug) AS synergy_slugs
+            matched_nutrients = sorted(set(cbf_result.matched_nutrients + self._rule_nutrients(rule_result.matched_rules)))
+            scored.append(
+                HybridRecommendation(
+                    food_id=food["id"],
+                    food_name=food["nom"],
+                    food_slug=food["slug"],
+                    category=food.get("category") or "General",
+                    final_score=final_score,
+                    cbf_score=cbf_result.score,
+                    rules_score=rule_result.score,
+                    cf_score=cf_score,
+                    reason=self._reason(cbf_result.score, rule_result.score, cf_score),
+                    safety_notes=cbf_result.safety_notes,
+                    matched_nutrients=matched_nutrients,
+                    matched_rules=rule_result.matched_rules,
+                    related_supplement=self._related_supplement(rule_result.matched_rules, user_profile),
+                )
+            )
 
-        WITH f, c, direct_matches, synergy_matches, direct_slugs, synergy_slugs,
-             ((direct_matches * 1.0) + (synergy_matches * 2.0) + (coalesce(direct_amount, 0) / 100.0) + (coalesce(synergy_amount, 0) / 100.0)) AS graph_score
-
-        WHERE graph_score > 0
-        ORDER BY graph_score DESC, f.name ASC
-        LIMIT $limit
-
-        RETURN f.id as id, f.name as name, f.slug as slug, c.name as category, 
-               graph_score, direct_matches, synergy_matches, direct_slugs, synergy_slugs
-        """
-        
-        results = []
-        if self.driver and user_id:
-            try:
-                with self.driver.session() as session:
-                    records = session.run(cypher_query, user_id=user_id, limit=n)
-                    for record in records:
-                        graph_score = float(record["graph_score"] or 0.0)
-                        direct_matches = int(record["direct_matches"] or 0)
-                        synergy_matches = int(record["synergy_matches"] or 0)
-                        matched_nutrients = sorted(set((record["direct_slugs"] or []) + (record["synergy_slugs"] or [])))
-                        score = round(min(0.45 + (graph_score / 8.0), 1.0), 4)
-                        reason = (
-                            f"Matched through the nutrition graph with {direct_matches} direct nutrient match(es) "
-                            f"and {synergy_matches} synergy path(s)."
-                        )
-                        results.append(
-                            GraphRecommendation(
-                                food_id=record["id"],
-                                food_name=record["name"],
-                                food_slug=record["slug"],
-                                category=record["category"] or "General",
-                                final_score=score,
-                                cbf_score=score * 0.8,
-                                rules_score=score * 0.1,
-                                cf_score=score * 0.1,
-                                reason=reason,
-                                safety_notes=["Verified against known graph constraints"],
-                                matched_nutrients=matched_nutrients,
-                                matched_rules=[],
-                                related_supplement=None
-                            )
-                        )
-            except Exception as e:
-                print(f"Neo4j Recommendation Error: {e}")
-        
-        # Fallback if graph is empty or no user_id
-        if not results:
-            results = self._fallback_recommendation(n, user_profile)
+        scored.sort(key=lambda item: (item.final_score, item.rules_score, item.cbf_score, item.food_name), reverse=True)
+        results = scored[:n]
 
         return {
-            "user_id": user_id,
-            "strategy": "GRAPH_TRAVERSAL",
-            "weights": {"alpha": 1.0, "beta": 0.0, "gamma": 0.0},
+            "user_id": user_profile.get("user_id"),
+            "strategy": "ASSOCIATION_RULES",
+            "weights": self.weights,
             "disclaimer": DISCLAIMER,
             "recommendations": [item.__dict__ for item in results],
         }
 
-    def _fallback_recommendation(self, n: int, user_profile: dict = None):
-        from apps.foods.models import Food
-        queryset = Food.objects.filter(is_active=True)
-        if user_profile:
-            aliments_exclus = user_profile.get("aliments_exclus", [])
-            allergies = user_profile.get("allergies", [])
-            if aliments_exclus:
-                queryset = queryset.exclude(slug__in=aliments_exclus)
-            if allergies:
-                for allergy in allergies:
-                    queryset = queryset.exclude(slug__icontains=allergy)
-        foods = queryset[:n]
-        return [
-            GraphRecommendation(
-                food_id=f.id,
-                food_name=f.name,
-                food_slug=f.slug,
-                category=f.category.name if hasattr(f, 'category') and f.category else "General",
-                final_score=0.5,
-                cbf_score=0.5,
-                rules_score=0.0,
-                cf_score=0.0,
-                reason="Fallback generic recommendation",
-                safety_notes=[],
-                matched_nutrients=[],
-                matched_rules=[],
-                related_supplement=None
-            ) for f in foods
-        ]
+    def _collaborative_artifacts(self) -> CollaborativeArtifacts:
+        artifacts = self.artifacts.get("cf")
+        if isinstance(artifacts, CollaborativeArtifacts):
+            return artifacts
+        return CollaborativeArtifacts(user_vectors={}, food_scores={}, feature_order=[])
+
+    def _final_score(self, cbf_score: float, rule_score: float, cf_score: float) -> float:
+        score = (
+            self.weights["content_based"] * cbf_score
+            + self.weights["association_rules"] * rule_score
+            + self.weights["collaborative"] * cf_score
+        )
+        return round(clamp(score), 4)
+
+    def _reason(self, cbf_score: float, rule_score: float, cf_score: float) -> str:
+        parts = []
+        if rule_score > 0:
+            parts.append("matched association rules from your supplement and nutrition profile")
+        if cbf_score > 0:
+            parts.append("fits your nutrition goals and health context")
+        if cf_score > 0:
+            parts.append("aligns with similar user feedback")
+        return "Recommended because it " + ", ".join(parts) + "." if parts else "General nutrition recommendation."
+
+    def _rule_nutrients(self, matched_rules: list[dict]) -> list[str]:
+        nutrients = []
+        for rule in matched_rules:
+            consequent = rule.get("consequent", "")
+            if consequent.startswith("nutrient:"):
+                nutrients.append(normalize_token(consequent.split(":", 1)[1]))
+        return nutrients
+
+    def _related_supplement(self, matched_rules: list[dict], user_profile: dict) -> str | None:
+        user_supplements = {normalize_token(value): value for value in user_profile.get("supplements", [])}
+        for rule in matched_rules:
+            antecedent = rule.get("antecedent", "")
+            if not antecedent.startswith("supplement:"):
+                continue
+            key = normalize_token(antecedent.split(":", 1)[1])
+            return user_supplements.get(key, key)
+        return None
