@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "apps.feedback",
     "apps.analytics",
     "apps.chat",
+    "apps.notifications",
     "apps.common",
 ]
 
@@ -139,6 +140,12 @@ SPECTACULAR_SETTINGS = {
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://redis:6379/0")
+CELERY_BEAT_SCHEDULE = {
+    "send-daily-habit-reminders": {
+        "task": "apps.notifications.tasks.send_daily_habit_reminders",
+        "schedule": 900.0,
+    },
+}
 RECOMMENDER_ARTIFACT_DIR = Path(os.getenv("RECOMMENDER_ARTIFACT_DIR", BASE_DIR / "storage" / "recommender"))
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
