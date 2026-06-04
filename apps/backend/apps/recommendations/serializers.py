@@ -1,6 +1,8 @@
 from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 
+from apps.supplements.models import Supplement
+
 from .models import RecommendationItem, RecommendationRun, RecommendationWeightProfile, SavedRecommendationItem
 from .services.food_metadata import attach_food_metadata_to_rules, recommendation_food_payload
 
@@ -90,9 +92,9 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(RecommendedSupplementSerializer)
     def get_matched_supplement(self, obj):
-        if not obj.supplement:
+        if not obj.supplement_id:
             return None
-        return {"id": obj.supplement.id, "name": obj.supplement.name, "slug": obj.supplement.slug}
+        return Supplement.objects.filter(id=obj.supplement_id).values("id", "name", "slug").first()
 
     def get_explanation(self, obj):
         return obj.explanation_details or {"summary": obj.explanation, "reasons": []}

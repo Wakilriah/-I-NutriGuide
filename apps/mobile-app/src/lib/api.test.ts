@@ -4,7 +4,7 @@ import { apiClient, isAccessTokenAlive } from "./api";
 import { useAuthStore } from "../stores/auth-store";
 
 function makeToken(exp: number) {
-  const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString("base64url");
+  const encode = (value: object) => btoa(JSON.stringify(value)).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
   return `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ exp })}.signature`;
 }
 

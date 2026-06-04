@@ -217,6 +217,19 @@ infra/scripts/deploy-remote.sh --host your.vps.ip --user root --remote-path /opt
 
 The remote script uploads `.env`, runs `git pull --ff-only`, validates production env values, deploys the stack, runs post-deploy tasks, and verifies the live domains.
 
+## Automatic Image Updates
+
+Production Compose includes Watchtower for app image updates. It only updates services with `com.centurylinklabs.watchtower.enable=true`, so PostgreSQL, Redis, Neo4j, Traefik, and Dozzle are not auto-updated.
+
+Set the polling interval in production `.env`:
+
+```env
+WATCHTOWER_INTERVAL_SECONDS=300
+WATCHTOWER_DOCKER_API_VERSION=1.44
+```
+
+Watchtower pulls newer images for the current tags, restarts the labeled app containers, and removes old images. It does not pull Git changes from GitHub; deploy manually when `docker-compose.prod.yml`, Traefik config, scripts, or environment values change.
+
 If the stack is already running and you only need to rerun migrations, seed data, superuser creation, and static collection:
 
 ```sh

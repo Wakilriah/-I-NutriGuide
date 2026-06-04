@@ -86,11 +86,15 @@ class RecommendationFeedbackSerializer(serializers.ModelSerializer):
             attrs["recommendation_item_id"] = recommendation_id
         if "recommendation_item_id" not in attrs:
             raise serializers.ValidationError({"recommendation_item_id": "This field is required."})
+        item_id = attrs["recommendation_item_id"]
+        user = self.context["request"].user
+        if not user.is_staff and not user.recommendation_runs.filter(items__id=item_id).exists():
+            raise serializers.ValidationError({"recommendation_item_id": "Recommendation item does not belong to this user."})
         food_id = attrs.get("food_id")
         if food_id:
             from apps.recommendations.models import RecommendationItem
 
-            item = RecommendationItem.objects.select_related("food").filter(id=attrs["recommendation_item_id"]).first()
+            item = RecommendationItem.objects.select_related("food").filter(id=item_id).first()
             if item and item.food_id != food_id:
                 raise serializers.ValidationError({"food_id": "Food does not match the recommendation item."})
         return attrs

@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - admin-data-quality-improvements
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create local env files
+        run: |
+          cp .env.example apps/backend/.env
+          printf 'VITE_API_BASE_URL=http://localhost:8000/api/v1\n' > apps/admin-panel/.env
+
+      - name: Build backend test image
+        run: docker compose -f docker-compose.dev.yml build backend
+
+      - name: Run backend tests
+        run: docker compose -f docker-compose.dev.yml run --rm backend python -m pytest tests
+
+      - name: Stop services
+        if: always()
+        run: docker compose -f docker-compose.dev.yml down -v --remove-orphans
+
+  admin-panel:
+    name: Admin build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/admin-panel
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/admin-panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  landing-page:
+    name: Landing build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/landing-page
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/landing-page/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  mobile-app:
+    name: Mobile typecheck and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/mobile-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test -- --runInBand
+
+  compose-and-images:
+    name: Compose validation and image builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create local env files
+        run: |
+          cp .env.example apps/backend/.env
+          printf 'VITE_API_BASE_URL=http://localhost:8000/api/v1\n' > apps/admin-panel/.env
+
+      - name: Validate production Compose
+        run: docker compose --env-file .env.production.example -f docker-compose.prod.yml config --quiet
+
+      - name: Validate dev Compose
+        run: docker compose -f docker-compose.dev.yml config --quiet
+
+      - name: Build production images
+        env:
+          DOCKER_IMAGE_NAMESPACE: inutriguide-ci
+          IMAGE_TAG: ${{ github.sha }}
+          CACHE_TAG: latest
+          VITE_API_BASE_URL: https://api.matchcesoir.pro/api/v1
+          EXPO_PUBLIC_API_BASE_URL: https://api.matchcesoir.pro/api/v1
+        run: docker compose -f docker-compose.prod-build.yml build

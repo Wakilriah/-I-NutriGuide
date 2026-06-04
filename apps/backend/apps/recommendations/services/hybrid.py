@@ -147,7 +147,7 @@ class HybridRecommender:
 
         return {
             "user_id": user_profile.get("user_id"),
-            "strategy": "HYBRID_CBF_ASSOCIATION_CF_SAFETY_FILTERED",
+            "strategy": "ASSOCIATION_RULES_FILTERED",
             "weights": weights,
             "user_type": user_type,
             "disclaimer": DISCLAIMER,
@@ -222,12 +222,12 @@ class HybridRecommender:
         )
         if has_medical_constraints:
             user_type = "complex_medical_case"
-            return self._configured_weights(user_type, {"alpha": 0.50, "beta": 0.35, "gamma": 0.15}), user_type
+            return self._configured_weights(user_type, {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}), user_type
         if int(user_profile.get("n_sessions", 0) or 0) < 3:
             user_type = "new_user"
-            return self._configured_weights(user_type, {"alpha": 0.60, "beta": 0.30, "gamma": 0.10}), user_type
+            return self._configured_weights(user_type, {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}), user_type
         user_type = "active_user"
-        return self._configured_weights(user_type, {"alpha": 0.40, "beta": 0.30, "gamma": 0.30}), user_type
+        return self._configured_weights(user_type, {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}), user_type
 
     def _configured_weights(self, user_type: str, defaults: dict) -> dict:
         profile = RecommendationWeightProfile.objects.filter(user_type=user_type, is_active=True).first()

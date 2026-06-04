@@ -132,9 +132,12 @@ class RecommendationPreviewView(APIView):
         serializer = HybridPreviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         profile = build_preview_profile(serializer.validated_data)
-        payload = HybridRecommender().recommend(profile, n=serializer.validated_data["n"])
+        limit = serializer.validated_data["n"]
+        payload = HybridRecommender().recommend(profile, n=max(limit * 4, limit + 10))
         results = []
         for scored in payload["recommendations"]:
+            if len(results) >= limit:
+                break
             food = Food.objects.select_related("category").prefetch_related("nutrients__nutrient").get(id=scored["food_id"])
             enriched = enrich_scored_recommendation(scored, food=food, user_profile=profile)
             if enriched is not None:

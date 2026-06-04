@@ -24,18 +24,77 @@ def test_cbf_excludes_allergy_and_excluded_food():
 
 
 def test_anemia_profile_keeps_iron_and_vitamin_c_foods():
+    category = FoodCategory.objects.create(name="Legumes", slug="legumes")
+    lentils = Food.objects.create(name="lentilles", slug="lentilles", category=category)
     foods = [
-        {"id": 1, "nom": "lentilles", "slug": "lentilles", "category": "legumes", "fer": 0.9, "folates": 0.7, "kcal_100g": 116},
+        {"id": lentils.id, "nom": "lentilles", "slug": "lentilles", "category": "legumes", "fer": 0.9, "folates": 0.7, "kcal_100g": 116},
     ]
-    user = {"aliments_exclus": ["lentilles"]}
+    user = {"maladies": ["anemie"]}
 
     recommender = HybridRecommender(artifacts={"rules": [], "cf": None})
-    payload = recommender.recommend(user, n=5)
+    payload = recommender.recommend(user, n=5, foods=foods)
     names = [item["food_name"] for item in payload["recommendations"]]
 
-    # Since it's a mock fallback using Django ORM and there are no actual DB records for this test, 
-    # we just assert it doesn't crash
-    assert len(names) >= 0
+    assert names == ["lentilles"]
+    assert payload["strategy"] == "ASSOCIATION_RULES_FILTERED"
+
+
+def test_hybrid_recommender_scores_active_association_rules():
+    fruits = FoodCategory.objects.create(name="Fruits", slug="fruits")
+    grains = FoodCategory.objects.create(name="Grains", slug="grains")
+    orange = Food.objects.create(name="Orange", slug="orange", category=fruits)
+    oats = Food.objects.create(name="Oats", slug="oats", category=grains)
+    foods = [
+        {"id": orange.id, "nom": "Orange", "slug": "orange", "category": "fruits", "vitamine_c": 0.8, "kcal_100g": 47},
+        {"id": oats.id, "nom": "Oats", "slug": "oats", "category": "grains", "fiber": 0.6, "kcal_100g": 389},
+    ]
+    rules = [
+        {
+            "id": 10,
+            "antecedent": "supplement:fer",
+            "consequent": "nutrient:vitamine_c",
+            "support": 0.3,
+            "confidence": 0.9,
+            "lift": 1.8,
+            "explanation": "Vitamin C foods may support iron absorption.",
+        }
+    ]
+
+    payload = HybridRecommender(artifacts={"rules": rules, "cf": None}).recommend({"supplements": ["iron"]}, n=2, foods=foods)
+
+    first = payload["recommendations"][0]
+    assert first["food_slug"] == "orange"
+    assert first["rules_score"] > 0
+    assert first["matched_rules"][0]["id"] == 10
+
+
+def test_association_rules_are_primary_ranking_signal():
+    fruits = FoodCategory.objects.create(name="Fruits", slug="fruits")
+    snacks = FoodCategory.objects.create(name="Snacks", slug="snacks")
+    generic = Food.objects.create(name="Generic high fit", slug="generic-high-fit", category=fruits)
+    rule_backed = Food.objects.create(name="Rule backed food", slug="rule-backed-food", category=snacks)
+    foods = [
+        {"id": generic.id, "nom": "Generic high fit", "slug": "generic-high-fit", "category": "fruits", "vitamine_c": 1.0, "fer": 1.0, "kcal_100g": 120},
+        {"id": rule_backed.id, "nom": "Rule backed food", "slug": "rule-backed-food", "category": "snacks", "kcal_100g": 120},
+    ]
+    rules = [
+        {
+            "id": 11,
+            "antecedent": "supplement:fer",
+            "consequent": "food:rule_backed_food",
+            "support": 0.4,
+            "confidence": 0.95,
+            "lift": 3.0,
+            "explanation": "Rule-backed food is strongly associated with iron supplementation.",
+        }
+    ]
+
+    payload = HybridRecommender(artifacts={"rules": rules, "cf": None}).recommend({"supplements": ["iron"]}, n=2, foods=foods)
+
+    assert payload["weights"]["beta"] > payload["weights"]["alpha"]
+    first = payload["recommendations"][0]
+    assert first["food_slug"] == "rule-backed-food"
+    assert first["matched_rules"][0]["id"] == 11
 
 
 def test_association_score_returns_zero_when_no_rules_exist():
@@ -99,10 +158,10 @@ def test_bmi_normalization_uses_thesis_formula():
 def test_hybrid_dynamic_weights_for_user_types():
     recommender = HybridRecommender(artifacts={"rules": [], "cf": None})
 
-    assert recommender._weights_for_user({"n_sessions": 0}) == ({"alpha": 0.60, "beta": 0.30, "gamma": 0.10}, "new_user")
-    assert recommender._weights_for_user({"n_sessions": 5}) == ({"alpha": 0.40, "beta": 0.30, "gamma": 0.30}, "active_user")
+    assert recommender._weights_for_user({"n_sessions": 0}) == ({"alpha": 0.25, "beta": 0.60, "gamma": 0.15}, "new_user")
+    assert recommender._weights_for_user({"n_sessions": 5}) == ({"alpha": 0.25, "beta": 0.60, "gamma": 0.15}, "active_user")
     assert recommender._weights_for_user({"n_sessions": 5, "allergies": ["peanut"]}) == (
-        {"alpha": 0.50, "beta": 0.35, "gamma": 0.15},
+        {"alpha": 0.25, "beta": 0.60, "gamma": 0.15},
         "complex_medical_case",
     )
 

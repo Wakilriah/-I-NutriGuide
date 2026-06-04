@@ -291,7 +291,7 @@ def build_food_interaction_scores() -> dict[int, dict[str, float]]:
 
 def build_transactions() -> list[set[str]]:
     transactions = []
-    for run in RecommendationRun.objects.prefetch_related("items__food", "user__supplements__supplement"):
+    for run in RecommendationRun.objects.prefetch_related("items__food"):
         profile = build_user_profile(run.user)
         items = profile_items(profile)
         for item in run.items.all():
@@ -307,6 +307,7 @@ def build_rules_from_database() -> list[dict]:
     for rule in AssociationRule.objects.filter(is_active=True):
         rules.append(
             {
+                "id": rule.id,
                 "antecedent": f"{rule.antecedent_type}:{normalize_token(rule.antecedent_slug)}",
                 "consequent": f"{rule.consequent_type}:{normalize_token(rule.consequent_slug)}",
                 "support": rule.support,

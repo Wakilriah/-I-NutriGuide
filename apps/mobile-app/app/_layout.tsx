@@ -1,5 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -25,6 +26,13 @@ export default function RootLayout() {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const screen = response.notification.request.content.data?.screen;
+      if (screen === "tracking") {
+        router.push("/tabs/tracking");
+      }
+    });
+
     let mounted = true;
 
     async function hydrateAuth() {
@@ -70,6 +78,7 @@ export default function RootLayout() {
 
     return () => {
       mounted = false;
+      subscription.remove();
     };
   }, []);
 
