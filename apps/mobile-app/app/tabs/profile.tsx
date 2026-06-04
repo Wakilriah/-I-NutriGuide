@@ -4,13 +4,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Switch, Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
 import { Screen } from "../../src/components/Screen";
 import { AnimatedSection, AppButton, AppCard, AppInput, AppTopBar, Badge, ErrorState, FilterChip, OptionSelect, PageHeader, SearchInput, SectionHeader, SkeletonCard } from "../../src/components/ui";
 import { searchFoods, type FoodSearchItem } from "../../src/features/foods/api";
+import { getNotificationPreferences, updateNotificationPreferences, type NotificationPreferencesPayload } from "../../src/features/notifications/api";
 import { getProfile, parseCommaList, updateProfile } from "../../src/features/profile/api";
 import { listTrackingHistory, type DailyTracking } from "../../src/features/tracking/api";
+import { registerForPushNotificationsOnce } from "../../src/lib/notifications";
 import { useAuthStore } from "../../src/stores/auth-store";
 import { colors, iconSizes, radii, spacing, typography } from "../../src/theme/design";
 
@@ -148,6 +150,15 @@ function numberFromProfile(value?: string | null) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function normalizeTime(value: string) {
+  const trimmed = value.trim();
+  return /^\d{2}:\d{2}$/.test(trimmed) ? `${trimmed}:00` : trimmed;
+}
+
+function displayTime(value: string | undefined, fallback: string) {
+  return (value || fallback).slice(0, 5);
+}
+
 function calculateBmi(weightKg?: string | null, heightCm?: string | null) {
   const weight = numberFromProfile(weightKg);
   const height = numberFromProfile(heightCm);
@@ -208,9 +219,11 @@ export default function ProfileScreen() {
   const queryClient = useQueryClient();
   const profile = useQuery({ queryKey: ["profile"], queryFn: getProfile });
   const trackingHistory = useQuery({ queryKey: ["tracking", "history"], queryFn: listTrackingHistory });
+  const notificationPreferences = useQuery({ queryKey: ["notification-preferences"], queryFn: getNotificationPreferences });
   const [foodQuery, setFoodQuery] = useState("");
   const [selectedDislikedFoods, setSelectedDislikedFoods] = useState<string[]>([]);
   const [status, setStatus] = useState("");
+  const [notificationStatus, setNotificationStatus] = useState("");
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(schema),
@@ -286,6 +299,28 @@ export default function ProfileScreen() {
     },
   });
 
+  const notificationMutation = useMutation({
+    mutationFn: async (payload: NotificationPreferencesPayload) => {
+      const normalizedPayload = Object.fromEntries(
+        Object.entries(payload).map(([key, value]) => [key, typeof value === "string" && key.endsWith("time") ? normalizeTime(value) : value]),
+      ) as NotificationPreferencesPayload;
+      if (normalizedPayload.notifications_enabled) {
+        await registerForPushNotificationsOnce();
+      }
+      return updateNotificationPreferences(normalizedPayload);
+    },
+    onError: () => setNotificationStatus("Unable to save notification settings right now."),
+    onSuccess: async () => {
+      setNotificationStatus("Notification settings updated.");
+      await queryClient.invalidateQueries({ queryKey: ["notification-preferences"] });
+    },
+  });
+
+  const updateNotifications = (payload: NotificationPreferencesPayload) => {
+    setNotificationStatus("");
+    notificationMutation.mutate(payload);
+  };
+
   const toggleDislikedFood = (name: string) => {
     setStatus("");
     setSelectedDislikedFoods((current) => {
@@ -351,6 +386,44 @@ export default function ProfileScreen() {
             </AnimatedSection>
 
             <AnimatedSection delay={100}>
+              <AppCard style={{ gap: spacing.md }}>
+                <SectionHeader title="Daily reminders" />
+                {notificationPreferences.isLoading ? <SkeletonCard lines={2} /> : null}
+                {notificationPreferences.isError ? <ErrorState message="Unable to load notification settings." /> : null}
+                {notificationPreferences.data ? (
+                  <View style={{ gap: spacing.md }}>
+                    <NotificationToggle
+                      label="Enable notifications"
+                      onValueChange={(value) => updateNotifications({ notifications_enabled: value, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || notificationPreferences.data.timezone })}
+                      value={notificationPreferences.data.notifications_enabled ?? false}
+                    />
+                    <NotificationToggle label="Supplement reminders" onValueChange={(value) => updateNotifications({ supplement_reminders_enabled: value })} value={notificationPreferences.data.supplement_reminders_enabled ?? true} />
+                    <AppInput
+                      accessibilityLabel="Supplement reminder time"
+                      defaultValue={displayTime(notificationPreferences.data.supplement_reminder_time, "09:00")}
+                      keyboardType="numbers-and-punctuation"
+                      label="Supplement time"
+                      onSubmitEditing={(event) => updateNotifications({ supplement_reminder_time: event.nativeEvent.text })}
+                      placeholder="09:00"
+                    />
+                    <NotificationToggle label="Water reminders" onValueChange={(value) => updateNotifications({ water_reminders_enabled: value })} value={notificationPreferences.data.water_reminders_enabled ?? true} />
+                    <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                      <View style={{ flex: 1 }}>
+                        <AppInput accessibilityLabel="Morning water reminder time" defaultValue={displayTime(notificationPreferences.data.water_morning_time, "11:00")} keyboardType="numbers-and-punctuation" label="Morning" onSubmitEditing={(event) => updateNotifications({ water_morning_time: event.nativeEvent.text })} placeholder="11:00" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <AppInput accessibilityLabel="Afternoon water reminder time" defaultValue={displayTime(notificationPreferences.data.water_afternoon_time, "15:00")} keyboardType="numbers-and-punctuation" label="Afternoon" onSubmitEditing={(event) => updateNotifications({ water_afternoon_time: event.nativeEvent.text })} placeholder="15:00" />
+                      </View>
+                    </View>
+                    <AppInput accessibilityLabel="Evening water reminder time" defaultValue={displayTime(notificationPreferences.data.water_evening_time, "19:00")} keyboardType="numbers-and-punctuation" label="Evening water time" onSubmitEditing={(event) => updateNotifications({ water_evening_time: event.nativeEvent.text })} placeholder="19:00" />
+                    {notificationStatus ? <Text style={notificationStatus === "Notification settings updated." ? successStyle : errorStyle}>{notificationStatus}</Text> : null}
+                    <Text style={typography.body}>Edit a time, then press return to save it.</Text>
+                  </View>
+                ) : null}
+              </AppCard>
+            </AnimatedSection>
+
+            <AnimatedSection delay={130}>
               <AppCard style={{ gap: spacing.md }}>
                 <SectionHeader title="Health context" />
                 <View style={{ flexDirection: "row", gap: spacing.sm }}>
@@ -478,6 +551,21 @@ export default function ProfileScreen() {
 
 const successStyle = { color: colors.primary, fontWeight: "800" as const };
 const errorStyle = { color: colors.danger, fontWeight: "800" as const };
+
+function NotificationToggle({ label, onValueChange, value }: { label: string; onValueChange: (value: boolean) => void; value: boolean }) {
+  return (
+    <View style={{ minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.md }}>
+      <Text style={{ color: colors.text, flex: 1, fontSize: 15, fontWeight: "900" }}>{label}</Text>
+      <Switch
+        ios_backgroundColor={colors.border}
+        onValueChange={onValueChange}
+        thumbColor={value ? colors.primary : colors.surface}
+        trackColor={{ false: colors.border, true: colors.primarySoft }}
+        value={value}
+      />
+    </View>
+  );
+}
 
 function ProfileProgressPanel({
   heightCm,
