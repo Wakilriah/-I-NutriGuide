@@ -61,7 +61,7 @@ class NotificationLog(models.Model):
         FAILED = "failed", "Failed"
         SKIPPED = "skipped", "Skipped"
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="notification_logs", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="push_notification_logs", on_delete=models.CASCADE)
     notification_type = models.CharField(max_length=40, choices=NotificationType.choices)
     title = models.CharField(max_length=120)
     body = models.CharField(max_length=255)

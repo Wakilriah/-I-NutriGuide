@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 ("provider_response", models.JSONField(blank=True, default=dict)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("sent_at", models.DateTimeField(blank=True, null=True)),
-                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="notification_logs", to=settings.AUTH_USER_MODEL)),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="push_notification_logs", to=settings.AUTH_USER_MODEL)),
             ],
             options={"ordering": ["-created_at"]},
         ),
