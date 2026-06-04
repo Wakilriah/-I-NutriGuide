@@ -124,6 +124,27 @@ services:
       - traefik.http.routers.inutriguide-landing.middlewares=secure-headers@file
       - traefik.http.services.inutriguide-landing.loadbalancer.server.port=3000
 
+  web_app:
+    image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-web-app:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - public
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.enable=true
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-web-http.rule=Host(`${WEB_HOST:-app.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-web-http.entrypoints=web
+      - traefik.http.routers.inutriguide-web-http.middlewares=redirect-to-https@file
+      - traefik.http.routers.inutriguide-web.rule=Host(`${WEB_HOST:-app.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-web.entrypoints=websecure
+      - traefik.http.routers.inutriguide-web.tls.certresolver=letsencrypt
+      - traefik.http.routers.inutriguide-web.middlewares=secure-headers@file
+      - traefik.http.services.inutriguide-web.loadbalancer.server.port=80
+    depends_on:
+      backend:
+        condition: service_healthy
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -207,6 +228,25 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  uptime_kuma:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    networks:
+      - public
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=inutriguide-prod_public
+      - traefik.http.routers.inutriguide-uptime-http.rule=Host(`${UPTIME_KUMA_HOST:-uptime.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-uptime-http.entrypoints=web
+      - traefik.http.routers.inutriguide-uptime-http.middlewares=redirect-to-https@file
+      - traefik.http.routers.inutriguide-uptime.rule=Host(`${UPTIME_KUMA_HOST:-uptime.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-uptime.entrypoints=websecure
+      - traefik.http.routers.inutriguide-uptime.tls.certresolver=letsencrypt
+      - traefik.http.routers.inutriguide-uptime.middlewares=ops-auth@docker,secure-headers@file
+      - traefik.http.services.inutriguide-uptime.loadbalancer.server.port=3001
+    volumes:
+      - uptime_kuma_data:/app/data
+
 networks:
   public:
   private:
@@ -218,3 +258,4 @@ volumes:
   neo4j_data:
   neo4j_logs:
   traefik_letsencrypt:
+  uptime_kuma_data:
