@@ -94,3 +94,34 @@ export async function fetchAdminRecommendationRun(runId: string) {
   const response = await apiClient.get<AdminRecommendationRun>(`/admin/recommendations/${runId}/`);
   return response.data;
 }
+
+export type EvaluationMetrics = {
+  precision_at_k: number;
+  recall_at_k: number;
+  ndcg: number;
+  coverage: number;
+  diversity: number;
+  average_confidence: number;
+  rule_hit_rate: number;
+  safety_violation_rate: number;
+  user_save_rate: number;
+  user_dislike_rate: number;
+  recommendation_acceptance_rate: number;
+  counts: Record<string, number>;
+  high_risk_issues: Array<{ type: string; message: string }>;
+};
+
+export type KnowledgeGraphPayload = {
+  nodes: Array<{ id: string; label: string; type: string }>;
+  edges: Array<{ source: string; target: string; type: string; label: string; level?: string }>;
+};
+
+export async function fetchEvaluationMetrics(params: { date_from?: string; date_to?: string; supplement?: string } = {}) {
+  const response = await apiClient.get<EvaluationMetrics>("/admin/evaluation/", { params });
+  return response.data;
+}
+
+export async function fetchKnowledgeGraph(params: { supplement?: string; nutrient?: string; food?: string; interaction_type?: string } = {}) {
+  const response = await apiClient.get<KnowledgeGraphPayload>("/admin/knowledge-graph/", { params });
+  return response.data;
+}

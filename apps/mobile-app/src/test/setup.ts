@@ -30,6 +30,12 @@ jest.mock("@expo/vector-icons", () => {
   };
 });
 
+jest.mock("react-native-safe-area-context", () => ({
+  SafeAreaView: ({ children }: { children: unknown }) => children,
+  SafeAreaProvider: ({ children }: { children: unknown }) => children,
+  useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
+}));
+
 jest.mock("expo-router", () => ({
   Link: ({ children }: { children: unknown }) => {
     const React = require("react");

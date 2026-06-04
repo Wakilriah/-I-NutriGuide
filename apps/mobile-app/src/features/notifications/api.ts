@@ -31,6 +31,16 @@ export type NotificationPreferencesPayload = Partial<
   >
 >;
 
+export type NotificationLog = {
+  id: number;
+  notification_type: "food_reminder" | "supplement_reminder" | "recommendation_ready" | "general";
+  title: string;
+  body: string;
+  data: Record<string, unknown>;
+  sent_at: string;
+  read_at: string | null;
+};
+
 export async function getNotificationPreferences() {
   const response = await apiClient.get<NotificationPreferences>("/notifications/preferences/");
   return response.data;
@@ -43,5 +53,10 @@ export async function updateNotificationPreferences(payload: NotificationPrefere
 
 export async function registerPushToken(payload: { token: string; platform: "ios" | "android" | "web"; device_id?: string }) {
   const response = await apiClient.post("/notifications/register-token/", payload);
+  return response.data;
+}
+
+export async function listNotifications() {
+  const response = await apiClient.get<NotificationLog[]>("/notifications/");
   return response.data;
 }

@@ -14,14 +14,14 @@ export function ButtonLink({ href, label }: ButtonLinkProps) {
       style={{
         minHeight: 58,
         overflow: "hidden",
-        borderRadius: radii.lg,
-        backgroundColor: colors.primary,
+        borderRadius: radii.pill,
+        backgroundColor: colors.secondaryContainer,
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.md,
         textAlign: "center",
       }}
     >
-      <Text style={{ color: colors.surface, fontWeight: "900" }}>{label}</Text>
+      <Text style={{ color: colors.text, fontWeight: "900" }}>{label}</Text>
     </Link>
   );
 }

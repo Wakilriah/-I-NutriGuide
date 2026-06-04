@@ -83,3 +83,46 @@ class NutrientInteraction(models.Model):
 
     def __str__(self) -> str:
         return f"{self.source_type}:{self.source_key} {self.interaction_type} {self.target_type}:{self.target_key}"
+
+
+class NutrientIntakeReference(models.Model):
+    class ReferenceType(models.TextChoices):
+        RDA = "rda", "Recommended Dietary Allowance"
+        AI = "ai", "Adequate Intake"
+        UL = "ul", "Tolerable Upper Intake Level"
+        DV = "dv", "Daily Value"
+
+    nutrient = models.ForeignKey(
+        Nutrient, related_name="intake_references", on_delete=models.CASCADE
+    )
+    reference_type = models.CharField(max_length=20, choices=ReferenceType.choices)
+    life_stage = models.CharField(max_length=120, default="Adults")
+    sex = models.CharField(max_length=40, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=3)
+    unit = models.CharField(max_length=20)
+    note = models.TextField(blank=True)
+    source = models.CharField(max_length=80, blank=True)
+    source_url = models.URLField(max_length=500, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nutrient__name", "reference_type", "life_stage", "sex"]
+        indexes = [
+            models.Index(fields=["reference_type"], name="nutr_intake_type_idx"),
+            models.Index(fields=["active"], name="nutr_intake_active_idx"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["nutrient", "reference_type", "life_stage", "sex"],
+                name="unique_nutrient_intake_reference",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        sex = f" {self.sex}" if self.sex else ""
+        return (
+            f"{self.nutrient.name} {self.reference_type} "
+            f"{self.life_stage}{sex}: {self.amount} {self.unit}"
+        )

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#418340",
+                    "primary-container": "#098730",
+                    "on-surface-variant": "#3f4a3d",
+                    "tertiary-fixed-dim": "#91d78a",
+                    "primary-fixed-dim": "#71dd7a",
+                    "outline": "#6f7a6c",
+                    "on-primary-container": "#f7fff1",
+                    "background": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#edf4ff",
+                    "surface-container-highest": "#d9e3f1",
+                    "on-secondary-fixed-variant": "#643f00",
+                    "secondary": "#845400",
+                    "on-surface": "#121d26",
+                    "inverse-surface": "#27313c",
+                    "surface-tint": "#006e24",
+                    "surface-variant": "#d9e3f1",
+                    "surface": "#f7f9ff",
+                    "on-primary-fixed-variant": "#005319",
+                    "on-tertiary-container": "#f7fff1",
+                    "on-primary-fixed": "#002106",
+                    "secondary-container": "#fda611",
+                    "on-background": "#121d26",
+                    "primary": "#006b23",
+                    "surface-bright": "#f7f9ff",
+                    "surface-dim": "#d1dbe8",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#ffb95b",
+                    "on-tertiary-fixed-variant": "#0c5216",
+                    "inverse-primary": "#71dd7a",
+                    "inverse-on-surface": "#e8f2ff",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#ffddb6",
+                    "tertiary-fixed": "#acf4a4",
+                    "surface-container": "#e4effd",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#002203",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "outline-variant": "#becab9",
+                    "on-secondary-container": "#684100",
+                    "surface-container-high": "#dfe9f7",
+                    "tertiary": "#276929",
+                    "primary-fixed": "#8dfa94",
+                    "on-secondary-fixed": "#2a1800"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "40px",
+                    "stack-gap": "16px",
+                    "base": "8px",
+                    "container-padding": "24px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Quicksand"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Quicksand"],
+                    "headline-lg-mobile": ["Quicksand"],
+                    "display-lg": ["Quicksand"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #EAF7EF; /* Custom soft mint background as requested */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .onboarding-card {
+            background-color: #FFF4E6; /* Custom warm beige/orange-tinted card as requested */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .step-transition {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .hidden-step {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            position: absolute;
+        }
+        .active-step {
+            opacity: 1;
+            transform: translateX(0);
+            position: relative;
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 107, 35, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen text-on-surface">
+<!-- Top Navigation Placeholder (Small Variant) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-gradient-to-r from-primary to-primary-container shadow-sm">
+<div class="flex items-center gap-3">
+<span class="font-headline-md text-headline-md font-bold text-on-primary">I-NutriGuide</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-on-primary/20 flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-32 px-6 max-w-[1200px] mx-auto w-full">
+<!-- Progress Indicator -->
+<div class="mb-12 flex justify-between items-center max-w-md mx-auto relative">
+<div class="absolute h-0.5 bg-outline-variant w-full top-1/2 -translate-y-1/2 z-0"></div>
+<div class="absolute h-0.5 bg-primary w-0 top-1/2 -translate-y-1/2 z-0 transition-all duration-500" id="progress-bar"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-md" id="dot-1">1</div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold text-label-md" id="dot-2">2</div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold text-label-md" id="dot-3">3</div>
+</div>
+<form class="relative" id="onboarding-form">
+<!-- STEP 1: Health Goals -->
+<section class="step-transition active-step flex flex-col gap-8" id="step-1">
+<div class="text-center">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-2">What is your primary health goal?</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">This helps our AI personalize your daily nutritional path and nutrient focuses.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Goal Cards -->
+<label class="onboarding-card p-6 rounded-lg custom-shadow cursor-pointer border-2 border-transparent hover:border-primary-container transition-all group flex items-start gap-4">
+<input class="hidden peer" name="goal" type="radio" value="Energy"/>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</div>
+<div>
+<span class="block font-headline-md text-headline-md text-on-surface">Energy</span>
+<span class="block font-body-md text-body-md text-on-surface-variant">Stay fueled through active days.</span>
+</div>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+</label>
+<label class="onboarding-card p-6 rounded-lg custom-shadow cursor-pointer border-2 border-transparent hover:border-primary-container transition-all group flex items-start gap-4">
+<input class="hidden peer" name="goal" type="radio" value="Muscle"/>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+</div>
+<div>
+<span class="block font-headline-md text-headline-md text-on-surface">Muscle</span>
+<span class="block font-body-md text-body-md text-on-surface-variant">Focus on protein and recovery.</span>
+</div>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+</label>
+<label class="onboarding-card p-6 rounded-lg custom-shadow cursor-pointer border-2 border-transparent hover:border-primary-container transition-all group flex items-start gap-4">
+<input class="hidden peer" name="goal" type="radio" value="Weight Loss"/>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+</div>
+<div>
+<span class="block font-headline-md text-headline-md text-on-surface">Weight Loss</span>
+<span class="block font-body-md text-body-md text-on-surface-variant">Manage calories with high satiety.</span>
+</div>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+</label>
+<label class="onboarding-card p-6 rounded-lg custom-shadow cursor-pointer border-2 border-transparent hover:border-primary-container transition-all group flex items-start gap-4">
+<input class="hidden peer" name="goal" type="radio" value="Deficiency Support"/>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<span class="block font-headline-md text-headline-md text-on-surface">Deficiency Support</span>
+<span class="block font-body-md text-body-md text-on-surface-variant">Target vitamins and minerals.</span>
+</div>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+</label>
+<label class="onboarding-card p-6 rounded-lg custom-shadow cursor-pointer border-2 border-transparent hover:border-primary-container transition-all group flex items-start gap-4">
+<input class="hidden peer" name="goal" type="radio" value="General Wellness"/>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="spa">spa</span>
+</div>
+<div>
+<span class="block font-headline-md text-headline-md text-on-surface">General Wellness</span>
+<span class="block font-body-md text-body-md text-on-surface-variant">Holistic approach to living well.</span>
+</div>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+</label>
+</div>
+</section>
+<!-- STEP 2: Diet & Allergies -->
+<section class="step-transition hidden-step flex flex-col gap-8" id="step-2">
+<div class="text-center">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-2">Your Dietary Profile</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">Help us filter out what doesn't belong on your plate.</p>
+</div>
+<div class="onboarding-card p-8 rounded-lg custom-shadow">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-6">Dietary Preference</h3>
+<div class="flex flex-wrap gap-4 mb-10">
+<!-- Diet Type Pill Choices -->
+<label class="cursor-pointer">
+<input class="hidden peer" name="diet" type="radio" value="Normal"/>
+<span class="px-6 py-2 rounded-full border-2 border-outline-variant text-label-md font-label-md peer-checked:bg-primary peer-checked:border-primary peer-checked:text-on-primary transition-colors block">Normal</span>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="diet" type="radio" value="Vegetarian"/>
+<span class="px-6 py-2 rounded-full border-2 border-outline-variant text-label-md font-label-md peer-checked:bg-primary peer-checked:border-primary peer-checked:text-on-primary transition-colors block">Vegetarian</span>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="diet" type="radio" value="Vegan"/>
+<span class="px-6 py-2 rounded-full border-2 border-outline-variant text-label-md font-label-md peer-checked:bg-primary peer-checked:border-primary peer-checked:text-on-primary transition-colors block">Vegan</span>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="diet" type="radio" value="Halal"/>
+<span class="px-6 py-2 rounded-full border-2 border-outline-variant text-label-md font-label-md peer-checked:bg-primary peer-checked:border-primary peer-checked:text-on-primary transition-colors block">Halal</span>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="diet" type="radio" value="Lactose-free"/>
+<span class="px-6 py-2 rounded-full border-2 border-outline-variant text-label-md font-label-md peer-checked:bg-primary peer-checked:border-primary peer-checked:text-on-primary transition-colors block">Lactose-free</span>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="diet" type="radio" value="Gluten-free"/>
+<span class="px-6 py-2 rounded-full border-2 border-outline-variant text-label-md font-label-md peer-checked:bg-primary peer-checked:border-primary peer-checked:text-on-primary transition-colors block">Gluten-free</span>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap">
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface">Known Allergies</label>
+<input class="bg-white/50 border-0 rounded-lg p-4 font-body-md focus:ring-2 focus:ring-primary-container outline-none placeholder:text-outline-variant" placeholder="e.g. Peanuts, Shellfish..." type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface">Disliked Foods</label>
+<input class="bg-white/50 border-0 rounded-lg p-4 font-body-md focus:ring-2 focus:ring-primary-container outline-none placeholder:text-outline-variant" placeholder="e.g. Mushrooms, Cilantro..." type="text"/>
+</div>
+</div>
+</div>
+</section>
+<!-- STEP 3: Lifestyle & Budget -->
+<section class="step-transition hidden-step flex flex-col gap-8" id="step-3">
+<div class="text-center">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-2">Almost there...</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">Let's ground your guidance in your real-world lifestyle.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter items-start">
+<!-- Left: Inputs -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<div class="onboarding-card p-6 rounded-lg custom-shadow flex flex-col gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Budget &amp; Time</h3>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface">Monthly Grocery Budget Level</label>
+<div class="flex justify-between items-center text-on-surface-variant px-2 mb-2">
+<span class="text-label-md">Value</span>
+<span class="text-label-md">Standard</span>
+<span class="text-label-md">Premium</span>
+</div>
+<input class="w-full accent-secondary" max="3" min="1" step="1" type="range"/>
+</div>
+<div class="flex flex-col gap-2 mt-4">
+<label class="font-label-md text-label-md text-on-surface">Max Cooking Time (Per Meal)</label>
+<select class="bg-white/50 border-0 rounded-lg p-4 font-body-md focus:ring-2 focus:ring-primary-container outline-none">
+<option>15 Minutes or less</option>
+<option>30 Minutes</option>
+<option>45 Minutes</option>
+<option>1 Hour+</option>
+</select>
+</div>
+</div>
+<div class="onboarding-card p-6 rounded-lg custom-shadow flex flex-col gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Current Supplements</h3>
+<textarea class="bg-white/50 border-0 rounded-lg p-4 font-body-md focus:ring-2 focus:ring-primary-container outline-none placeholder:text-outline-variant" placeholder="List any vitamins, protein powders, or medications you're currently taking..." rows="3"></textarea>
+</div>
+</div>
+<!-- Right: Decorative Card -->
+<div class="hidden lg:block relative rounded-lg overflow-hidden h-[450px] shadow-lg group">
+<div class="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 transition-all group-hover:bg-primary/10"></div>
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A beautifully organized kitchen counter featuring vibrant fresh vegetables, artisanal wooden bowls of grains, and high-quality kitchen tools in a bright, modern minimalist setting. The scene is bathed in soft morning sunlight streaming through a window, casting gentle shadows. The color palette emphasizes fresh greens, warm wood tones, and clean white surfaces, evoking a sense of calm, organized wellness and professional culinary guidance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXHG25u4bokeGfmTiFXwwjtSkfMoYxHdtLEVnx3WGv5AeWKEDOgm1DP_k8bY-MrAg4pb2DVev1-WfnhHghhnd6hmBBonwtPtcmBeMBSUfTiJxda18tKK0_ZF5zkzamRn7TBxR4AHxgN0j8Cu9a8Im403YkTU5cpUZYmax8ktepH3z3HEl7v5zl0CQVvQXol3jatE02N0d6ufLltZRsPPW8w3NDPDnbVjaOyLGZW8EVfTRXGifgOAXQR1iPuJDrJ5rt8pooSCqzqcI"/>
+<div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-20">
+<p class="text-on-primary font-headline-md">Your kitchen, empowered by AI intelligence.</p>
+</div>
+</div>
+</div>
+</section>
+</form>
+</main>
+<!-- Navigation Footer -->
+<footer class="fixed bottom-0 w-full z-40 bg-surface/80 backdrop-blur-md px-6 py-6 border-t border-primary/10 flex flex-col items-center gap-4">
+<div class="max-w-[1200px] w-full flex justify-between items-center">
+<button class="hidden px-8 py-3 rounded-full border-2 border-outline text-outline font-label-md hover:bg-surface-variant transition-colors flex items-center gap-2" id="prev-btn">
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_back">arrow_back</span>
+                Back
+            </button>
+<div class="flex-grow" id="spacer"></div>
+<button class="px-10 py-3 rounded-full bg-secondary-container text-on-secondary-container font-label-md shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2" id="next-btn">
+                Next
+                <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<p class="text-[12px] text-on-surface-variant text-center max-w-2xl px-4">
+            This app gives nutritional guidance and does not replace professional medical advice.
+        </p>
+</footer>
+<script>
+        const steps = ['step-1', 'step-2', 'step-3'];
+        const dots = ['dot-1', 'dot-2', 'dot-3'];
+        let currentStepIdx = 0;
+
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        function updateUI() {
+            // Update Visibility
+            steps.forEach((stepId, idx) => {
+                const stepEl = document.getElementById(stepId);
+                if (idx === currentStepIdx) {
+                    stepEl.classList.remove('hidden-step');
+                    stepEl.classList.add('active-step');
+                } else {
+                    stepEl.classList.add('hidden-step');
+                    stepEl.classList.remove('active-step');
+                }
+            });
+
+            // Update Progress Dots
+            dots.forEach((dotId, idx) => {
+                const dotEl = document.getElementById(dotId);
+                if (idx <= currentStepIdx) {
+                    dotEl.classList.remove('bg-surface-container-highest', 'text-outline');
+                    dotEl.classList.add('bg-primary', 'text-on-primary');
+                } else {
+                    dotEl.classList.add('bg-surface-container-highest', 'text-outline');
+                    dotEl.classList.remove('bg-primary', 'text-on-primary');
+                }
+            });
+
+            // Update Progress Line
+            const progress = (currentStepIdx / (steps.length - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // Button Logic
+            if (currentStepIdx === 0) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+
+            if (currentStepIdx === steps.length - 1) {
+                nextBtn.innerHTML = 'Finish <span class="material-symbols-outlined text-[18px]" data-icon="done">done</span>';
+            } else {
+                nextBtn.innerHTML = 'Next <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>';
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStepIdx < steps.length - 1) {
+                currentStepIdx++;
+                updateUI();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // Final Submission Logic
+                nextBtn.disabled = true;
+                nextBtn.innerText = 'Creating Profile...';
+                setTimeout(() => {
+                    alert('Profile generated! Welcome to I-NutriGuide.');
+                    // In a real app, redirect would happen here
+                }, 1500);
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStepIdx > 0) {
+                currentStepIdx--;
+                updateUI();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body></html>

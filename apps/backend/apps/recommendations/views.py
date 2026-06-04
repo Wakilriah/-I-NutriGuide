@@ -3,20 +3,25 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import RecommendationRun, SavedRecommendationItem
+from .models import RecommendationRun, RecommendationWeightProfile, SavedRecommendationItem
 from .serializers import (
     AdminRecommendationRunSerializer,
     GenerateRecommendationSerializer,
     HybridPreviewSerializer,
     HybridRecommendationQuerySerializer,
     RecommendationRunSerializer,
+    RecommendationWeightProfileSerializer,
     SavedRecommendationItemSerializer,
 )
 from .services.cache import get_cached_recommendations, set_cached_recommendations
 from .services.engine import generate_recommendations, get_food_recommendations_payload, get_recommendation_cache_key
 from .services.enrichment import enrich_scored_recommendation, to_api_result
 from .services.hybrid import HybridRecommender
+from .services.evaluation import recommendation_metrics
+from .services.knowledge_graph import knowledge_graph_payload
+from .services.plans import build_meal_plan, build_timing_plan
 from .services.training import build_preview_profile
+from .tasks import generate_recommendations_for_user
 from apps.common.pagination import AdminPageNumberPagination
 from apps.foods.models import Food
 
@@ -29,6 +34,10 @@ class GenerateRecommendationView(APIView):
         serializer = GenerateRecommendationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         limit = serializer.validated_data["limit"]
+        if serializer.validated_data.get("async_generate"):
+            task = generate_recommendations_for_user.delay(request.user.id, limit)
+            return Response({"status": "queued", "task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+
         cache_key = get_recommendation_cache_key(request.user, limit)
         cached_payload = get_cached_recommendations(cache_key)
         if cached_payload is not None:
@@ -37,6 +46,23 @@ class GenerateRecommendationView(APIView):
         run = generate_recommendations(request.user, limit=limit)
         payload = RecommendationRunSerializer(run).data
         set_cached_recommendations(cache_key, payload)
+        return Response(payload, status=status.HTTP_201_CREATED)
+
+
+class RefreshRecommendationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(request=GenerateRecommendationSerializer, responses={201: RecommendationRunSerializer})
+    def post(self, request):
+        serializer = GenerateRecommendationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        limit = serializer.validated_data["limit"]
+        if serializer.validated_data.get("async_generate"):
+            task = generate_recommendations_for_user.delay(request.user.id, limit)
+            return Response({"status": "queued", "task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+        run = generate_recommendations(request.user, limit=limit, source="refresh")
+        payload = RecommendationRunSerializer(run, context={"request": request}).data
+        set_cached_recommendations(get_recommendation_cache_key(request.user, limit), payload)
         return Response(payload, status=status.HTTP_201_CREATED)
 
 
@@ -63,6 +89,40 @@ class FoodRecommendationView(APIView):
         return Response(payload)
 
 
+class RecommendationExplainView(generics.RetrieveAPIView):
+    serializer_class = RecommendationRunSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = "item_id"
+
+    def get(self, request, *args, **kwargs):
+        item = (
+            RecommendationRun.objects.filter(user=request.user, items__id=kwargs["item_id"])
+            .prefetch_related("items__food__category", "items__food__nutrients__nutrient", "items__supplement", "items__feedback")
+            .first()
+        )
+        if item is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        recommendation_item = item.items.get(id=kwargs["item_id"])
+        return Response(
+            {
+                "id": recommendation_item.id,
+                "food_id": recommendation_item.food_id,
+                "food_name": recommendation_item.food.name,
+                "final_score": recommendation_item.score,
+                "score_breakdown": recommendation_item.score_breakdown,
+                "safety_status": recommendation_item.explanation_details.get("score_details", {}).get("safety_status", "safe"),
+                "safety_level": recommendation_item.explanation_details.get("score_details", {}).get("safety_level", "LOW"),
+                "safety_message": recommendation_item.explanation_details.get("score_details", {}).get("safety_message", ""),
+                "blocked_reason": recommendation_item.explanation_details.get("score_details", {}).get("blocked_reason", ""),
+                "explanation": recommendation_item.explanation_details or {"summary": recommendation_item.explanation, "reasons": []},
+                "alternatives": recommendation_item.explanation_details.get("alternatives", []),
+                "matched_rules": recommendation_item.matched_rules,
+                "matched_nutrients": recommendation_item.matched_nutrients,
+                "warnings": recommendation_item.warnings,
+            }
+        )
+
+
 class RecommendationPreviewView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = HybridPreviewSerializer
@@ -83,6 +143,51 @@ class RecommendationPreviewView(APIView):
             if enriched is not None:
                 results.append(to_api_result(enriched, food))
         return Response({**payload, "results": results, "recommendations": results})
+
+
+class SupplementTimingPlanView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(build_timing_plan(request.user))
+
+
+class DailyMealPlanView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(build_meal_plan(request.user))
+
+
+class AdminEvaluationView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(
+            recommendation_metrics(
+                date_from=request.query_params.get("date_from"),
+                date_to=request.query_params.get("date_to"),
+                supplement=request.query_params.get("supplement"),
+            )
+        )
+
+
+class AdminKnowledgeGraphView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    @extend_schema(responses=dict)
+    def get(self, request):
+        return Response(
+            knowledge_graph_payload(
+                supplement=request.query_params.get("supplement"),
+                nutrient=request.query_params.get("nutrient"),
+                food=request.query_params.get("food"),
+                interaction_type=request.query_params.get("interaction_type"),
+            )
+        )
 
 
 class RecommendationHistoryView(generics.ListAPIView):
@@ -175,3 +280,15 @@ class AdminRecommendationRunDetailView(generics.RetrieveAPIView):
             "items__supplement",
             "items__feedback",
         )
+
+
+class AdminRecommendationWeightProfileListCreateView(generics.ListCreateAPIView):
+    serializer_class = RecommendationWeightProfileSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = RecommendationWeightProfile.objects.all()
+
+
+class AdminRecommendationWeightProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = RecommendationWeightProfileSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = RecommendationWeightProfile.objects.all()

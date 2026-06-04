@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from apps.nutrients.models import Nutrient
 
-from .models import Supplement, SupplementNutrient, UserSupplement
+from .models import Supplement, SupplementFactSheet, SupplementNutrient, UserSupplement
 
 
 class SupplementNutrientSerializer(serializers.ModelSerializer):
@@ -39,13 +39,6 @@ class SupplementSerializer(serializers.ModelSerializer):
             "common_dose",
             "source",
             "source_id",
-            "brand_name",
-            "manufacturer",
-            "product_type",
-            "upc",
-            "physical_state",
-            "off_market",
-            "target_groups",
             "is_active",
             "nutrients",
             "nutrient_items",
@@ -100,6 +93,29 @@ class SupplementSerializer(serializers.ModelSerializer):
         SupplementNutrient.objects.bulk_create(rows)
 
 
+class SupplementFactSheetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplementFactSheet
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "source",
+            "source_id",
+            "audience",
+            "url",
+            "description",
+            "benefits",
+            "safety",
+            "interactions",
+            "recommended_intake",
+            "deficiency",
+            "food_sources",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "source", "updated_at"]
+
+
 class UserSupplementSerializer(serializers.ModelSerializer):
     supplement = SupplementSerializer(read_only=True)
     supplement_id = serializers.PrimaryKeyRelatedField(
@@ -124,8 +140,4 @@ class UserSupplementSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate_frequency(self, value):
-        if value != "daily":
-            raise serializers.ValidationError(
-                "Only daily supplement routines are supported."
-            )
-        return value
+        return (value or "").strip() or "daily"

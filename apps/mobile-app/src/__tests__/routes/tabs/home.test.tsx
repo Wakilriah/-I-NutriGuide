@@ -4,8 +4,9 @@ import { router } from "expo-router";
 import HomeScreen from "../../../../app/tabs/home";
 
 jest.mock("../../../features/recommendations/api", () => ({
-  generateRecommendations: jest.fn(async () => ({ run_id: "run-new", created_at: "2026-05-08T12:00:00Z", disclaimer: "", items: [] })),
   listRecommendationHistory: jest.fn(),
+  queueRecommendationGeneration: jest.fn(async () => ({ run_id: "run-new", created_at: "2026-05-08T12:00:00Z", disclaimer: "", items: [] })),
+  resolveFoodImageUri: jest.fn(() => "https://example.com/food.webp"),
 }));
 
 jest.mock("../../../features/supplements/api", () => ({
@@ -40,7 +41,7 @@ const recommendationRun = {
       id: 11,
       run_id: "run-1",
       rank: 1,
-      food: { id: 5, name: "Citrus yogurt bowl", slug: "citrus-yogurt-bowl", category: "Breakfast" },
+      food: { id: 5, name: "Citrus yogurt bowl", slug: "citrus-yogurt-bowl", category: "Breakfast", image_path: "" },
       matched_supplement: { id: 1, name: "Vitamin D", slug: "vitamin-d" },
       score: "0.92",
       nutrient_score: "0.90",
@@ -80,15 +81,15 @@ describe("HomeScreen", () => {
 
     render(<HomeScreen />);
 
-    expect(screen.getByText("Hi Amina")).toBeTruthy();
-    expect(screen.getByText("Today's routine")).toBeTruthy();
-    expect(screen.getByText("Vitamin D")).toBeTruthy();
-    expect(screen.getByText("Best match now")).toBeTruthy();
+    expect(screen.getByText(/Hi,/)).toBeTruthy();
+    expect(screen.getAllByText("Next supplement").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Vitamin D").length).toBeGreaterThan(0);
+    expect(screen.getByText("Top recommended foods")).toBeTruthy();
     expect(screen.getByText("Citrus yogurt bowl")).toBeTruthy();
   });
 
   it("generates a recommendation when no latest run exists", async () => {
-    const { generateRecommendations } = require("../../../features/recommendations/api");
+    const { queueRecommendationGeneration } = require("../../../features/recommendations/api");
     (useQuery as jest.Mock).mockImplementation(({ queryKey }) => {
       if (queryKey[0] === "user-supplements") {
         return { data: [supplement], isError: false, isLoading: false };
@@ -97,12 +98,9 @@ describe("HomeScreen", () => {
     });
 
     render(<HomeScreen />);
-    fireEvent.press(screen.getByLabelText("Generate today's match"));
+    fireEvent.press(screen.getByText("Generate recommendations"));
 
-    expect(generateRecommendations).toHaveBeenCalledWith(10);
-    await waitFor(() => {
-      expect(router.replace).toHaveBeenCalledWith("/recommendations/run-new");
-    });
+    expect(queueRecommendationGeneration).toHaveBeenCalledWith(10);
   });
 
   it("opens the profile tab from the top avatar area", () => {

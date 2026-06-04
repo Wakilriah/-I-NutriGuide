@@ -35,6 +35,7 @@ $required = @(
     "CSRF_TRUSTED_ORIGINS",
     "API_HOST",
     "ADMIN_HOST",
+    "MOBILE_WEB_HOST",
     "LANDING_HOST",
     "DOZZLE_HOST",
     "NEO4J_HOST",
@@ -94,7 +95,7 @@ if ($values["TRAEFIK_ACME_EMAIL"] -notmatch "^[^@\s]+@[^@\s]+\.[^@\s]+$") {
     throw "TRAEFIK_ACME_EMAIL must be a valid email address for Let's Encrypt notices."
 }
 
-$expectedApiBase = "$expectedScheme://$($values["API_HOST"])/api/v1"
+$expectedApiBase = "${expectedScheme}://$($values["API_HOST"])/api/v1"
 if ($values["VITE_API_BASE_URL"].TrimEnd("/") -ne $expectedApiBase) {
     throw "VITE_API_BASE_URL must be $expectedApiBase."
 }
@@ -102,11 +103,11 @@ if ($values["EXPO_PUBLIC_API_BASE_URL"].TrimEnd("/") -ne $expectedApiBase) {
     throw "EXPO_PUBLIC_API_BASE_URL must be $expectedApiBase."
 }
 
-if ($values["CORS_ALLOWED_ORIGINS"] -notlike "*$expectedScheme://$($values["ADMIN_HOST"])*") {
-    throw "CORS_ALLOWED_ORIGINS must include $expectedScheme://$($values["ADMIN_HOST"])."
+if ($values["CORS_ALLOWED_ORIGINS"] -notlike "*${expectedScheme}://$($values["ADMIN_HOST"])*" -or $values["CORS_ALLOWED_ORIGINS"] -notlike "*${expectedScheme}://$($values["MOBILE_WEB_HOST"])*") {
+    throw "CORS_ALLOWED_ORIGINS must include ${expectedScheme}://$($values["ADMIN_HOST"]) and ${expectedScheme}://$($values["MOBILE_WEB_HOST"])."
 }
-if ($values["CSRF_TRUSTED_ORIGINS"] -notlike "*$expectedScheme://$($values["API_HOST"])*" -or $values["CSRF_TRUSTED_ORIGINS"] -notlike "*$expectedScheme://$($values["ADMIN_HOST"])*") {
-    throw "CSRF_TRUSTED_ORIGINS must include $expectedScheme://$($values["API_HOST"]) and $expectedScheme://$($values["ADMIN_HOST"])."
+if ($values["CSRF_TRUSTED_ORIGINS"] -notlike "*${expectedScheme}://$($values["API_HOST"])*" -or $values["CSRF_TRUSTED_ORIGINS"] -notlike "*${expectedScheme}://$($values["ADMIN_HOST"])*" -or $values["CSRF_TRUSTED_ORIGINS"] -notlike "*${expectedScheme}://$($values["MOBILE_WEB_HOST"])*") {
+    throw "CSRF_TRUSTED_ORIGINS must include ${expectedScheme}://$($values["API_HOST"]), ${expectedScheme}://$($values["ADMIN_HOST"]), and ${expectedScheme}://$($values["MOBILE_WEB_HOST"])."
 }
 
 Write-Host "Production env validation passed: $EnvFile"

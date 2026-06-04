@@ -58,7 +58,7 @@ def test_chat_recommendation_creates_messages_and_chat_run(authenticated_client,
 
     def fake_recommend(self, user_profile, n=10, foods=None):
         return {
-            "user_id": user.id, "strategy": "ASSOCIATION_RULES", "weights": {}, "disclaimer": "test",
+            "user_id": user.id, "strategy": "ASSOCIATION_RULES_FILTERED", "weights": {}, "disclaimer": "test",
             "recommendations": [
                 {"food_id": chat_recommendation_data["orange"].id, "food_name": "Orange", "food_slug": "orange", "category": "General", "final_score": 1.0, "cbf_score": 1.0, "rules_score": 1.0, "cf_score": 1.0, "reason": "Test", "safety_notes": [], "matched_nutrients": [], "matched_rules": [{"explanation": "rule"}], "related_supplement": None}
             ]        }

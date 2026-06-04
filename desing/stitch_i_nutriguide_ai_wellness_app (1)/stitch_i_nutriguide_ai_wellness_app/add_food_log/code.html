@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Food - I-NutriGuide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#71dd7a",
+                    "surface-container-high": "#e5e8ee",
+                    "inverse-on-surface": "#eef1f6",
+                    "on-secondary-fixed-variant": "#643f00",
+                    "outline-variant": "#becab9",
+                    "on-background": "#181c20",
+                    "on-primary-container": "#f7fff1",
+                    "secondary-fixed": "#ffddb6",
+                    "primary-container": "#098730",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#b6cbc5",
+                    "tertiary-container": "#657973",
+                    "on-surface": "#181c20",
+                    "surface": "#f7f9ff",
+                    "surface-dim": "#d7dadf",
+                    "on-secondary-fixed": "#2a1800",
+                    "surface-container-highest": "#e0e3e8",
+                    "secondary": "#845400",
+                    "on-tertiary-fixed": "#0c1f1b",
+                    "primary": "#006b23",
+                    "surface-container-low": "#f1f4f9",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#684100",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#ebeef3",
+                    "surface-variant": "#e0e3e8",
+                    "tertiary": "#4c605b",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#8dfa94",
+                    "on-tertiary-container": "#f4fffa",
+                    "primary-fixed-dim": "#71dd7a",
+                    "secondary-fixed-dim": "#ffb95b",
+                    "background": "#f7f9ff",
+                    "outline": "#6f7a6c",
+                    "surface-bright": "#f7f9ff",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#005319",
+                    "on-surface-variant": "#3f4a3d",
+                    "secondary-container": "#fda611",
+                    "on-tertiary-fixed-variant": "#374b46",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#2d3135",
+                    "on-primary-fixed": "#002106",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#d1e7e0",
+                    "surface-tint": "#006e24",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "gutter": "16px",
+                    "container-margin": "20px",
+                    "base": "4px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Quicksand"],
+                    "headline-md": ["Quicksand"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Quicksand"],
+                    "display-lg": ["Quicksand"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #F4FCE3; /* Mint background from Brand Guidance */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .card-shadow {
+            box-shadow: 0px 4px 20px rgba(47, 158, 68, 0.08);
+        }
+        .segmented-control input:checked + label {
+            background-color: #098730;
+            color: #f7fff1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface-dim shadow-sm flex justify-between items-center px-container-margin h-16 w-full z-40">
+<div class="flex items-center gap-3">
+<button aria-label="Back" class="material-symbols-outlined text-primary">arrow_back</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Log Meal</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity cursor-pointer">notifications</span>
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkHHYeCVABnZex7ns1yrSwz_aQ9C2yEnI8sLXNL9xvSxfnKAP5uJDf7XFao3Tk5zcX5dq-JX3YW9wFg0blQ8eiIvjtmMtK3jtTdigQYSZ4yC089bAI5KkcCBM307RDmYim6WSHch2kymKbSb_dr8FfzOPirsPw7jMGHb_WLiB6jZX3E1Ega8E9cKcPwfauj52MGCUouseRZJQjv-IWjieiLRpnl_UGUb_SULpvK_dwx4UwZMB2SoBLtOIZR4zKdUSw_1cAV3TDkH8"/>
+</div>
+</div>
+</header>
+<main class="px-container-margin py-lg max-w-2xl mx-auto space-y-lg">
+<!-- Quick Actions Card -->
+<section class="grid grid-cols-2 gap-md">
+<button class="flex flex-col items-center justify-center p-md bg-surface-container-lowest rounded-xl card-shadow border border-outline-variant/20 hover:bg-primary-fixed/20 transition-colors group">
+<span class="material-symbols-outlined text-primary mb-sm text-3xl group-active:scale-90 transition-transform">barcode_scanner</span>
+<span class="font-label-md text-label-md text-on-surface">Scan Barcode</span>
+</button>
+<button class="flex flex-col items-center justify-center p-md bg-surface-container-lowest rounded-xl card-shadow border border-outline-variant/20 hover:bg-secondary-fixed/20 transition-colors group">
+<span class="material-symbols-outlined text-secondary mb-sm text-3xl group-active:scale-90 transition-transform">auto_awesome</span>
+<span class="font-label-md text-label-md text-on-surface">Get Recommendations</span>
+</button>
+</section>
+<!-- Main Form -->
+<form class="space-y-lg bg-surface-container-lowest p-lg rounded-2xl card-shadow border border-outline-variant/10">
+<!-- Food Name -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Food Name</label>
+<div class="relative">
+<input class="w-full h-14 px-md rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg font-body-lg" placeholder="e.g. Avocado Toast" type="text"/>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50">search</span>
+</div>
+</div>
+<!-- Meal Type Segmented Control -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Meal Type</label>
+<div class="flex p-1 bg-surface-container-low rounded-xl segmented-control">
+<input checked="" class="hidden" id="breakfast" name="meal_type" type="radio"/>
+<label class="flex-1 text-center py-2 rounded-lg font-label-md text-label-md text-on-surface-variant cursor-pointer transition-all" for="breakfast">Breakfast</label>
+<input class="hidden" id="lunch" name="meal_type" type="radio"/>
+<label class="flex-1 text-center py-2 rounded-lg font-label-md text-label-md text-on-surface-variant cursor-pointer transition-all" for="lunch">Lunch</label>
+<input class="hidden" id="dinner" name="meal_type" type="radio"/>
+<label class="flex-1 text-center py-2 rounded-lg font-label-md text-label-md text-on-surface-variant cursor-pointer transition-all" for="dinner">Dinner</label>
+<input class="hidden" id="snack" name="meal_type" type="radio"/>
+<label class="flex-1 text-center py-2 rounded-lg font-label-md text-label-md text-on-surface-variant cursor-pointer transition-all" for="snack">Snack</label>
+</div>
+</div>
+<!-- Quantity & Unit -->
+<div class="grid grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Quantity</label>
+<input class="w-full h-14 px-md rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg font-body-lg" type="number" value="100"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Unit</label>
+<select class="w-full h-14 px-md rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg font-body-lg appearance-none">
+<option>g</option>
+<option>serving</option>
+<option>cup</option>
+<option>piece</option>
+</select>
+</div>
+</div>
+<!-- Calories and Time -->
+<div class="grid grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Calories (kcal)</label>
+<input class="w-full h-14 px-md rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg font-body-lg" placeholder="0" type="number"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Time</label>
+<div class="relative">
+<input class="w-full h-14 px-md rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg font-body-lg" type="time" value="08:30"/>
+</div>
+</div>
+</div>
+<!-- Macros Section -->
+<div class="space-y-md p-md bg-surface-container-low rounded-2xl">
+<h3 class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Macronutrients</h3>
+<div class="grid grid-cols-3 gap-md">
+<div class="space-y-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant text-center block">Protein (g)</label>
+<input class="w-full h-12 text-center rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary font-bold text-primary" placeholder="0" type="number"/>
+<div class="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[40%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant text-center block">Carbs (g)</label>
+<input class="w-full h-12 text-center rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-secondary font-bold text-secondary" placeholder="0" type="number"/>
+<div class="h-1.5 w-full bg-secondary/10 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[60%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant text-center block">Fats (g)</label>
+<input class="w-full h-12 text-center rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-outline font-bold text-outline" placeholder="0" type="number"/>
+<div class="h-1.5 w-full bg-outline/10 rounded-full overflow-hidden">
+<div class="h-full bg-outline w-[25%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Notes -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Notes</label>
+<textarea class="w-full p-md rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-md font-body-md resize-none" placeholder="How did you feel? Any specific ingredients?" rows="2"></textarea>
+</div>
+<!-- Action Buttons -->
+<div class="pt-md">
+<button class="w-full h-16 bg-primary text-on-primary rounded-full font-headline-md text-headline-md shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
+                    Save Food
+                </button>
+</div>
+</form>
+<!-- Decorative Insight Card -->
+<div class="bg-primary-container text-on-primary-container p-lg rounded-2xl flex items-start gap-md card-shadow">
+<span class="material-symbols-outlined text-4xl">lightbulb</span>
+<div>
+<h4 class="font-headline-md text-body-lg font-bold mb-xs">Nurture Your Body</h4>
+<p class="font-body-md text-body-md opacity-90 leading-relaxed">Adding a portion of protein to your breakfast helps maintain steady energy levels throughout the morning!</p>
+</div>
+</div>
+</main>
+<!-- AI Chat FAB -->
+<button class="fixed bottom-24 right-container-margin w-14 h-14 bg-primary text-on-primary rounded-full shadow-[0px_8px_24px_rgba(0,0,0,0.12)] z-50 flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/80 dark:bg-surface-dim/80 glass-nav border-t border-outline-variant/30 rounded-t-xl shadow-[0px_-4px_20px_rgba(47,158,68,0.08)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all px-4 py-1" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<span class="font-label-sm text-label-sm">Track</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all px-4 py-1" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-label-sm text-label-sm">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all px-4 py-1" href="#">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-label-sm text-label-sm">Supps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all px-4 py-1" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions for form inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.01]');
+                input.parentElement.style.transition = 'transform 0.2s ease-out';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+
+        // Simple segmented control logic
+        const labels = document.querySelectorAll('.segmented-control label');
+        labels.forEach(label => {
+            label.addEventListener('click', () => {
+                // Visual feedback only, radio handles state
+                console.log('Meal type selected:', label.innerText);
+            });
+        });
+    </script>
+</body></html>

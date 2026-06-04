@@ -4,6 +4,7 @@ import {
   Activity,
   Apple,
   Database,
+  Heart,
   MessageSquare,
   Pill,
   RefreshCw,
@@ -32,6 +33,7 @@ export function DashboardPage() {
   const isInitialLoading = isLoading && !data;
   const dashboard = data;
   const lastSynced = dataUpdatedAt ? formatDateTime(dataUpdatedAt) : "Not synced yet";
+  const supplementKnowledgeTotal = dashboard ? Math.max(dashboard.total_supplements, dashboard.total_supplement_normalizations ?? 0) : 0;
 
   const readiness = useMemo(() => buildReadinessRows(dashboard), [dashboard]);
   const accountMix = useMemo(() => buildAccountRows(dashboard), [dashboard]);
@@ -84,9 +86,9 @@ export function DashboardPage() {
           <StatCard icon={Apple} label="Nutrients" value={formatNumber(dashboard.total_nutrients)} helper={`${formatNumber(dashboard.ciqual_foods)} CIQUAL foods`} />
           <StatCard
             icon={Pill}
-            label="Supplements"
-            value={formatNumber(dashboard.total_supplements)}
-            helper={`${formatNumber(dashboard.user_supplement_entries)} user links`}
+            label="Supplement Knowledge"
+            value={formatNumber(supplementKnowledgeTotal)}
+            helper={`${formatNumber(dashboard.total_supplement_categories ?? 0)} categories, ${formatNumber(dashboard.user_supplement_entries)} user links`}
           />
           <StatCard
             icon={Activity}
@@ -98,9 +100,50 @@ export function DashboardPage() {
           <StatCard icon={MessageSquare} label="Feedback" value={formatNumber(dashboard.total_feedback)} helper={`${formatPercent(ratio(dashboard.helpful_feedback, dashboard.total_feedback))} helpful`} />
           <StatCard
             icon={ShieldCheck}
-            label="Active Rules"
+            label="Synced Rules"
             value={formatNumber(dashboard.active_association_rules)}
-            helper={`${formatNumber(dashboard.total_association_rules)} total`}
+            helper={`${formatNumber(dashboard.total_association_rules)} scoring rules`}
+          />
+        </div>
+      ) : null}
+
+      {dashboard ? (
+        <div className="metric-grid compact-metric-grid">
+          <StatCard
+            icon={Database}
+            label="Normalization Map"
+            value={formatNumber(dashboard.total_supplement_normalizations ?? 0)}
+            helper={`${formatNumber(dashboard.active_supplement_normalizations ?? 0)} active`}
+          />
+          <StatCard
+            icon={ShieldCheck}
+            label="Seed Rules"
+            value={formatNumber(dashboard.active_synergy_seed_rules ?? 0)}
+            helper={`${formatNumber(dashboard.total_synergy_seed_rules ?? 0)} imported`}
+          />
+          <StatCard
+            icon={ShieldCheck}
+            label="Mined Rules"
+            value={formatNumber(dashboard.active_mined_association_rules ?? 0)}
+            helper={`${formatNumber(dashboard.total_mined_association_rules ?? 0)} stored`}
+          />
+          <StatCard
+            icon={ShieldCheck}
+            label="Safety Constraints"
+            value={formatNumber(dashboard.active_safety_constraints ?? 0)}
+            helper={`${formatNumber(dashboard.total_safety_constraints ?? 0)} imported`}
+          />
+          <StatCard
+            icon={Database}
+            label="Transactions"
+            value={formatNumber(dashboard.total_association_transactions ?? 0)}
+            helper={`${formatNumber(dashboard.total_association_transaction_items ?? 0)} items`}
+          />
+          <StatCard
+            icon={Activity}
+            label="Interactions"
+            value={formatNumber(dashboard.active_nutrient_interactions ?? 0)}
+            helper={`${formatNumber(dashboard.total_nutrient_interactions ?? 0)} nutrient links`}
           />
         </div>
       ) : null}
@@ -173,12 +216,15 @@ export function DashboardPage() {
               <CardDescription>Foods appearing most often in generated runs.</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataList
+              <FoodSignalList
                 emptyLabel="No recommendation history yet."
+                icon="recommend"
                 items={dashboard.most_recommended_foods.map((item) => ({
                   label: item.food__name,
+                  slug: item.food__slug,
                   value: item.count,
                 }))}
+                total={dashboard.total_recommendation_items}
               />
             </CardContent>
           </Card>
@@ -189,10 +235,65 @@ export function DashboardPage() {
               <CardDescription>Foods users decided to keep.</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataList
+              <FoodSignalList
                 emptyLabel="No saved foods yet."
+                icon="saved"
                 items={dashboard.most_saved_foods.map((item) => ({
                   label: item.recommendation_item__food__name,
+                  slug: item.recommendation_item__food__slug,
+                  value: item.count,
+                }))}
+                total={dashboard.total_saved_foods}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
+      {dashboard ? (
+        <div className="dashboard-list-grid">
+          <Card>
+            <CardHeader>
+              <CardTitle>Seed Rule Categories</CardTitle>
+              <CardDescription>Supplement categories represented by imported positive seed rules.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataList
+                emptyLabel="No seed rules imported yet."
+                items={(dashboard.synergy_rule_category_counts ?? []).map((item) => ({
+                  label: item.supplement_category_name || "Uncategorized",
+                  value: item.count,
+                }))}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Mined Rule Sources</CardTitle>
+              <CardDescription>Stored rule sources after association mining.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataList
+                emptyLabel="No mined rules stored yet."
+                items={(dashboard.mined_rule_source_counts ?? []).map((item) => ({
+                  label: item.source || "Unknown source",
+                  value: item.count,
+                }))}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Safety Constraint Types</CardTitle>
+              <CardDescription>Constraints kept separate from positive recommendation rules.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataList
+                emptyLabel="No safety constraints imported yet."
+                items={(dashboard.safety_constraint_type_counts ?? []).map((item) => ({
+                  label: readableLabel(item.constraint_type),
                   value: item.count,
                 }))}
               />
@@ -224,6 +325,47 @@ function DataList({ emptyLabel, items }: { emptyLabel: string; items: Array<{ la
         <li key={item.label}>
           <span>{item.label || "Unknown"}</span>
           <strong>{formatNumber(item.value)}</strong>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function FoodSignalList({
+  emptyLabel,
+  icon,
+  items,
+  total,
+}: {
+  emptyLabel: string;
+  icon: "recommend" | "saved";
+  items: Array<{ label: string; slug?: string; value: number }>;
+  total: number;
+}) {
+  if (items.length === 0) {
+    return <p className="empty-line">{emptyLabel}</p>;
+  }
+
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+  const Icon = icon === "saved" ? Heart : Apple;
+
+  return (
+    <ul className="food-signal-list">
+      {items.map((item, index) => (
+        <li key={`${item.slug || item.label}-${index}`}>
+          <div className="food-signal-icon">
+            <Icon aria-hidden="true" size={16} />
+          </div>
+          <div className="food-signal-copy">
+            <div>
+              <strong>{item.label || "Unknown food"}</strong>
+              <span>{formatPercent(ratio(item.value, total))} of tracked {icon === "saved" ? "saves" : "recommendations"}</span>
+            </div>
+            <div className="dashboard-progress-track" aria-hidden="true">
+              <span style={{ width: `${Math.max(8, Math.round((item.value / maxValue) * 100))}%` }} />
+            </div>
+          </div>
+          <Badge variant={icon === "saved" ? "secondary" : "outline"}>{formatNumber(item.value)}</Badge>
         </li>
       ))}
     </ul>
@@ -306,13 +448,23 @@ function buildReadinessRows(metrics?: DashboardMetrics) {
     },
     {
       label: "Active Supplements",
-      value: ratio(metrics.active_supplements, metrics.total_supplements),
-      detail: `${formatNumber(metrics.active_supplements)} of ${formatNumber(metrics.total_supplements)} supplements are enabled`,
+      value: ratio(Math.max(metrics.active_supplements, metrics.active_supplement_normalizations ?? 0), Math.max(metrics.total_supplements, metrics.total_supplement_normalizations ?? 0)),
+      detail: `${formatNumber(Math.max(metrics.active_supplements, metrics.active_supplement_normalizations ?? 0))} active supplement knowledge rows`,
     },
     {
       label: "Rule Coverage",
       value: ratio(metrics.recommendation_items_with_rules, metrics.total_recommendation_items),
       detail: `${formatNumber(metrics.recommendation_items_with_rules)} recommendation items matched rules`,
+    },
+    {
+      label: "Normalization Map",
+      value: ratio(metrics.active_supplement_normalizations ?? 0, metrics.total_supplement_normalizations ?? 0),
+      detail: `${formatNumber(metrics.active_supplement_normalizations ?? 0)} supplement aliases normalize to canonical items`,
+    },
+    {
+      label: "Safety Dataset",
+      value: ratio(metrics.active_safety_constraints ?? 0, metrics.total_safety_constraints ?? 0),
+      detail: `${formatNumber(metrics.active_safety_constraints ?? 0)} safety constraints are enabled`,
     },
   ];
 }
@@ -371,4 +523,8 @@ function formatDateTime(value: number) {
 
 function truncate(value: string, length: number) {
   return value.length > length ? `${value.slice(0, length - 1)}...` : value;
+}
+
+function readableLabel(value: string) {
+  return value ? value.replace(/_/g, " ") : "Unknown";
 }

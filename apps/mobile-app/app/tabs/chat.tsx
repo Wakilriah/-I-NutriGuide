@@ -1,22 +1,25 @@
+"use client";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { AnimatedSection, AppButton, AppCard, AppTopBar, Badge, ErrorState, FilterChip, PageHeader, SkeletonCard } from "../../src/components/ui";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { MobileAppShell } from "../../src/components/MobileAppShell";
+import { AppCard, AppTopBar, Badge, ChatAssistant, ChatInputBar, ChatMessageBubble, ErrorState, QuickPromptChips, SkeletonCard, TypingIndicator } from "../../src/components/ui";
 import { ChatMessage, ChatSession, clearChatSessions, listChatSessions, sendChatMessage } from "../../src/features/chat/api";
-import { colors, iconSizes, radii, spacing, typography } from "../../src/theme/design";
+import { colors, radii, spacing, typography } from "../../src/theme/design";
 
 const starterPrompts = [
-  "Recommend foods for my supplements",
+  "What should I eat with iron?",
+  "Can I take coffee with supplements?",
   "Explain my latest recommendation",
   "What should I avoid?",
-  "Update my disliked foods",
 ];
 
 const welcomeMessage: ChatMessage = {
   id: "welcome",
   role: "assistant",
-  content: "Hi, I am your nutrition assistant. Ask about food pairings, supplement timing, allergies, or recommendation ideas.",
+  content: "Hi! I can help with food pairings, supplement timing, allergies, water, calories, and recommendation explanations.",
   metadata: {},
   recommendation_run_id: null,
   groq_model: "",
@@ -60,6 +63,7 @@ export default function ChatScreen() {
       });
     },
   });
+
   const clearMutation = useMutation({
     mutationFn: clearChatSessions,
     onSuccess: async () => {
@@ -96,12 +100,11 @@ export default function ChatScreen() {
     if (!trimmed || sendMutation.isPending) {
       return;
     }
-    const pendingId = `pending-${trimmed}`;
     setHistoryCleared(false);
     setMessages((current) => [
       ...current,
       {
-        id: pendingId,
+        id: `pending-${trimmed}`,
         role: "user",
         content: trimmed,
         metadata: {},
@@ -118,152 +121,73 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ flex: 1 }}>
-        <AppTopBar />
+      <MobileAppShell>
+        <AppTopBar title="I-NutriGuide Assistant" subtitle="Online" />
         <ScrollView
-          contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.lg }}
+          contentContainerStyle={{ gap: spacing.lg, padding: spacing.lg, paddingBottom: 204 }}
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
           ref={scrollRef}
-          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={{ gap: spacing.lg }}>
-            <AnimatedSection>
-              <PageHeader eyebrow="AI Assistant" title="Nutrition chat" subtitle="Ask for supplement-aware food ideas, timing tips, and recommendation explanations." />
-            </AnimatedSection>
+          <ChatAssistant clearing={clearMutation.isPending} onClear={() => clearMutation.mutate()} />
+          <QuickPromptChips onPick={sendMessage} prompts={starterPrompts} />
 
-            <AnimatedSection delay={40}>
-              <AppButton
-                accessibilityLabel="Clear chat history"
-                disabled={clearMutation.isPending || sendMutation.isPending}
-                icon="trash"
-                label={clearMutation.isPending ? "Clearing" : "Clear chat history"}
-                onPress={() => clearMutation.mutate()}
-                variant="ghost"
-              />
-            </AnimatedSection>
+          {sessionsQuery.isLoading ? <SkeletonCard lines={2} /> : null}
+          {sendMutation.isError || clearMutation.isError ? <ErrorState message="I could not process that request. Please try again." /> : null}
 
-            <AnimatedSection delay={80}>
-              <AppCard style={{ gap: spacing.sm, borderColor: colors.primary, borderLeftWidth: 4 }}>
-                <Badge label="Association rules + Groq" tone="orange" />
-                <Text style={{ color: colors.text, fontSize: 20, fontWeight: "900" }}>Personalized answers from your food engine</Text>
-                <Text style={{ color: colors.muted, lineHeight: 22 }}>The chat uses your saved profile, supplements, and recommendation rules before asking Groq to explain the result.</Text>
-              </AppCard>
-            </AnimatedSection>
+          <View style={{ gap: spacing.md }}>
+            {messages.map((message) => {
+              const isAssistant = message.role === "assistant";
+              const citedItems = message.metadata?.cited_items ?? [];
+              return (
+                <View key={message.id} style={{ gap: spacing.sm }}>
+                  <ChatMessageBubble role={isAssistant ? "assistant" : "user"}>{message.content}</ChatMessageBubble>
 
-            <AnimatedSection delay={130} style={{ gap: spacing.xs }}>
-              <Text style={typography.label}>Try asking</Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
-                {starterPrompts.map((prompt) => (
-                  <FilterChip key={prompt} label={prompt} onPress={() => sendMessage(prompt)} />
-                ))}
-              </View>
-            </AnimatedSection>
-
-            <AnimatedSection delay={180} style={{ gap: spacing.sm }}>
-              {sessionsQuery.isLoading ? <SkeletonCard lines={2} /> : null}
-              {sendMutation.isError ? <ErrorState message="I could not send that message. Please try again." /> : null}
-              {clearMutation.isError ? <ErrorState message="I could not clear your chat history. Please try again." /> : null}
-              {messages.map((message) => {
-                const assistant = message.role === "assistant";
-                const citedItems = message.metadata?.cited_items ?? [];
-                return (
-                  <View key={message.id} style={{ gap: spacing.xs }}>
-                    <View style={{ alignItems: assistant ? "flex-start" : "flex-end" }}>
-                      <View
-                        style={{
-                          maxWidth: "88%",
-                          borderRadius: radii.xl,
-                          borderBottomLeftRadius: assistant ? 4 : radii.xl,
-                          borderBottomRightRadius: assistant ? radii.xl : 4,
-                          backgroundColor: assistant ? colors.surface : colors.primary,
-                          borderColor: assistant ? colors.border : colors.primary,
-                          borderWidth: 1,
-                          padding: spacing.md,
-                        }}
-                      >
-                        <Text style={{ color: assistant ? colors.text : colors.surface, lineHeight: 22, fontWeight: "700" }}>{message.content}</Text>
-                      </View>
-                    </View>
-                    {assistant && citedItems.length ? (
-                      <View style={{ gap: spacing.xs }}>
-                        {citedItems.slice(0, 3).map((item) => (
-                          <AppCard key={item.id} style={{ gap: spacing.xs, padding: spacing.sm }}>
-                            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                              <View style={{ width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: radii.md, backgroundColor: colors.primarySoft }}>
-                                <Ionicons color={colors.primary} name="restaurant" size={iconSizes.sm} />
-                              </View>
-                              <View style={{ flex: 1 }}>
-                                <Text style={{ color: colors.text, fontWeight: "900" }}>{item.food.name}</Text>
-                                <Text style={{ color: colors.muted, marginTop: 2 }}>{item.food.category}</Text>
-                              </View>
-                              <Badge label={`${Math.round(Number(item.score) * 100)}%`} tone="green" />
+                  {isAssistant && citedItems.length > 0 ? (
+                    <View style={{ gap: spacing.xs }}>
+                      {citedItems.slice(0, 3).map((item) => (
+                        <AppCard key={item.id} style={{ gap: spacing.xs, padding: spacing.md }}>
+                          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                            <View style={styles.foodIcon}>
+                              <Ionicons color={colors.primary} name="restaurant" size={16} />
                             </View>
-                            <Text style={{ color: colors.muted, lineHeight: 20 }}>{item.explanation}</Text>
-                          </AppCard>
-                        ))}
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
-              {sendMutation.isPending ? (
-                <View testID="chat-loading-skeleton">
-                  <SkeletonCard lines={2} />
+                            <Text numberOfLines={1} style={{ flex: 1, color: colors.text, fontWeight: "900" }}>{item.food.name}</Text>
+                            <Badge label={`${Math.round(Number(item.score) * 100)}%`} tone="green" />
+                          </View>
+                          <Text style={typography.body}>{item.explanation}</Text>
+                        </AppCard>
+                      ))}
+                    </View>
+                  ) : null}
                 </View>
-              ) : null}
-            </AnimatedSection>
+              );
+            })}
+            {sendMutation.isPending ? <TypingIndicator /> : null}
           </View>
         </ScrollView>
 
-        <View
-          style={{
-            borderTopColor: "rgba(191,202,186,0.48)",
-            borderTopWidth: 1,
-            backgroundColor: "rgba(239,253,237,0.96)",
-            padding: spacing.md,
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-            <TextInput
-              accessibilityLabel="Chat message"
-              multiline
-              onChangeText={setDraft}
-              placeholder="Ask for a recommendation..."
-              placeholderTextColor={colors.placeholder}
-              style={{
-                minHeight: 52,
-                maxHeight: 110,
-                flex: 1,
-                borderColor: colors.border,
-                borderRadius: radii.xl,
-                borderWidth: 1,
-                backgroundColor: colors.surfaceContainerLow,
-                color: colors.text,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
-              }}
-              value={draft}
-            />
-            <TouchableOpacity
-              accessibilityLabel="Send chat message"
-              disabled={sendMutation.isPending}
-              onPress={() => sendMessage()}
-              style={{
-                width: 52,
-                height: 52,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: radii.pill,
-                backgroundColor: colors.primary,
-                opacity: sendMutation.isPending ? 0.7 : 1,
-              }}
-            >
-              <Ionicons color={colors.surface} name="send" size={iconSizes.md} />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.inputDock}>
+          <ChatInputBar disabled={sendMutation.isPending} onChangeText={setDraft} onSend={() => sendMessage()} value={draft} />
         </View>
-      </View>
+      </MobileAppShell>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = {
+  foodIcon: {
+    width: 34,
+    height: 34,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderRadius: radii.md,
+    backgroundColor: colors.primarySoft,
+  },
+  inputDock: {
+    position: "absolute" as const,
+    left: spacing.lg,
+    right: spacing.lg,
+    bottom: 92,
+  },
+};

@@ -6,6 +6,7 @@ import SavedFoodsScreen from "../../../../app/tabs/saved";
 jest.mock("../../../features/recommendations/api", () => ({
   listSavedRecommendationItems: jest.fn(),
   removeSavedRecommendationItem: jest.fn(async () => undefined),
+  resolveFoodImageUri: jest.fn((path?: string) => path || "http://localhost:8000/media/foods/default.webp"),
 }));
 
 jest.mock("@tanstack/react-query", () => ({
@@ -66,7 +67,7 @@ describe("SavedFoodsScreen", () => {
 
     expect(screen.getAllByText("Spinach").length).toBeGreaterThan(0);
     expect(screen.getByText("1 saved matches")).toBeTruthy();
-    expect(router.push).toHaveBeenCalledWith("/recommendations/run-1");
+    expect(router.push).toHaveBeenCalledWith("/tabs/recommendation-detail/run-1");
   });
 
   it("removes a saved food", async () => {

@@ -16,29 +16,23 @@ describe("ProfileOnboardingScreen", () => {
     jest.clearAllMocks();
   });
 
-  it("validates required profile basics", async () => {
+  it("validates required gender choice", async () => {
     render(<ProfileOnboardingScreen />);
 
     fireEvent.press(screen.getByLabelText("Save profile basics"));
 
-    expect(await screen.findByText("Age is required.")).toBeTruthy();
     expect(await screen.findByText("Select a gender option.")).toBeTruthy();
-    expect(await screen.findByText("Height is required.")).toBeTruthy();
-    expect(await screen.findByText("Weight is required.")).toBeTruthy();
   });
 
   it("saves profile basics", async () => {
     const { updateProfile } = require("../../../features/profile/api");
     render(<ProfileOnboardingScreen />);
 
-    fireEvent.changeText(screen.getByLabelText("Age"), "33");
-    fireEvent.press(screen.getByLabelText("Gender: Female"));
-    fireEvent.changeText(screen.getByLabelText("Height cm"), "168");
-    fireEvent.changeText(screen.getByLabelText("Weight kg"), "64");
+    fireEvent.press(screen.getByLabelText("Female"));
     fireEvent.press(screen.getByLabelText("Save profile basics"));
 
     await waitFor(() => {
-      expect(updateProfile).toHaveBeenCalledWith({ age: 33, gender: "female", height_cm: 168, weight_kg: 64 });
+      expect(updateProfile).toHaveBeenCalledWith({ age: 30, gender: "female", height_cm: 170, weight_kg: 70 });
     });
   });
 
@@ -53,9 +47,9 @@ describe("ProfileOnboardingScreen", () => {
 
     render(<ProfileOnboardingScreen />);
 
-    expect(await screen.findByDisplayValue("41")).toBeTruthy();
+    expect(await screen.findByText("41")).toBeTruthy();
     expect(screen.getByText("Male")).toBeTruthy();
-    expect(screen.getByDisplayValue("181.00")).toBeTruthy();
-    expect(screen.getByDisplayValue("82.50")).toBeTruthy();
+    expect(screen.getByText("181")).toBeTruthy();
+    expect(screen.getByText("82.5")).toBeTruthy();
   });
 });

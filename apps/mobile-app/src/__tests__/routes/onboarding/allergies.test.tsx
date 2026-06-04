@@ -22,8 +22,8 @@ describe("AllergyOnboardingScreen", () => {
     fireEvent.press(screen.getByLabelText("Peanuts"));
     fireEvent.press(screen.getByLabelText("Shellfish"));
     fireEvent.press(screen.getByLabelText("Halal"));
-    fireEvent.press(screen.getByLabelText("Lactose free"));
-    fireEvent.press(screen.getByLabelText("Save allergy details"));
+    fireEvent.press(screen.getByLabelText("Lactose Free"));
+    fireEvent.press(screen.getByLabelText("Save allergy filters"));
 
     await waitFor(() => {
       expect(updateProfile).toHaveBeenCalledWith({

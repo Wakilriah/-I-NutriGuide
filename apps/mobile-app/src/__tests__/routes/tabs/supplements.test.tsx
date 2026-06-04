@@ -20,7 +20,7 @@ describe("SupplementsScreen", () => {
 
     render(<SupplementsScreen />);
 
-    expect(screen.getByText("No supplements added yet.")).toBeTruthy();
+    expect(screen.getByText("No supplements yet")).toBeTruthy();
   });
 
   it("shows user supplements", () => {
@@ -42,6 +42,7 @@ describe("SupplementsScreen", () => {
     render(<SupplementsScreen />);
 
     expect(screen.getByText("Vitamin D")).toBeTruthy();
-    expect(screen.getByText("1000 IU - daily - morning")).toBeTruthy();
+    expect(screen.getByText("1000 IU - daily")).toBeTruthy();
+    expect(screen.getByText("morning")).toBeTruthy();
   });
 });

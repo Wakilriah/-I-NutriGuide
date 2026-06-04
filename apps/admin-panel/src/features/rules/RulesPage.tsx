@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit3, Network, Plus, Search, ShieldCheck, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import {
   createAssociationRule,
@@ -90,7 +90,8 @@ export function RulesPage() {
   const activeRules = rules.filter((rule) => rule.is_active).length;
   const averageConfidence = average(rules.map((rule) => rule.confidence));
   const averageLift = average(rules.map((rule) => rule.lift));
-  const nutrientConsequents = rules.filter((rule) => rule.consequent_type === "nutrient").length;
+  const foodConsequents = rules.filter((rule) => rule.consequent_type === "food").length;
+  const supplementAntecedents = rules.filter((rule) => rule.antecedent_type === "supplement").length;
 
   const form = useForm<RuleFormValues>({
     resolver: zodResolver(ruleSchema),
@@ -171,6 +172,7 @@ export function RulesPage() {
         <div>
           <p className="eyebrow">Recommendation Logic</p>
           <h1 id="rules-title">Association Rules</h1>
+          <p className="page-heading-copy">Imported seed and mined rules are reviewed in Rule Dataset, then synced here for the live recommender.</p>
         </div>
         <span className={isError ? "status-pill status-pill-error" : "status-pill"}>
           {isLoading ? "Loading" : isError ? "API unavailable" : `${totalRules} rules`}
@@ -184,7 +186,8 @@ export function RulesPage() {
           <StatCard icon={ShieldCheck} label="Active On Page" value={activeRules} helper={`${totalRules} total`} />
           <StatCard icon={Network} label="Avg Confidence" value={averageConfidence.toFixed(2)} />
           <StatCard icon={Network} label="Avg Lift" value={averageLift.toFixed(2)} />
-          <StatCard icon={Network} label="Nutrient Consequents" value={nutrientConsequents} />
+          <StatCard icon={Network} label="Food Consequents" value={foodConsequents} />
+          <StatCard icon={Network} label="Supplement Inputs" value={supplementAntecedents} />
         </div>
       )}
 
@@ -192,9 +195,15 @@ export function RulesPage() {
         <div className="table-header table-header-split">
           <div>
             <h2>Rule Library</h2>
-            <p>Rules add evidence-based boosts to the recommendation ranking.</p>
+            <p>These rules are the flattened scoring layer used by the recommendation engine cache.</p>
           </div>
           <div className="row-actions">
+            <Button asChild type="button" variant="secondary">
+              <Link to="/rules/dataset">
+                <Network aria-hidden="true" size={17} />
+                Rule Dataset
+              </Link>
+            </Button>
             <div className="search-row">
               <Search aria-hidden="true" size={17} />
               <input

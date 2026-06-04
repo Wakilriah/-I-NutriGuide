@@ -31,9 +31,9 @@ describe("GoalOnboardingScreen", () => {
     const { updateProfile } = require("../../../features/profile/api");
     render(<GoalOnboardingScreen />);
 
-    fireEvent.press(screen.getByLabelText("Digestive health"));
-    fireEvent.press(screen.getByLabelText("Activity level: Moderate"));
-    fireEvent.press(screen.getByLabelText("Diet type: Vegetarian"));
+    fireEvent.press(screen.getByLabelText("Digestive Health"));
+    fireEvent.press(screen.getByLabelText("Moderate"));
+    fireEvent.press(screen.getByLabelText("Vegetarian"));
     fireEvent.press(screen.getByLabelText("Save goals"));
 
     await waitFor(() => {
@@ -56,7 +56,7 @@ describe("GoalOnboardingScreen", () => {
 
     render(<GoalOnboardingScreen />);
 
-    expect(await screen.findByText("Digestive health")).toBeTruthy();
+    expect(await screen.findByText("Digestive Health")).toBeTruthy();
     expect(screen.getByText("Active")).toBeTruthy();
     expect(screen.getByText("Vegetarian")).toBeTruthy();
   });

@@ -35,9 +35,12 @@ class FoodViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(is_active=True)
 
         search = self.request.query_params.get("search")
+        food_name = self.request.query_params.get("food_name")
         category = self.request.query_params.get("category")
         source = self.request.query_params.get("source")
         is_active = self.request.query_params.get("is_active")
+        recommended_for_supplements = self.request.query_params.get("recommended_for_supplements")
+        allergen_tags = self.request.query_params.get("allergen_tags")
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search)
@@ -47,7 +50,10 @@ class FoodViewSet(viewsets.ModelViewSet):
                 | Q(category__slug__icontains=search)
                 | Q(source__icontains=search)
                 | Q(ciqual_code__icontains=search)
+                | Q(image_alt__icontains=search)
             )
+        if food_name:
+            queryset = queryset.filter(Q(name__icontains=food_name) | Q(slug__icontains=food_name))
         if category:
             queryset = queryset.filter(category__slug=category)
         if source:
@@ -57,4 +63,8 @@ class FoodViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(source__iexact=source)
         if is_active in {"true", "false"} and bool(self.request.user and self.request.user.is_staff):
             queryset = queryset.filter(is_active=is_active == "true")
+        if recommended_for_supplements:
+            queryset = queryset.filter(recommended_for_supplements__icontains=recommended_for_supplements)
+        if allergen_tags:
+            queryset = queryset.filter(allergen_tags__icontains=allergen_tags)
         return queryset

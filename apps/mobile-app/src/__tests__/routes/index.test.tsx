@@ -21,8 +21,8 @@ describe("WelcomeScreen", () => {
     render(<WelcomeScreen />);
 
     expect(screen.getByText("I-NutriGuide")).toBeTruthy();
-    expect(screen.getByText("Sign in")).toBeTruthy();
-    expect(screen.getByText("Create an account")).toBeTruthy();
+    expect(screen.getByText("Get Started  ->")).toBeTruthy();
+    expect(screen.getByText("Create a new account")).toBeTruthy();
   });
 
   it("redirects signed-in users away from the welcome screen", async () => {

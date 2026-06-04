@@ -34,10 +34,18 @@ type PaginatedResponse<T> = {
 };
 
 export async function listSupplements(search = "") {
+  const page = await listSupplementsPage({ search, page: 1 });
+  return page.results;
+}
+
+export async function listSupplementsPage({ page = 1, search = "" }: { page?: number; search?: string }) {
   const response = await apiClient.get<Supplement[] | PaginatedResponse<Supplement>>("/supplements/", {
-    params: search.trim() ? { search: search.trim(), page_size: 20 } : { page_size: 20 },
+    params: search.trim() ? { search: search.trim(), page, page_size: 20 } : { page, page_size: 20 },
   });
-  return Array.isArray(response.data) ? response.data : response.data.results;
+  if (Array.isArray(response.data)) {
+    return { count: response.data.length, next: null, previous: null, results: response.data };
+  }
+  return response.data;
 }
 
 export async function listUserSupplements() {

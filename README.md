@@ -29,10 +29,10 @@ make start-local
 
 `make start-local` starts Docker Desktop when needed, starts PostgreSQL, Redis, backend, and admin panel, then waits for the backend health endpoint. Use this when the browser shows `ERR_CONNECTION_REFUSED` for `localhost:8000`.
 
-To include the Expo app in the Docker dev stack, run:
+Run the mobile app outside Docker from `apps/mobile-app`:
 
 ```sh
-powershell -ExecutionPolicy Bypass -File infra/scripts/start-local-dev.ps1 -WithMobile
+npm run start:lan
 ```
 
 For full foreground logs/build output, use:
@@ -46,13 +46,13 @@ The initial services are prepared for:
 - Backend API: http://localhost:8000
 - Health endpoint: http://localhost:8000/api/v1/health/
 - Admin panel: http://localhost:5173
-- Expo app: http://localhost:8081
+- Expo app: http://localhost:8081 when started with npm
 - PostgreSQL: localhost:5432
 - Redis: localhost:6379
 - Celery worker and beat run in the dev Compose stack
 - Dozzle: http://localhost:9999
 
-When using Expo Go from a physical phone, set `REACT_NATIVE_PACKAGER_HOSTNAME` and `EXPO_PUBLIC_API_BASE_URL` in `.env` to your computer's LAN IP so the QR code and API calls point at the host machine instead of the Docker container IP.
+When using Expo Go from a physical phone, `npm run start:lan` writes `.env.local` with your computer's LAN IP so the QR code and API calls point at the host machine.
 
 ## Local Admin Credentials
 

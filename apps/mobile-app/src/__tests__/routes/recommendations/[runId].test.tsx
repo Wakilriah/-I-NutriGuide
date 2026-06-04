@@ -5,6 +5,7 @@ import RecommendationDetailScreen from "../../../../app/recommendations/[runId]"
 
 jest.mock("../../../features/recommendations/api", () => ({
   getRecommendationRun: jest.fn(),
+  resolveFoodImageUri: jest.fn((path?: string) => path || "http://localhost:8000/media/foods/default.webp"),
   saveRecommendationItem: jest.fn(async () => ({})),
   submitRecommendationFeedback: jest.fn(async () => ({})),
 }));
@@ -78,7 +79,7 @@ describe("RecommendationDetailScreen", () => {
     render(<RecommendationDetailScreen />);
 
     expect(screen.getByText("This is educational and not medical advice.")).toBeTruthy();
-    expect(screen.getByText("Spinach")).toBeTruthy();
+    expect(screen.getAllByText("Spinach").length).toBeGreaterThan(0);
     expect(screen.getByText("Spinach fits your current supplement routine.")).toBeTruthy();
     expect(screen.getByText("high-fiber")).toBeTruthy();
     expect(screen.getByText("Check supplement timing")).toBeTruthy();

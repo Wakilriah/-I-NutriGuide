@@ -123,6 +123,7 @@ const foodApi = vi.hoisted(() => ({
     ...payload,
   })),
   deleteFood: vi.fn(async () => undefined),
+  DEFAULT_FOOD_IMAGE_PATH: "/media/foods/default.webp",
   fetchFood: vi.fn(async (slug) => ({
     id: 1,
     name: slug === "spinach" ? "Spinach" : "Orange",
@@ -134,6 +135,15 @@ const foodApi = vi.hoisted(() => ({
     source: slug === "orange" ? "CIQUAL 2020" : "",
     serving_size_g: "100.000",
     image_url: "",
+    image_path: slug === "orange" ? "/media/foods/fruits/orange.webp" : "",
+    image_alt: slug === "orange" ? "Orange preview" : "",
+    recommended_for_supplements: slug === "orange" ? ["Iron"] : [],
+    nutrient_tags: slug === "orange" ? ["vitamin_c"] : [],
+    synergy_reason: slug === "orange" ? "Vitamin C may support iron meals." : "",
+    avoid_or_caution: "",
+    allergen_tags: slug === "orange" ? ["citrus"] : [],
+    diet_tags: [],
+    association_rule_items: [],
     is_active: slug === "orange",
     nutrients: [],
     created_at: "2026-05-08T00:00:00Z",
@@ -156,6 +166,15 @@ const foodApi = vi.hoisted(() => ({
         source: "CIQUAL 2020",
         serving_size_g: "100.000",
         image_url: "",
+        image_path: "/media/foods/fruits/orange.webp",
+        image_alt: "Orange preview",
+        recommended_for_supplements: ["Iron"],
+        nutrient_tags: ["vitamin_c"],
+        synergy_reason: "Vitamin C may support iron meals.",
+        avoid_or_caution: "",
+        allergen_tags: ["citrus"],
+        diet_tags: ["vegan"],
+        association_rule_items: ["FOOD_ORANGE"],
         is_active: true,
         nutrients: [
           {
@@ -181,6 +200,15 @@ const foodApi = vi.hoisted(() => ({
         source: "",
         serving_size_g: "100.000",
         image_url: "",
+        image_path: "",
+        image_alt: "",
+        recommended_for_supplements: [],
+        nutrient_tags: [],
+        synergy_reason: "",
+        avoid_or_caution: "",
+        allergen_tags: [],
+        diet_tags: [],
+        association_rule_items: [],
         is_active: false,
         nutrients: [],
         created_at: "2026-05-08T00:00:00Z",
@@ -202,6 +230,7 @@ const foodApi = vi.hoisted(() => ({
     updated_at: "2026-05-08T00:00:00Z",
     ...payload,
   })),
+  resolveFoodImageUrl: vi.fn((imagePath?: string, legacyImageUrl?: string) => imagePath || legacyImageUrl || "/media/foods/default.webp"),
 }));
 
 vi.mock("../api/foods", () => foodApi);
@@ -294,6 +323,140 @@ const supplementApi = vi.hoisted(() => ({
 }));
 
 vi.mock("../api/supplements", () => supplementApi);
+
+const associationDatasetApi = vi.hoisted(() => ({
+  fetchAssociationTransactions: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 1,
+        transaction_id: "txn-1",
+        source: "long",
+        raw_payload: {},
+        one_hot_items: ["supp:iron", "food:orange"],
+        item_count: 2,
+        items: [
+          { id: 1, item_type: "supp", item_value: "Iron", item: "supp:iron" },
+          { id: 2, item_type: "food", item_value: "Orange", item: "food:orange" },
+        ],
+      },
+    ],
+  })),
+  fetchMinedAssociationRules: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 1,
+        antecedent_items: ["supp:iron"],
+        consequent_items: ["food:orange"],
+        support: 0.2,
+        confidence: 0.7,
+        lift: 1.4,
+        rule_type: "positive_synergy",
+        source: "mined_long",
+        explanation: "Iron appears with orange.",
+        is_active: true,
+      },
+    ],
+  })),
+  fetchSafetyConstraints: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 1,
+        supplement_category_name: "Iron",
+        avoid_or_review_item: "tea_or_coffee",
+        constraint_type: "avoid_timing",
+        reason: "Tea or coffee may reduce iron absorption.",
+        how_to_use: "Separate timing where possible.",
+        source_url: "https://example.com/iron",
+        is_active: true,
+      },
+    ],
+  })),
+  fetchSupplementCategories: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 1,
+        category: "Iron",
+        canonical_item: "iron",
+        association_item: "supp:iron",
+        keywords: ["iron"],
+        main_nutrient: "Iron",
+        source_url: "https://example.com/iron",
+        is_active: true,
+        created_at: "2026-05-08T00:00:00Z",
+        updated_at: "2026-05-08T00:00:00Z",
+      },
+    ],
+  })),
+  fetchSupplementNormalizations: vi.fn(async () => ({
+    count: 2,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 1,
+        original_supplement_name: "Iron",
+        original_supplement_slug: "iron",
+        normalized_category: "Iron",
+        canonical_item: "iron",
+        primary_keyword: "iron",
+        main_nutrient: "Iron",
+        notes: "Test normalization",
+        source_url: "https://example.com/iron",
+        is_active: true,
+      },
+      {
+        id: 2,
+        original_supplement_name: "Archived Zinc",
+        original_supplement_slug: "archived-zinc",
+        normalized_category: "Zinc",
+        canonical_item: "zinc",
+        primary_keyword: "zinc",
+        main_nutrient: "Zinc",
+        notes: "Test normalization",
+        source_url: "https://example.com/zinc",
+        is_active: true,
+      },
+    ],
+  })),
+  fetchSynergySeedRules: vi.fn(async () => ({
+    count: 1,
+    next: null,
+    previous: null,
+    results: [
+      {
+        id: 1,
+        rule_seed_id: "seed-1",
+        supplement_category_name: "Iron",
+        supplement_item: "supp:iron",
+        food: "Orange",
+        food_item: "food:orange",
+        nutrient_relation: "vitamin_c_iron",
+        association_type: "positive",
+        reason: "Vitamin C supports iron absorption.",
+        seed_weight: 0.8,
+        source_url: "https://example.com/iron",
+        is_active: true,
+      },
+    ],
+  })),
+  updateMinedAssociationRule: vi.fn(async (_id, payload) => payload),
+  updateSafetyConstraint: vi.fn(async (_id, payload) => payload),
+  updateSynergySeedRule: vi.fn(async (_id, payload) => payload),
+}));
+
+vi.mock("../api/association-dataset", () => associationDatasetApi);
 
 const rulesApi = vi.hoisted(() => ({
   createAssociationRule: vi.fn(async (payload) => ({
@@ -749,7 +912,7 @@ describe("App", () => {
     useAuthStore.getState().setSession(adminSession);
 
     render(<App />);
-    fireEvent.click(screen.getByRole("link", { name: /rules/i }));
+    fireEvent.click(screen.getByRole("link", { name: /^rules$/i }));
 
     expect(screen.getByRole("heading", { name: /association rules/i })).toBeInTheDocument();
     expect(screen.getByText(/rule library/i)).toBeInTheDocument();
@@ -799,6 +962,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("link", { name: /^foods$/i }));
 
     expect(await screen.findByText("Orange")).toBeInTheDocument();
+    expect(screen.getByAltText("Orange preview")).toBeInTheDocument();
     expect(screen.getByText("Spinach")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/search foods/i), { target: { value: "orange" } });
@@ -831,6 +995,15 @@ describe("App", () => {
         source: "",
         serving_size_g: "100",
         image_url: "",
+        image_path: "",
+        image_alt: "",
+        recommended_for_supplements: [],
+        nutrient_tags: [],
+        synergy_reason: "",
+        avoid_or_caution: "",
+        allergen_tags: [],
+        diet_tags: [],
+        association_rule_items: [],
         is_active: true,
         nutrient_items: [
           {

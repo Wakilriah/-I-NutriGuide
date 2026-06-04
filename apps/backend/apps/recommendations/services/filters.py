@@ -5,7 +5,7 @@ DAIRY_CATEGORIES = {"dairy"}
 MEAT_TERMS = {"meat", "viande", "charcuterie", "abats"}
 FISH_TERMS = {"fish", "poisson", "crustace", "mollusque"}
 DAIRY_TERMS = {"dairy", "lait", "fromage", "yaourt", "yogourt", "creme"}
-EGG_TERMS = {"egg", "oeuf", "œuf"}
+EGG_TERMS = {"egg", "oeuf"}
 
 
 def get_blocked_food_slugs(profile):

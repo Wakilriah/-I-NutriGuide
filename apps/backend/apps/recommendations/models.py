@@ -81,3 +81,31 @@ class SavedRecommendationItem(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.email} saved item {self.recommendation_item_id}"
+
+
+class RecommendationWeightProfile(models.Model):
+    class UserType(models.TextChoices):
+        NEW_USER = "new_user", "New user"
+        ACTIVE_USER = "active_user", "Active user"
+        COMPLEX_MEDICAL_CASE = "complex_medical_case", "Complex medical case"
+
+    user_type = models.CharField(max_length=40, choices=UserType.choices, unique=True)
+    alpha = models.FloatField()
+    beta = models.FloatField()
+    gamma = models.FloatField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["user_type"]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        total = round((self.alpha or 0) + (self.beta or 0) + (self.gamma or 0), 6)
+        if total != 1:
+            raise ValidationError("alpha + beta + gamma must equal 1.")
+
+    def __str__(self) -> str:
+        return f"{self.user_type}: {self.alpha}/{self.beta}/{self.gamma}"

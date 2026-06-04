@@ -10,13 +10,13 @@ from apps.accounts.models import (
 from apps.common.neo4j_client import get_neo4j_driver
 from apps.foods.models import Food, FoodCategory, FoodNutrient
 from apps.nutrients.models import Nutrient, NutrientInteraction
+from apps.rules.models import FoodSupplementSynergyRule, SafetyConstraint, SupplementCategory
+from apps.rules.services import canonical_key
 from apps.recommendations.services.normalizer import normalize_token
 from apps.supplements.models import (
     Supplement,
-    SupplementIngredient,
-    SupplementIngredientGroup,
+    SupplementFactSheet,
     SupplementNutrient,
-    SupplementResearchEstimate,
     UserSupplement,
 )
 
@@ -66,13 +66,7 @@ class Command(BaseCommand):
                 "CREATE CONSTRAINT IF NOT EXISTS FOR (s:Supplement) REQUIRE s.id IS UNIQUE"
             )
             session.run(
-                "CREATE CONSTRAINT IF NOT EXISTS FOR (i:SupplementIngredient) REQUIRE i.key IS UNIQUE"
-            )
-            session.run(
-                "CREATE CONSTRAINT IF NOT EXISTS FOR (g:IngredientGroup) REQUIRE g.key IS UNIQUE"
-            )
-            session.run(
-                "CREATE CONSTRAINT IF NOT EXISTS FOR (e:ResearchEstimate) REQUIRE e.id IS UNIQUE"
+                "CREATE CONSTRAINT IF NOT EXISTS FOR (fs:SupplementFactSheet) REQUIRE fs.id IS UNIQUE"
             )
             session.run(
                 "CREATE CONSTRAINT IF NOT EXISTS FOR (a:Allergen) REQUIRE a.id IS UNIQUE"
@@ -97,10 +91,7 @@ class Command(BaseCommand):
                 "CREATE INDEX IF NOT EXISTS FOR (s:Supplement) ON (s.normalized_key)"
             )
             session.run(
-                "CREATE INDEX IF NOT EXISTS FOR (i:SupplementIngredient) ON (i.normalized_key)"
-            )
-            session.run(
-                "CREATE INDEX IF NOT EXISTS FOR (g:IngredientGroup) ON (g.normalized_key)"
+                "CREATE INDEX IF NOT EXISTS FOR (fs:SupplementFactSheet) ON (fs.normalized_key)"
             )
 
             self._sync_categories(session)
@@ -109,10 +100,9 @@ class Command(BaseCommand):
             self._sync_food_nutrients(session)
             self._sync_supplements(session)
             self._sync_supplement_nutrients(session)
-            self._sync_supplement_ingredient_groups(session)
-            self._sync_supplement_ingredients(session)
-            self._sync_research_estimates(session)
+            self._sync_supplement_fact_sheets(session)
             self._sync_interactions(session)
+            self._sync_association_dataset(session)
             self._sync_allergies_and_restrictions(session)
             self._sync_users(session)
             self._sync_user_preferences(session)
@@ -249,101 +239,6 @@ class Command(BaseCommand):
                 batch=sn_data,
             )
 
-    def _sync_supplement_ingredient_groups(self, session):
-        self.stdout.write("Syncing SupplementIngredientGroups...")
-        group_data = [
-            {
-                "key": normalize_token(group.name),
-                "normalized_key": normalize_token(group.name),
-                "name": group.name,
-                "source": group.source,
-                "source_id": group.source_id,
-                "categories": group.categories,
-                "fact_sheet_count": len(group.fact_sheets or []),
-            }
-            for group in SupplementIngredientGroup.objects.all()
-        ]
-        if group_data:
-            session.run(
-                "UNWIND $batch AS row "
-                "MERGE (g:IngredientGroup {key: row.key}) "
-                "SET g.normalized_key=row.normalized_key, g.name=row.name, g.source=row.source, "
-                "g.source_id=row.source_id, g.categories=row.categories, g.fact_sheet_count=row.fact_sheet_count",
-                batch=group_data,
-            )
-
-    def _sync_supplement_ingredients(self, session):
-        self.stdout.write("Syncing SupplementIngredients...")
-        ingredient_query = (
-            "UNWIND $batch AS row "
-            "MERGE (i:SupplementIngredient {key: row.key}) "
-            "SET i.normalized_key=row.normalized_key, i.name=row.name, i.ingredient_group=row.ingredient_group, "
-            "i.category=row.category, i.source=row.source "
-            "WITH i, row MATCH (s:Supplement {id: row.s_id}) "
-            "MERGE (s)-[r:CONTAINS_INGREDIENT]->(i) "
-            "SET r.source_id=row.source_id, r.amount=row.amount, r.unit=row.unit, r.is_other_ingredient=row.is_other_ingredient"
-        )
-        group_query = (
-            "UNWIND $batch AS row "
-            "MATCH (i:SupplementIngredient {key: row.key}) "
-            "MATCH (g:IngredientGroup {key: row.key}) "
-            "MERGE (i)-[:IN_GROUP]->(g)"
-        )
-        nutrient_query = (
-            "UNWIND $batch AS row "
-            "MATCH (i:SupplementIngredient {key: row.key}) "
-            "MATCH (n:Nutrient {normalized_key: row.normalized_key}) "
-            "MERGE (i)-[:MAPS_TO_NUTRIENT]->(n)"
-        )
-        batch = []
-        synced = 0
-        queryset = SupplementIngredient.objects.select_related("supplement").filter(
-            supplement__is_active=True
-        )
-        for ingredient in queryset.iterator(chunk_size=NEO4J_BATCH_SIZE):
-            key = normalize_token(ingredient.ingredient_group or ingredient.name)
-            if not key:
-                continue
-            batch.append(
-                {
-                    "s_id": ingredient.supplement_id,
-                    "key": key,
-                    "normalized_key": key,
-                    "name": ingredient.name,
-                    "ingredient_group": ingredient.ingredient_group,
-                    "category": ingredient.category,
-                    "source": ingredient.source,
-                    "source_id": ingredient.source_id,
-                    "amount": (
-                        float(ingredient.amount)
-                        if ingredient.amount is not None
-                        else None
-                    ),
-                    "unit": ingredient.unit,
-                    "is_other_ingredient": ingredient.is_other_ingredient,
-                }
-            )
-            if len(batch) >= NEO4J_BATCH_SIZE:
-                self._sync_ingredient_batch(
-                    session, ingredient_query, group_query, nutrient_query, batch
-                )
-                synced += len(batch)
-                self.stdout.write(f"Synced {synced} SupplementIngredient rows...")
-                batch = []
-        if batch:
-            self._sync_ingredient_batch(
-                session, ingredient_query, group_query, nutrient_query, batch
-            )
-            synced += len(batch)
-            self.stdout.write(f"Synced {synced} SupplementIngredient rows...")
-
-    def _sync_ingredient_batch(
-        self, session, ingredient_query, group_query, nutrient_query, batch
-    ):
-        session.run(ingredient_query, batch=batch)
-        session.run(group_query, batch=batch)
-        session.run(nutrient_query, batch=batch)
-
     def _run_in_batches(self, session, query, rows):
         batch = []
         for row in rows:
@@ -357,54 +252,50 @@ class Command(BaseCommand):
                 batch=batch,
             )
 
-    def _sync_research_estimates(self, session):
-        self.stdout.write("Syncing SupplementResearchEstimates...")
-        estimate_data = [
+    def _sync_supplement_fact_sheets(self, session):
+        self.stdout.write("Syncing SupplementFactSheets...")
+        fact_sheet_data = [
             {
-                "id": estimate.id,
-                "source": estimate.source,
-                "release": estimate.release,
-                "study_code": estimate.study_code,
-                "ingredient_name": estimate.ingredient_name,
-                "ingredient_key": estimate.ingredient_key,
-                "labeled_amount": (
-                    float(estimate.labeled_amount)
-                    if estimate.labeled_amount is not None
-                    else None
-                ),
-                "labeled_unit": estimate.labeled_unit,
-                "predicted_amount": (
-                    float(estimate.predicted_amount)
-                    if estimate.predicted_amount is not None
-                    else None
-                ),
-                "predicted_unit": estimate.predicted_unit,
-                "predicted_percent_difference": (
-                    float(estimate.predicted_percent_difference)
-                    if estimate.predicted_percent_difference is not None
-                    else None
-                ),
+                "id": item.id,
+                "title": item.title,
+                "slug": item.slug,
+                "source": item.source,
+                "source_id": item.source_id,
+                "audience": item.audience,
+                "url": item.url,
+                "normalized_key": normalize_token(item.title),
+                "description": item.description[:2000],
+                "safety": item.safety[:2000],
+                "interactions": item.interactions[:2000],
             }
-            for estimate in SupplementResearchEstimate.objects.all()
+            for item in SupplementFactSheet.objects.all()
         ]
-        if estimate_data:
-            session.run(
-                "UNWIND $batch AS row "
-                "MERGE (e:ResearchEstimate {id: row.id}) "
-                "SET e.source=row.source, e.release=row.release, e.study_code=row.study_code, "
-                "e.ingredient_name=row.ingredient_name, e.ingredient_key=row.ingredient_key, "
-                "e.labeled_amount=row.labeled_amount, e.labeled_unit=row.labeled_unit, "
-                "e.predicted_amount=row.predicted_amount, e.predicted_unit=row.predicted_unit, "
-                "e.predicted_percent_difference=row.predicted_percent_difference",
-                batch=estimate_data,
-            )
-            session.run(
-                "UNWIND $batch AS row "
-                "MATCH (e:ResearchEstimate {id: row.id}) "
-                "MATCH (n:Nutrient {normalized_key: row.ingredient_key}) "
-                "MERGE (e)-[:ESTIMATES]->(n)",
-                batch=estimate_data,
-            )
+        if not fact_sheet_data:
+            return
+
+        session.run(
+            "UNWIND $batch AS row "
+            "MERGE (fs:SupplementFactSheet {id: row.id}) "
+            "SET fs.title=row.title, fs.slug=row.slug, fs.source=row.source, "
+            "fs.source_id=row.source_id, fs.audience=row.audience, fs.url=row.url, "
+            "fs.normalized_key=row.normalized_key, fs.description=row.description, "
+            "fs.safety=row.safety, fs.interactions=row.interactions",
+            batch=fact_sheet_data,
+        )
+        session.run(
+            "UNWIND $batch AS row "
+            "MATCH (fs:SupplementFactSheet {id: row.id}) "
+            "MATCH (n:Nutrient {normalized_key: row.normalized_key}) "
+            "MERGE (fs)-[:DESCRIBES]->(n)",
+            batch=fact_sheet_data,
+        )
+        session.run(
+            "UNWIND $batch AS row "
+            "MATCH (fs:SupplementFactSheet {id: row.id}) "
+            "MATCH (s:Supplement {normalized_key: row.normalized_key}) "
+            "MERGE (fs)-[:EXPLAINS]->(s)",
+            batch=fact_sheet_data,
+        )
 
     def _sync_interactions(self, session):
         self.stdout.write("Syncing nutrient interactions...")
@@ -444,6 +335,70 @@ class Command(BaseCommand):
                 f"MERGE (source)-[r:{rel_type}]->(target) "
                 "SET r.mechanism=row.mechanism, r.evidence_level=row.evidence_level, r.severity=row.severity",
                 batch=rows,
+            )
+
+    def _sync_association_dataset(self, session):
+        self.stdout.write("Syncing association dataset graph...")
+        session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (sc:SupplementCategory) REQUIRE sc.item IS UNIQUE")
+        categories = [
+            {"id": item.id, "name": item.category, "item": f"supp:{item.canonical_item}", "nutrient": item.main_nutrient}
+            for item in SupplementCategory.objects.filter(is_active=True)
+        ]
+        if categories:
+            session.run(
+                "UNWIND $batch AS row "
+                "MERGE (sc:SupplementCategory {item: row.item}) "
+                "SET sc.id=row.id, sc.name=row.name, sc.main_nutrient=row.nutrient",
+                batch=categories,
+            )
+            session.run(
+                "UNWIND $batch AS row "
+                "MATCH (sc:SupplementCategory {item: row.item}) "
+                "MERGE (n:KnowledgeEntity {type: 'nutrient', key: row.nutrient}) "
+                "MERGE (sc)-[:CONTAINS]->(n)",
+                batch=[row for row in categories if row["nutrient"]],
+            )
+
+        synergies = [
+            {
+                "supplement_item": item.supplement_item,
+                "food_key": canonical_key(item.food_item.split(":", 1)[1]),
+                "food_slug": item.food_item.split(":", 1)[1].replace("_", "-"),
+                "reason": item.reason,
+                "weight": item.seed_weight,
+            }
+            for item in FoodSupplementSynergyRule.objects.filter(is_active=True, association_type="positive")
+            if ":" in item.food_item
+        ]
+        if synergies:
+            session.run(
+                "UNWIND $batch AS row "
+                "MATCH (sc:SupplementCategory {item: row.supplement_item}) "
+                "MATCH (f:Food {slug: row.food_slug}) "
+                "MERGE (sc)-[r:HAS_SYNERGY_WITH]->(f) "
+                "SET r.reason=row.reason, r.weight=row.weight",
+                batch=synergies,
+            )
+
+        constraints = [
+            {
+                "supplement_item": f"supp:{item.supplement_category.canonical_item}" if item.supplement_category_id else "",
+                "target": item.avoid_or_review_item,
+                "target_key": canonical_key(item.avoid_or_review_item),
+                "reason": item.reason,
+                "constraint_type": item.constraint_type,
+            }
+            for item in SafetyConstraint.objects.filter(is_active=True).select_related("supplement_category")
+        ]
+        if constraints:
+            session.run(
+                "UNWIND $batch AS row "
+                "MATCH (sc:SupplementCategory {item: row.supplement_item}) "
+                "MERGE (target:KnowledgeEntity {type: 'safety_item', key: row.target_key}) "
+                "SET target.raw_key=row.target "
+                "MERGE (sc)-[r:SHOULD_NOT_BE_TAKEN_WITH]->(target) "
+                "SET r.reason=row.reason, r.constraint_type=row.constraint_type",
+                batch=[row for row in constraints if row["supplement_item"]],
             )
 
     def _sync_allergies_and_restrictions(self, session):

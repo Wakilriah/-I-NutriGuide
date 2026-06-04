@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-NutriGuide - Recommendations</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&amp;family=Quicksand:wght@600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        .organic-shadow {
+            box-shadow: 0 10px 30px -5px rgba(0, 110, 36, 0.08);
+        }
+        .card-gradient {
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#418340",
+                      "primary-container": "#098730",
+                      "on-surface-variant": "#3f4a3d",
+                      "tertiary-fixed-dim": "#91d78a",
+                      "primary-fixed-dim": "#71dd7a",
+                      "outline": "#6f7a6c",
+                      "on-primary-container": "#f7fff1",
+                      "background": "#f7f9ff",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#edf4ff",
+                      "surface-container-highest": "#d9e3f1",
+                      "on-secondary-fixed-variant": "#643f00",
+                      "secondary": "#845400",
+                      "on-surface": "#121d26",
+                      "inverse-surface": "#27313c",
+                      "surface-tint": "#006e24",
+                      "surface-variant": "#d9e3f1",
+                      "surface": "#f7f9ff",
+                      "on-primary-fixed-variant": "#005319",
+                      "on-tertiary-container": "#f7fff1",
+                      "on-primary-fixed": "#002106",
+                      "secondary-container": "#fda611",
+                      "on-background": "#121d26",
+                      "primary": "#006b23",
+                      "surface-bright": "#f7f9ff",
+                      "surface-dim": "#d1dbe8",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed-dim": "#ffb95b",
+                      "on-tertiary-fixed-variant": "#0c5216",
+                      "inverse-primary": "#71dd7a",
+                      "inverse-on-surface": "#e8f2ff",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#ffddb6",
+                      "tertiary-fixed": "#acf4a4",
+                      "surface-container": "#e4effd",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed": "#002203",
+                      "on-primary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "outline-variant": "#becab9",
+                      "on-secondary-container": "#684100",
+                      "surface-container-high": "#dfe9f7",
+                      "tertiary": "#276929",
+                      "primary-fixed": "#8dfa94",
+                      "on-secondary-fixed": "#2a1800"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "40px",
+                      "stack-gap": "16px",
+                      "base": "8px",
+                      "container-padding": "24px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "body-md": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Quicksand"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Quicksand"],
+                      "headline-lg-mobile": ["Quicksand"],
+                      "display-lg": ["Quicksand"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen pb-32">
+<!-- Top AppBar Component -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-surface-container-lowest border-b border-surface-variant">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border border-surface-variant overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAffV8DHUvIBsRdXMv1AzRxqDlUvsiME5xv6WLvg4gS6qcMZIAFtud426WA05FQQtAsrhk7aoor1ZKD350QYR6T3nwU45J9q_2_zp7fRGQqBndapG4QY3mu7z120EJ9Ccpn3r7lclVoz-YkKTh0jfEimYlGu9wBI-hR6MTosub9XtUHedz_Z89wdQTKf0f4oPRGN38DRS9BXZTjyIO97_AIE82aHzqHPIwwmQz4N-ffwstrYhT0yWPvh1ej6uxffNbGaM-GjS5OWL4"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">I-NutriGuide</h1>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="mt-20 px-container-padding max-w-[1200px] mx-auto">
+<!-- Screen Header -->
+<div class="mb-8">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-2">Recommended for You</h2>
+<p class="text-on-surface-variant font-body-md">Curated nutrition based on your biomarkers and supplement intake.</p>
+</div>
+<!-- AI Insights Chips -->
+<div class="flex gap-3 overflow-x-auto pb-4 mb-stack-gap no-scrollbar">
+<button class="whitespace-nowrap px-6 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-full shadow-sm">All Plans</button>
+<button class="whitespace-nowrap px-6 py-2 bg-surface-container-high text-on-surface-variant font-label-md text-label-md rounded-full">Low Carb</button>
+<button class="whitespace-nowrap px-6 py-2 bg-surface-container-high text-on-surface-variant font-label-md text-label-md rounded-full">Heart Healthy</button>
+<button class="whitespace-nowrap px-6 py-2 bg-surface-container-high text-on-surface-variant font-label-md text-label-md rounded-full">Anti-Inflammatory</button>
+</div>
+<!-- Recommendation Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Card 1: Avocado Toast -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden organic-shadow transition-all duration-300 hover:-translate-y-1 border border-surface-variant/30 flex flex-col">
+<div class="relative aspect-[4/3] w-full shrink-0">
+<img alt="Avocado toast" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0WC7X_oawVam88MVIiNI7qecahjTAEzYmnqg1xn-VaAKyvNidCtwzBHiGFkST_BDgLA-LNYWZfqXyIXfmQNd7PuoRV7hMYVcs-kDL6doTb3RKX2e6jn2oE7LZ1nLvBsSgj9bLBUK3594xXEhAjCjce0T6eAi-E9UfbI38Em-H9pDxf4bBngH3a6v3-7w3-Dma8xnmEsvGr4hHN1pP0VSuT6Wd0BZPeboGRlFeiZhhndU4OFbLgrXulwZIxw-9bWFFqrQOKyfPG50"/>
+<div class="absolute inset-0 card-gradient"></div>
+<!-- Top Badges -->
+<div class="absolute top-3 left-3 flex flex-wrap gap-2">
+<span class="bg-primary text-white px-3 py-0.5 rounded-full font-label-md text-[12px]">94% Match</span>
+<span class="bg-green-600 text-white px-3 py-0.5 rounded-full font-label-md text-[12px] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] filled-icon">check_circle</span> Safe
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<h3 class="text-white font-headline-md text-headline-md mb-0.5">Avocado Toast</h3>
+<div class="flex items-center gap-1.5 text-white/90">
+<span class="material-symbols-outlined text-[16px]">link</span>
+<span class="font-label-md text-[13px]">Optimized for Omega-3 absorption</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-4 flex-grow">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px] font-label-md uppercase tracking-wider">Confidence</span>
+<span class="text-primary font-bold text-label-md uppercase">High</span>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all" title="Like">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error-container transition-all" title="Dislike">
+<span class="material-symbols-outlined">close</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary-fixed transition-all" title="Save">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+<button class="w-full bg-secondary-container text-on-secondary-container py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 transition-opacity">View Details</button>
+</div>
+</div>
+<!-- Card 2: Grilled Salmon -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden organic-shadow transition-all duration-300 hover:-translate-y-1 border border-surface-variant/30 flex flex-col">
+<div class="relative aspect-[4/3] w-full shrink-0">
+<img alt="Grilled salmon" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEbiGxeKHj5mPL0NU_Luj5g7BB0VPz8c_z4s5slQynC4zlY3Eje9ujvgojygEhzdIkfNsgUj5MQPmlDKMTCWTT0IqEAsbXKCahM5oUxFMVge31WlpSaZGhoZnMkbMsUxb0ZXF67pmtSiJ_Z_UKe8aDHF4MBFNp510T_l3xQ0iW6mjPxqnmG4namuJ90SZ-ahiiKF0OfTJ3qfDoaXIIiyhJNq-EufATiWuAbpOjTDz0aNbvB6ihHzVz_jbsiNxRTRvS6RgAh33qabg"/>
+<div class="absolute inset-0 card-gradient"></div>
+<div class="absolute top-3 left-3 flex flex-wrap gap-2">
+<span class="bg-primary text-white px-3 py-0.5 rounded-full font-label-md text-[12px]">88% Match</span>
+<span class="bg-green-600 text-white px-3 py-0.5 rounded-full font-label-md text-[12px] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] filled-icon">check_circle</span> Safe
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<h3 class="text-white font-headline-md text-headline-md mb-0.5">Grilled Salmon</h3>
+<div class="flex items-center gap-1.5 text-white/90">
+<span class="material-symbols-outlined text-[16px]">link</span>
+<span class="font-label-md text-[13px]">Optimized for Vitamin D absorption</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-4 flex-grow">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px] font-label-md uppercase tracking-wider">Confidence</span>
+<span class="text-primary font-bold text-label-md uppercase">High</span>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error-container transition-all">
+<span class="material-symbols-outlined">close</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary-fixed transition-all">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+<button class="w-full bg-secondary-container text-on-secondary-container py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 transition-opacity">View Details</button>
+</div>
+</div>
+<!-- Card 3: Mediterranean Salad -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden organic-shadow transition-all duration-300 hover:-translate-y-1 border border-surface-variant/30 flex flex-col">
+<div class="relative aspect-[4/3] w-full shrink-0">
+<img alt="Greek power bowl" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPXBTU3zZvk1ECuLKt6p3HwEXr7E5ogJz8jPKCAlNPrUBz92Qm8BpLicLpsE1t-zHWkMbC66u-kMjYDAPY4ukQsgdXeFOsQ_WvrsWLsNkFKXkhDx_B3NmfrDMCs7DYQc5i1Ddx3fWdz-P9NKJea_aQJQzoLEKijCWbNhhO_VpXkqh5ldhyye5MjI_t2VgkHBtoijCFRo_gDrT_En5QnZYkCFU9J4bS3lxKRSrEYDiEGco6i49D4l0WrEwmb3939PJdWcokKdrD8lE"/>
+<div class="absolute inset-0 card-gradient"></div>
+<div class="absolute top-3 left-3 flex flex-wrap gap-2">
+<span class="bg-surface-dim text-on-surface px-3 py-0.5 rounded-full font-label-md text-[12px]">76% Match</span>
+<span class="bg-secondary text-white px-3 py-0.5 rounded-full font-label-md text-[12px] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> Warning
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<h3 class="text-white font-headline-md text-headline-md mb-0.5">Greek Power Bowl</h3>
+<div class="flex items-center gap-1.5 text-white/90">
+<span class="material-symbols-outlined text-[16px]">link</span>
+<span class="font-label-md text-[13px]">Optimized for B-Complex absorption</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-4 flex-grow">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px] font-label-md uppercase tracking-wider">Confidence</span>
+<span class="text-secondary font-bold text-label-md uppercase">Med</span>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error-container transition-all">
+<span class="material-symbols-outlined">close</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-surface-variant flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary-fixed transition-all">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+<button class="w-full bg-secondary-container text-on-secondary-container py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 transition-opacity">View Details</button>
+</div>
+</div>
+<!-- Floating AI Assistant Tip -->
+<div class="md:col-span-2 lg:col-span-3 flex items-center justify-center">
+<div class="p-8 bg-gradient-to-br from-primary to-primary-container rounded-lg text-on-primary-container organic-shadow w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-[40px]" data-icon="smart_toy">smart_toy</span>
+<h4 class="font-headline-md text-headline-md">Nutri-Insight</h4>
+</div>
+<p class="font-body-md text-body-lg opacity-95">
+                        "Your current iron levels are optimal for morning exercise. I've boosted the match score for dishes with citrus to ensure they are <strong>optimized for absorption</strong>!"
+                    </p>
+</div>
+<button class="bg-surface-container-lowest text-primary px-8 py-3 rounded-full font-label-md text-label-md hover:bg-white transition-all shadow-lg active:scale-95">
+                    Refine my Preferences
+                </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-2 pb-6 pt-3 bg-surface-container-lowest border-t border-surface-variant shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-[12px] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary flex-1" href="#">
+<span class="material-symbols-outlined filled-icon">restaurant</span>
+<span class="font-label-md text-[12px] mt-1 font-bold">Recs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1" href="#">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-label-md text-[12px] mt-1">Supps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-md text-[12px] mt-1">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors flex-1" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-[12px] mt-1">Profile</span>
+</a>
+</nav>
+<script>
+    // Micro-interactions for buttons
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const icon = this.querySelector('.material-symbols-outlined');
+            if (!icon) return;
+
+            if (this.title === 'Like' || icon.innerText === 'favorite') {
+                icon.classList.toggle('filled-icon');
+                icon.classList.toggle('text-primary');
+            } else if (this.title === 'Save' || icon.innerText === 'bookmark') {
+                icon.classList.toggle('filled-icon');
+                icon.classList.toggle('text-secondary');
+            }
+        });
+    });
+</script>
+</body></html>

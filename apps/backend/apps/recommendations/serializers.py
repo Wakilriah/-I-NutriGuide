@@ -3,14 +3,21 @@ from rest_framework import serializers
 
 from apps.supplements.models import Supplement
 
-from .models import RecommendationItem, RecommendationRun, SavedRecommendationItem
+from .models import RecommendationItem, RecommendationRun, RecommendationWeightProfile, SavedRecommendationItem
+from .services.food_metadata import attach_food_metadata_to_rules, recommendation_food_payload
 
 
 class RecommendedFoodSerializer(serializers.Serializer):
     id = serializers.IntegerField()
+    food_name = serializers.CharField()
     name = serializers.CharField()
     slug = serializers.CharField()
     category = serializers.CharField()
+    image_path = serializers.CharField()
+    image_alt = serializers.CharField(allow_blank=True)
+    nutrient_tags = serializers.ListField(child=serializers.CharField(), required=False)
+    synergy_reason = serializers.CharField(allow_blank=True)
+    avoid_or_caution = serializers.CharField(allow_blank=True)
     nutrients = serializers.ListField(child=serializers.CharField(), required=False)
 
 
@@ -28,6 +35,18 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
     explanation = serializers.SerializerMethodField()
     warnings = serializers.SerializerMethodField()
     feedback = serializers.SerializerMethodField()
+    matched_rules = serializers.SerializerMethodField()
+    association_rule_score = serializers.SerializerMethodField()
+    matched_rule = serializers.SerializerMethodField()
+    support = serializers.SerializerMethodField()
+    rule_confidence = serializers.SerializerMethodField()
+    lift = serializers.SerializerMethodField()
+    safety_note = serializers.SerializerMethodField()
+    safety_status = serializers.SerializerMethodField()
+    safety_level = serializers.SerializerMethodField()
+    safety_message = serializers.SerializerMethodField()
+    blocked_reason = serializers.SerializerMethodField()
+    alternatives = serializers.SerializerMethodField()
 
     class Meta:
         model = RecommendationItem
@@ -44,24 +63,32 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
             "score_breakdown",
             "nutrient_score",
             "rule_score",
+            "association_rule_score",
             "preference_score",
             "matched_nutrients",
             "matched_rules",
+            "matched_rule",
+            "support",
+            "rule_confidence",
+            "lift",
             "tags",
             "warnings",
+            "safety_note",
+            "safety_status",
+            "safety_level",
+            "safety_message",
+            "blocked_reason",
+            "alternatives",
             "explanation",
             "feedback",
         ]
 
     @extend_schema_field(RecommendedFoodSerializer)
     def get_food(self, obj):
-        return {
-            "id": obj.food.id,
-            "name": obj.food.name,
-            "slug": obj.food.slug,
-            "category": obj.food.category.name,
-            "nutrients": list(obj.food.nutrients.values_list("nutrient__slug", flat=True)),
-        }
+        return recommendation_food_payload(
+            obj.food,
+            nutrients=list(obj.food.nutrients.values_list("nutrient__slug", flat=True)),
+        )
 
     @extend_schema_field(RecommendedSupplementSerializer)
     def get_matched_supplement(self, obj):
@@ -90,6 +117,47 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
                 )
         return normalized
 
+    def get_matched_rules(self, obj):
+        return attach_food_metadata_to_rules(obj.matched_rules or [])
+
+    def get_matched_rule(self, obj):
+        rules = self.get_matched_rules(obj)
+        return rules[0] if rules else None
+
+    def get_association_rule_score(self, obj):
+        return obj.rule_score
+
+    def get_support(self, obj):
+        rule = self.get_matched_rule(obj)
+        return rule.get("support") if rule else None
+
+    def get_rule_confidence(self, obj):
+        rule = self.get_matched_rule(obj)
+        return rule.get("confidence") if rule else None
+
+    def get_lift(self, obj):
+        rule = self.get_matched_rule(obj)
+        return rule.get("lift") if rule else None
+
+    def get_safety_note(self, obj):
+        warnings = self.get_warnings(obj)
+        return warnings[0].get("message") if warnings and isinstance(warnings[0], dict) else None
+
+    def get_safety_status(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("safety_status", "SAFE")
+
+    def get_safety_level(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("safety_level", "LOW")
+
+    def get_safety_message(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("safety_message", "Safe for your current profile.")
+
+    def get_blocked_reason(self, obj):
+        return (obj.explanation_details or {}).get("score_details", {}).get("blocked_reason", "")
+
+    def get_alternatives(self, obj):
+        return (obj.explanation_details or {}).get("alternatives", [])
+
     def get_feedback(self, obj):
         request = self.context.get("request")
         user_feedback = None
@@ -104,7 +172,18 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
                 }
         return {
             "user_feedback": user_feedback,
-            "available_actions": ["liked", "disliked", "saved", "tried", "not_interested"],
+            "available_actions": [
+                "liked",
+                "disliked",
+                "saved",
+                "not_interested",
+                "allergy_issue",
+                "do_not_eat",
+                "too_expensive",
+                "not_available",
+                "already_tried",
+                "good_recommendation",
+            ],
         }
 
 
@@ -141,6 +220,21 @@ class SavedRecommendationItemSerializer(serializers.ModelSerializer):
         return saved_item
 
 
+class RecommendationWeightProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecommendationWeightProfile
+        fields = ["id", "user_type", "alpha", "beta", "gamma", "is_active", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        alpha = attrs.get("alpha", getattr(self.instance, "alpha", 0))
+        beta = attrs.get("beta", getattr(self.instance, "beta", 0))
+        gamma = attrs.get("gamma", getattr(self.instance, "gamma", 0))
+        if round(alpha + beta + gamma, 6) != 1:
+            raise serializers.ValidationError("alpha + beta + gamma must equal 1.")
+        return attrs
+
+
 class AdminRecommendationRunSerializer(RecommendationRunSerializer):
     user = serializers.SerializerMethodField()
 
@@ -163,6 +257,7 @@ class AdminRecommendationRunSerializer(RecommendationRunSerializer):
 
 class GenerateRecommendationSerializer(serializers.Serializer):
     limit = serializers.IntegerField(min_value=1, max_value=50, default=10)
+    async_generate = serializers.BooleanField(default=False, required=False)
 
 
 class HybridRecommendationQuerySerializer(serializers.Serializer):
@@ -183,4 +278,9 @@ class HybridPreviewSerializer(serializers.Serializer):
     imc_norm = serializers.FloatField(required=False)
     activite = serializers.FloatField(required=False, default=0.0)
     activity = serializers.FloatField(required=False)
+    activity_level = serializers.CharField(required=False, allow_blank=True)
+    age = serializers.IntegerField(required=False, min_value=0, max_value=120)
+    gender = serializers.CharField(required=False, allow_blank=True)
+    liked_foods = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    liked_categories = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     n = serializers.IntegerField(min_value=1, max_value=50, default=10)

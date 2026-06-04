@@ -30,13 +30,13 @@ services:
         - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-landing-page:${CACHE_TAG:-latest}
     platform: ${DOCKER_PLATFORM:-linux/amd64}
 
-  web_app:
-    image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-web-app:${IMAGE_TAG:-latest}
+  mobile_web:
+    image: ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-mobile-web:${IMAGE_TAG:-latest}
     build:
       context: ./apps/mobile-app
       target: production
       args:
         EXPO_PUBLIC_API_BASE_URL: ${EXPO_PUBLIC_API_BASE_URL:-https://api.matchcesoir.pro/api/v1}
       cache_from:
-        - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-web-app:${CACHE_TAG:-latest}
+        - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-mobile-web:${CACHE_TAG:-latest}
     platform: ${DOCKER_PLATFORM:-linux/amd64}
