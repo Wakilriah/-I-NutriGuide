@@ -8,9 +8,12 @@ if [ -f .env ]; then
   set +a
 fi
 
-: "${API_DOMAIN:?API_DOMAIN is required.}"
-: "${ADMIN_DOMAIN:?ADMIN_DOMAIN is required.}"
-: "${LOGS_DOMAIN:?LOGS_DOMAIN is required.}"
+: "${API_DOMAIN:=${API_HOST:-}}"
+: "${ADMIN_DOMAIN:=${ADMIN_HOST:-}}"
+: "${LOGS_DOMAIN:=${DOZZLE_HOST:-}}"
+: "${API_DOMAIN:?API_DOMAIN or API_HOST is required.}"
+: "${ADMIN_DOMAIN:?ADMIN_DOMAIN or ADMIN_HOST is required.}"
+: "${LOGS_DOMAIN:?LOGS_DOMAIN or DOZZLE_HOST is required.}"
 : "${EXPO_PUBLIC_API_BASE_URL:?EXPO_PUBLIC_API_BASE_URL is required.}"
 
 check_status() {
