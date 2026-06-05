@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
 import { login } from "../../src/features/auth/api";
 import { getAuthErrorMessage } from "../../src/features/auth/errors";
+import { useGoogleSignIn } from "../../src/features/auth/google";
 import { loginSchema, type LoginValues } from "../../src/features/auth/schemas";
 import { getProfile, isProfileComplete } from "../../src/features/profile/api";
 import { useAuthStore } from "../../src/stores/auth-store";
@@ -16,7 +17,9 @@ const LOGIN_FAILED_MESSAGE = "Please verify your email and password and try agai
 
 export default function LoginScreen() {
   const setSession = useAuthStore((state) => state.setSession);
+  const googleSignIn = useGoogleSignIn();
   const [showPassword, setShowPassword] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const {
     control,
     formState: { errors, isSubmitting },
@@ -32,15 +35,31 @@ export default function LoginScreen() {
   const onSubmit = handleSubmit(async (values) => {
     try {
       const session = await login({ email: values.email.trim().toLowerCase(), password: values.password });
-      await setSession(session);
-      const profile = await getProfile();
-      const complete = isProfileComplete(profile);
-      useAuthStore.getState().setProfileComplete(complete);
-      router.replace(complete ? "/tabs/home" : "/onboarding/profile");
+      await completeSession(session);
     } catch (error) {
       setError("password", { message: getAuthErrorMessage(error, LOGIN_FAILED_MESSAGE, { hideServerMessage: true }) });
     }
   });
+
+  const completeSession = async (session: Awaited<ReturnType<typeof login>>) => {
+    await setSession(session);
+    const profile = await getProfile();
+    const complete = isProfileComplete(profile);
+    useAuthStore.getState().setProfileComplete(complete);
+    router.replace(complete ? "/tabs/home" : "/onboarding/profile");
+  };
+
+  const onGoogleSignIn = async () => {
+    setGoogleError(null);
+    try {
+      const session = await googleSignIn.signIn();
+      if (session) {
+        await completeSession(session);
+      }
+    } catch (error) {
+      setGoogleError(getAuthErrorMessage(error, "Google sign-in could not be completed."));
+    }
+  };
 
   return (
     <AuthBackgroundScreen>
@@ -101,6 +120,12 @@ export default function LoginScreen() {
           />
 
           <AppButton accessibilityLabel="Submit login" disabled={isSubmitting} icon="log-in" label={isSubmitting ? "Signing in" : "Sign in"} onPress={onSubmit} />
+          <AppButton accessibilityLabel="Forgot password" icon="key" label="Forgot password" onPress={() => router.push("/auth/forgot-password" as never)} variant="ghost" />
+        </View>
+
+        <View style={{ gap: spacing.sm }}>
+          <AppButton accessibilityLabel="Continue with Google" disabled={googleSignIn.disabled} icon="logo-google" label="Continue with Google" onPress={onGoogleSignIn} variant="secondary" />
+          {googleError ? <Text style={{ color: colors.danger, fontWeight: "800", textAlign: "center" }}>{googleError}</Text> : null}
         </View>
 
         <AppButton accessibilityLabel="Create an account" icon="person-add" label="Create an account" onPress={() => router.push("/auth/register" as never)} />

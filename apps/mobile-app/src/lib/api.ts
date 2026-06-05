@@ -38,7 +38,16 @@ type TokenRefreshResponse = {
   access: string;
 };
 
-const AUTH_FREE_PATHS = ["/auth/login/", "/auth/register/", "/auth/refresh/"];
+const AUTH_FREE_PATHS = [
+  "/auth/login/",
+  "/auth/register/",
+  "/auth/refresh/",
+  "/auth/verify-email/",
+  "/auth/resend-verification/",
+  "/auth/google/",
+  "/auth/password-reset/request/",
+  "/auth/password-reset/confirm/",
+];
 let refreshPromise: Promise<string | null> | null = null;
 
 function decodeJwtPayload(token: string) {

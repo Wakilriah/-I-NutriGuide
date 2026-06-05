@@ -9,6 +9,14 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=150)
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_code_hash = models.CharField(max_length=128, blank=True)
+    email_verification_expires_at = models.DateTimeField(null=True, blank=True)
+    email_verification_sent_at = models.DateTimeField(null=True, blank=True)
+    password_reset_code_hash = models.CharField(max_length=128, blank=True)
+    password_reset_expires_at = models.DateTimeField(null=True, blank=True)
+    password_reset_sent_at = models.DateTimeField(null=True, blank=True)
+    google_sub = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]

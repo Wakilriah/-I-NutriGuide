@@ -2,11 +2,23 @@ from django.contrib.auth import get_user_model
 from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password
 from django.utils.text import slugify
+from django.conf import settings
 from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 
 from .models import Allergy, DailyTracking, DietaryRestriction, DislikedFood, NotificationLog, UserProfile
+from .services import (
+    can_resend_email_verification,
+    can_send_password_reset,
+    issue_email_verification_code,
+    issue_password_reset_code,
+    reset_password_with_code,
+    verify_email_code,
+)
 
 User = get_user_model()
 
@@ -49,8 +61,25 @@ DIETARY_RESTRICTION_ALIASES = {
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "name", "is_staff"]
-        read_only_fields = ["id", "is_staff"]
+        fields = ["id", "email", "name", "is_staff", "is_email_verified"]
+        read_only_fields = ["id", "is_staff", "is_email_verified"]
+
+
+def build_auth_session(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        "user": UserSerializer(user).data,
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+    }
+
+
+class EmailVerifiedTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if not self.user.is_email_verified:
+            raise serializers.ValidationError("Please verify your email before signing in.")
+        return data
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
@@ -187,15 +216,161 @@ class RegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         password = validated_data.pop("password")
-        return User.objects.create_user(password=password, **validated_data)
+        user = User.objects.create_user(password=password, is_email_verified=False, **validated_data)
+        issue_email_verification_code(user)
+        return user
 
     def to_representation(self, instance):
-        refresh = RefreshToken.for_user(instance)
         return {
             "user": UserSerializer(instance).data,
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
+            "verification_required": not instance.is_email_verified,
+            "detail": "We sent a verification code to your email.",
         }
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(min_length=6, max_length=6)
+
+    def validate_email(self, value):
+        return value.lower()
+
+    def validate(self, attrs):
+        try:
+            user = User.objects.get(email=attrs["email"])
+        except User.DoesNotExist as exc:
+            raise serializers.ValidationError("Invalid or expired verification code.") from exc
+        if not verify_email_code(user, attrs["code"]):
+            raise serializers.ValidationError("Invalid or expired verification code.")
+        attrs["user"] = user
+        return attrs
+
+    def create(self, validated_data):
+        return validated_data["user"]
+
+    def to_representation(self, instance):
+        return build_auth_session(instance)
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        email = value.lower()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist as exc:
+            raise serializers.ValidationError("No account was found for this email.") from exc
+        if user.is_email_verified:
+            raise serializers.ValidationError("This email is already verified.")
+        if not can_resend_email_verification(user):
+            raise serializers.ValidationError("Please wait before requesting another code.")
+        self.user = user
+        return email
+
+    def save(self, **kwargs):
+        issue_email_verification_code(self.user)
+        return self.user
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.lower()
+
+    def save(self, **kwargs):
+        try:
+            user = User.objects.get(email=self.validated_data["email"])
+        except User.DoesNotExist:
+            return None
+        if user.has_usable_password() and can_send_password_reset(user):
+            issue_password_reset_code(user)
+        return user
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(min_length=6, max_length=6)
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        return value.lower()
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
+    def validate(self, attrs):
+        try:
+            user = User.objects.get(email=attrs["email"])
+        except User.DoesNotExist as exc:
+            raise serializers.ValidationError("Invalid or expired reset code.") from exc
+        if not reset_password_with_code(user, attrs["code"], attrs["password"]):
+            raise serializers.ValidationError("Invalid or expired reset code.")
+        attrs["user"] = user
+        return attrs
+
+    def create(self, validated_data):
+        return validated_data["user"]
+
+    def to_representation(self, instance):
+        return {"detail": "Your password has been reset. You can sign in now."}
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField(write_only=True)
+
+    def validate_id_token(self, value):
+        if not settings.GOOGLE_OAUTH_CLIENT_IDS:
+            raise serializers.ValidationError("Google sign-in is not configured.")
+        try:
+            info = id_token.verify_oauth2_token(value, google_requests.Request())
+        except ValueError as exc:
+            raise serializers.ValidationError("Invalid Google token.") from exc
+        if info.get("aud") not in settings.GOOGLE_OAUTH_CLIENT_IDS:
+            raise serializers.ValidationError("Invalid Google token audience.")
+        if not info.get("email"):
+            raise serializers.ValidationError("Google account email is required.")
+        if info.get("email_verified") is False:
+            raise serializers.ValidationError("Google account email must be verified.")
+        self.google_info = info
+        return value
+
+    def create(self, validated_data):
+        info = self.google_info
+        email = info["email"].lower()
+        google_sub = info["sub"]
+        name = info.get("name") or email.split("@")[0]
+        user = User.objects.filter(google_sub=google_sub).first()
+        if user is None:
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "name": name,
+                    "google_sub": google_sub,
+                    "is_email_verified": True,
+                },
+            )
+            if created:
+                user.set_unusable_password()
+                user.save(update_fields=["password"])
+        changed_fields = []
+        if user.google_sub != google_sub:
+            user.google_sub = google_sub
+            changed_fields.append("google_sub")
+        if not user.is_email_verified:
+            user.is_email_verified = True
+            changed_fields.append("is_email_verified")
+        if not user.name and name:
+            user.name = name
+            changed_fields.append("name")
+        if changed_fields:
+            user.save(update_fields=changed_fields)
+        return user
+
+    def to_representation(self, instance):
+        return build_auth_session(instance)
 
 
 class ProfileSerializer(serializers.ModelSerializer):

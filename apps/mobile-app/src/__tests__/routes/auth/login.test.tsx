@@ -7,7 +7,7 @@ jest.mock("../../../features/auth/api", () => ({
   login: jest.fn(async () => ({
     access: "access-token",
     refresh: "refresh-token",
-    user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+    user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
   })),
 }));
 

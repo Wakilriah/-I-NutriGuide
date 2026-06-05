@@ -30,7 +30,7 @@ describe("api client auth", () => {
     useAuthStore.setState({
       accessToken: expiredToken,
       refreshToken: "refresh-token",
-      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
     });
 
     const response = await apiClient.get("/profile/", {
@@ -57,7 +57,7 @@ describe("api client auth", () => {
     useAuthStore.setState({
       accessToken: makeToken(now - 60),
       refreshToken: "refresh-token",
-      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
     });
 
     await apiClient.post("/auth/register/", {}, {

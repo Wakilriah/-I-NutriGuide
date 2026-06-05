@@ -11,7 +11,7 @@ describe("auth store", () => {
     await useAuthStore.getState().setSession({
       access: "access-token",
       refresh: "refresh-token",
-      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
     });
 
     expect(useAuthStore.getState().accessToken).toBe("access-token");
@@ -32,7 +32,7 @@ describe("auth store", () => {
     useAuthStore.setState({
       accessToken: "expired-access-token",
       refreshToken: "refresh-token",
-      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
     });
 
     await useAuthStore.getState().updateAccessToken("fresh-access-token");
@@ -47,7 +47,7 @@ describe("auth store", () => {
 
   it("hydrates persisted tokens and restores the user", () => {
     useAuthStore.getState().hydrateSession({ access: "stored-access-token", refresh: "stored-refresh-token" });
-    useAuthStore.getState().setUser({ id: 3, email: "restored@example.com", name: "Restored User", is_staff: false });
+    useAuthStore.getState().setUser({ id: 3, email: "restored@example.com", name: "Restored User", is_staff: false, is_email_verified: true });
 
     expect(useAuthStore.getState().accessToken).toBe("stored-access-token");
     expect(useAuthStore.getState().refreshToken).toBe("stored-refresh-token");

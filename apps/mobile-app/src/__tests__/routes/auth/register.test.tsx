@@ -1,13 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 import RegisterScreen from "../../../../app/auth/register";
-import { useAuthStore } from "../../../stores/auth-store";
 
 jest.mock("../../../features/auth/api", () => ({
+  loginWithGoogle: jest.fn(),
   register: jest.fn(async () => ({
-    access: "access-token",
-    refresh: "refresh-token",
-    user: { id: 2, email: "new@example.com", name: "New User", is_staff: false },
+    user: { id: 2, email: "new@example.com", name: "New User", is_staff: false, is_email_verified: true },
+    verification_required: true,
+    detail: "We sent a verification code to your email.",
   })),
 }));
 
@@ -54,8 +54,7 @@ describe("RegisterScreen", () => {
       });
     });
     await waitFor(() => {
-      expect(useAuthStore.getState().accessToken).toBe("access-token");
-      expect(router.replace).toHaveBeenCalledWith("/onboarding/profile");
+      expect(router.replace).toHaveBeenCalledWith({ pathname: "/auth/verify-email", params: { email: "new@example.com" } });
     });
   });
 

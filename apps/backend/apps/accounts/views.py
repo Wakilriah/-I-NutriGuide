@@ -11,7 +11,22 @@ from django.utils import timezone
 from .models import DailyTracking, NotificationLog, UserProfile
 from apps.common.pagination import AdminPageNumberPagination
 
-from .serializers import AdminUserDetailSerializer, AdminUserSerializer, AdminUserWriteSerializer, DailyTrackingSerializer, NotificationLogSerializer, ProfileSerializer, RegisterSerializer, UserSerializer
+from .serializers import (
+    AdminUserDetailSerializer,
+    AdminUserSerializer,
+    AdminUserWriteSerializer,
+    DailyTrackingSerializer,
+    EmailVerifiedTokenObtainPairSerializer,
+    GoogleAuthSerializer,
+    NotificationLogSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    ProfileSerializer,
+    RegisterSerializer,
+    ResendVerificationSerializer,
+    UserSerializer,
+    VerifyEmailSerializer,
+)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -21,6 +36,7 @@ class RegisterView(generics.CreateAPIView):
 
 class LoginView(TokenObtainPairView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = EmailVerifiedTokenObtainPairSerializer
 
 
 class RefreshView(TokenRefreshView):
@@ -33,6 +49,43 @@ class CurrentUserView(APIView):
     @extend_schema(responses=UserSerializer)
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+
+class VerifyEmailView(generics.CreateAPIView):
+    serializer_class = VerifyEmailSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class ResendVerificationView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(request=ResendVerificationSerializer)
+    def post(self, request):
+        serializer = ResendVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "We sent a new verification code to your email."})
+
+
+class GoogleAuthView(generics.CreateAPIView):
+    serializer_class = GoogleAuthSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(request=PasswordResetRequestSerializer)
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "If an account exists for this email, we sent a password reset code."})
+
+
+class PasswordResetConfirmView(generics.CreateAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):

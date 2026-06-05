@@ -26,6 +26,10 @@ DJANGO_SECURE_HSTS_PRELOAD
 DJANGO_ALLOWED_HOSTS
 CORS_ALLOWED_ORIGINS
 CSRF_TRUSTED_ORIGINS
+RESEND_API_KEY
+RESEND_FROM_EMAIL
+EMAIL_VERIFICATION_URL
+PASSWORD_RESET_URL
 API_HOST
 ADMIN_HOST
 MOBILE_WEB_HOST
@@ -101,6 +105,11 @@ case "$TRAEFIK_ACME_EMAIL" in
   *) echo "TRAEFIK_ACME_EMAIL must be a valid email address for Let's Encrypt notices." >&2; exit 1 ;;
 esac
 
+case "$RESEND_FROM_EMAIL" in
+  *@*.*) ;;
+  *) echo "RESEND_FROM_EMAIL must be a valid sender email address." >&2; exit 1 ;;
+esac
+
 expected_api_base="${expected_scheme}://${API_HOST}/api/v1"
 if [ "${VITE_API_BASE_URL%/}" != "$expected_api_base" ]; then
   echo "VITE_API_BASE_URL must be $expected_api_base." >&2
@@ -108,6 +117,18 @@ if [ "${VITE_API_BASE_URL%/}" != "$expected_api_base" ]; then
 fi
 if [ "${EXPO_PUBLIC_API_BASE_URL%/}" != "$expected_api_base" ]; then
   echo "EXPO_PUBLIC_API_BASE_URL must be $expected_api_base." >&2
+  exit 1
+fi
+
+expected_email_verification_url="${expected_scheme}://${MOBILE_WEB_HOST}/auth/verify-email"
+if [ "${EMAIL_VERIFICATION_URL%/}" != "$expected_email_verification_url" ]; then
+  echo "EMAIL_VERIFICATION_URL must be $expected_email_verification_url." >&2
+  exit 1
+fi
+
+expected_password_reset_url="${expected_scheme}://${MOBILE_WEB_HOST}/auth/reset-password"
+if [ "${PASSWORD_RESET_URL%/}" != "$expected_password_reset_url" ]; then
+  echo "PASSWORD_RESET_URL must be $expected_password_reset_url." >&2
   exit 1
 fi
 

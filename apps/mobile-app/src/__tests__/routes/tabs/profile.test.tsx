@@ -45,7 +45,7 @@ describe("ProfileScreen", () => {
       hasHydrated: true,
       profileComplete: true,
       refreshToken: "refresh-token",
-      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+      user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
     });
   });
 

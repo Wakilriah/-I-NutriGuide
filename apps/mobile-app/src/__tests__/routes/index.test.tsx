@@ -30,7 +30,7 @@ describe("WelcomeScreen", () => {
       useAuthStore.setState({
         accessToken: "access-token",
         refreshToken: "refresh-token",
-        user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+        user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
         hasHydrated: true,
       });
     });
@@ -48,7 +48,7 @@ describe("WelcomeScreen", () => {
       useAuthStore.setState({
         accessToken: "access-token",
         refreshToken: "refresh-token",
-        user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false },
+        user: { id: 1, email: "user@example.com", name: "Demo User", is_staff: false, is_email_verified: true },
         hasHydrated: true,
       });
     });

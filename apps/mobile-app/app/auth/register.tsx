@@ -7,13 +7,17 @@ import { Text, View } from "react-native";
 import { AppButton, AppInput, AuthBackgroundScreen, AuthGlassCard, Badge, PageHeader } from "../../src/components/ui";
 import { register } from "../../src/features/auth/api";
 import { getAuthErrorMessage } from "../../src/features/auth/errors";
+import { useGoogleSignIn } from "../../src/features/auth/google";
 import { registerSchema, type RegisterValues } from "../../src/features/auth/schemas";
+import { getProfile, isProfileComplete } from "../../src/features/profile/api";
 import { useAuthStore } from "../../src/stores/auth-store";
 import { colors, radii, spacing } from "../../src/theme/design";
 
 export default function RegisterScreen() {
   const setSession = useAuthStore((state) => state.setSession);
+  const googleSignIn = useGoogleSignIn();
   const [showPasswords, setShowPasswords] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const {
     control,
     formState: { errors, isSubmitting },
@@ -25,7 +29,7 @@ export default function RegisterScreen() {
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    const session = await register({
+    const result = await register({
       name: values.name.trim(),
       email: values.email.trim().toLowerCase(),
       password: values.password,
@@ -34,18 +38,29 @@ export default function RegisterScreen() {
       return null;
     });
 
-    if (!session) {
+    if (!result) {
       return;
     }
 
-    try {
-      await setSession(session);
-      useAuthStore.getState().setProfileComplete(false);
-      router.replace("/onboarding/profile");
-    } catch (error) {
-      setError("email", { message: "Account created, but the app could not start your session. Please sign in." });
-    }
+    router.replace({ pathname: "/auth/verify-email", params: { email: result.user.email } } as never);
   });
+
+  const onGoogleSignIn = async () => {
+    setGoogleError(null);
+    try {
+      const session = await googleSignIn.signIn();
+      if (!session) {
+        return;
+      }
+      await setSession(session);
+      const profile = await getProfile();
+      const complete = isProfileComplete(profile);
+      useAuthStore.getState().setProfileComplete(complete);
+      router.replace(complete ? "/tabs/home" : "/onboarding/profile");
+    } catch (error) {
+      setGoogleError(getAuthErrorMessage(error, "Google sign-up could not be completed."));
+    }
+  };
 
   return (
     <AuthBackgroundScreen>
@@ -114,6 +129,10 @@ export default function RegisterScreen() {
             variant="secondary"
           />
           <AppButton accessibilityLabel="Submit registration" disabled={isSubmitting} icon="person-add" label={isSubmitting ? "Creating" : "Create account"} onPress={onSubmit} />
+        </View>
+        <View style={{ gap: spacing.sm }}>
+          <AppButton accessibilityLabel="Continue with Google" disabled={googleSignIn.disabled} icon="logo-google" label="Continue with Google" onPress={onGoogleSignIn} variant="secondary" />
+          {googleError ? <Text style={{ color: colors.danger, fontWeight: "800", textAlign: "center" }}>{googleError}</Text> : null}
         </View>
         <Link href="/auth/login" style={{ color: colors.primary, fontWeight: "800", textAlign: "center" }}>
           Already have an account? Sign in
