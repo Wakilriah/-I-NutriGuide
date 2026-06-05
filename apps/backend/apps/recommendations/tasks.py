@@ -1,8 +1,8 @@
 from celery import shared_task
 
-from apps.accounts.models import NotificationLog
-from apps.accounts.tasks import send_user_push
 from django.contrib.auth import get_user_model
+from apps.notifications.models import NotificationLog
+from apps.notifications.services import send_push_notification
 
 from .serializers import RecommendationRunSerializer
 from .services.cache import set_cached_recommendations
@@ -21,7 +21,7 @@ def generate_recommendations_for_user(user_id, limit=10):
     run = generate_recommendations(user, limit=limit)
     payload = RecommendationRunSerializer(run).data
     set_cached_recommendations(get_recommendation_cache_key(user, limit), payload)
-    send_user_push(
+    send_push_notification(
         user,
         title="Recommendations ready",
         body=f"Your new nutrition plan has {len(run.items.all())} food suggestions.",

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import DevicePushToken, NotificationPreference
+from .models import DevicePushToken, NotificationLog, NotificationPreference
 
 
 class DevicePushTokenSerializer(serializers.ModelSerializer):
@@ -55,3 +55,21 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
         except ZoneInfoNotFoundError as exc:
             raise serializers.ValidationError("Unsupported timezone.") from exc
         return value
+
+
+class NotificationLogSerializer(serializers.ModelSerializer):
+    data = serializers.SerializerMethodField()
+    sent_at = serializers.DateTimeField(source="created_at", read_only=True)
+    read_at = serializers.SerializerMethodField()
+
+    class Meta:
+        model = NotificationLog
+        fields = ["id", "notification_type", "title", "body", "data", "sent_at", "read_at"]
+        read_only_fields = fields
+
+    def get_data(self, obj):
+        response = obj.provider_response if isinstance(obj.provider_response, dict) else {}
+        return response.get("data", {})
+
+    def get_read_at(self, obj):
+        return None

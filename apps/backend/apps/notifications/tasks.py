@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from celery import shared_task
@@ -64,8 +64,8 @@ def _send_due_water_reminder(preference: NotificationPreference) -> int:
     if due_slot is None:
         return 0
     today = _local_date(preference)
-    notification_type = f"{NotificationLog.NotificationType.WATER_REMINDER}:{due_slot}"
-    if _already_sent(preference.user, notification_type, today):
+    notification_type = NotificationLog.NotificationType.WATER_REMINDER
+    if _already_sent(preference.user, notification_type, today, slot=due_slot):
         return 0
     tracking = DailyTracking.objects.filter(user=preference.user, date=today).first()
     water_ml = tracking.water_ml if tracking else 0
@@ -77,7 +77,7 @@ def _send_due_water_reminder(preference: NotificationPreference) -> int:
         notification_type=notification_type,
         title="Water reminder",
         body=f"You are {remaining} ml below today's water goal. Log a glass when you can.",
-        data={"screen": "tracking", "type": "water_reminder"},
+        data={"screen": "tracking", "type": "water_reminder", "slot": due_slot},
     )
     return 1
 
@@ -90,21 +90,26 @@ def _is_due_now(preference: NotificationPreference, reminder_time) -> bool:
     return reminder_at <= now < reminder_at + timedelta(minutes=REMINDER_WINDOW_MINUTES)
 
 
-def _already_sent(user, notification_type: str, local_date) -> bool:
-    start = timezone.make_aware(datetime.combine(local_date, datetime.min.time()))
+def _already_sent(user, notification_type: str, local_date, *, slot: str | None = None) -> bool:
+    preference = getattr(user, "notification_preference", None)
+    tz = _timezone_for_preference(preference)
+    start = datetime.combine(local_date, time.min, tzinfo=tz).astimezone(ZoneInfo("UTC"))
     end = start + timedelta(days=1)
-    return NotificationLog.objects.filter(
+    queryset = NotificationLog.objects.filter(
         user=user,
         notification_type=notification_type,
         created_at__gte=start,
         created_at__lt=end,
         status__in=[NotificationLog.Status.SENT, NotificationLog.Status.QUEUED],
-    ).exists()
+    )
+    if slot:
+        queryset = queryset.filter(provider_response__data__slot=slot)
+    return queryset.exists()
 
 
 def _local_now(preference: NotificationPreference):
     try:
-        return timezone.now().astimezone(ZoneInfo(preference.timezone))
+        return timezone.now().astimezone(_timezone_for_preference(preference))
     except ZoneInfoNotFoundError:
         return timezone.now()
 
@@ -119,3 +124,9 @@ def _in_quiet_hours(value, start, end) -> bool:
     if start < end:
         return start <= value < end
     return value >= start or value < end
+
+
+def _timezone_for_preference(preference: NotificationPreference | None):
+    if preference is None:
+        return ZoneInfo("UTC")
+    return ZoneInfo(preference.timezone)

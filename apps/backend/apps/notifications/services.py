@@ -13,10 +13,16 @@ EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send"
 
 def send_push_notification(user, *, notification_type: str, title: str, body: str, data: dict | None = None):
     tokens = list(DevicePushToken.objects.filter(user=user, active=True).values_list("token", flat=True))
-    log = NotificationLog.objects.create(user=user, notification_type=notification_type, title=title, body=body)
+    log = NotificationLog.objects.create(
+        user=user,
+        notification_type=notification_type,
+        title=title,
+        body=body,
+        provider_response={"data": data or {}},
+    )
     if not tokens:
         log.status = NotificationLog.Status.SKIPPED
-        log.provider_response = {"reason": "no_active_tokens"}
+        log.provider_response = {"reason": "no_active_tokens", "data": data or {}}
         log.save(update_fields=["status", "provider_response"])
         return log
 
@@ -41,11 +47,11 @@ def send_push_notification(user, *, notification_type: str, title: str, body: st
             payload = json.loads(response.read().decode("utf-8"))
         log.status = NotificationLog.Status.SENT
         log.sent_at = timezone.now()
-        log.provider_response = payload
+        log.provider_response = {"expo": payload, "data": data or {}}
         _deactivate_invalid_tokens(messages, payload)
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
         log.status = NotificationLog.Status.FAILED
-        log.provider_response = {"error": str(exc)}
+        log.provider_response = {"error": str(exc), "data": data or {}}
     log.save(update_fields=["status", "sent_at", "provider_response"])
     return log
 

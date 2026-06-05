@@ -51,8 +51,11 @@ class NotificationPreference(models.Model):
 
 class NotificationLog(models.Model):
     class NotificationType(models.TextChoices):
+        FOOD_REMINDER = "food_reminder", "Food reminder"
         SUPPLEMENT_REMINDER = "supplement_reminder", "Supplement reminder"
         WATER_REMINDER = "water_reminder", "Water reminder"
+        RECOMMENDATION_READY = "recommendation_ready", "Recommendation ready"
+        GENERAL = "general", "General"
         TEST = "test", "Test"
 
     class Status(models.TextChoices):

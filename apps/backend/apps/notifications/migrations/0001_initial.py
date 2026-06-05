@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             name="NotificationLog",
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("notification_type", models.CharField(choices=[("supplement_reminder", "Supplement reminder"), ("water_reminder", "Water reminder"), ("test", "Test")], max_length=40)),
+                ("notification_type", models.CharField(choices=[("food_reminder", "Food reminder"), ("supplement_reminder", "Supplement reminder"), ("water_reminder", "Water reminder"), ("recommendation_ready", "Recommendation ready"), ("general", "General"), ("test", "Test")], max_length=40)),
                 ("title", models.CharField(max_length=120)),
                 ("body", models.CharField(max_length=255)),
                 ("status", models.CharField(choices=[("queued", "Queued"), ("sent", "Sent"), ("failed", "Failed"), ("skipped", "Skipped")], default="queued", max_length=20)),

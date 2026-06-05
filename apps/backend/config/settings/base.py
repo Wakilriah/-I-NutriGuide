@@ -140,18 +140,12 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-from celery.schedules import crontab
-
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_BEAT_SCHEDULE = {
     "send-daily-habit-reminders": {
         "task": "apps.notifications.tasks.send_daily_habit_reminders",
         "schedule": 900.0,
-    },
-    "remind-users-track-nutrition": {
-        "task": "apps.accounts.tasks.remind_users_to_track_nutrition",
-        "schedule": crontab(),  # Every minute for exact supplement reminder times.
     },
 }
 RECOMMENDER_ARTIFACT_DIR = Path(os.getenv("RECOMMENDER_ARTIFACT_DIR", BASE_DIR / "storage" / "recommender"))

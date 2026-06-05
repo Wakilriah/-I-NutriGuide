@@ -2,8 +2,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import DevicePushToken, NotificationPreference
-from .serializers import DevicePushTokenSerializer, NotificationPreferenceSerializer
+from .models import DevicePushToken, NotificationLog, NotificationPreference
+from .serializers import DevicePushTokenSerializer, NotificationLogSerializer, NotificationPreferenceSerializer
 
 
 class RegisterPushTokenView(generics.CreateAPIView):
@@ -18,6 +18,14 @@ class NotificationPreferenceView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         preference, _created = NotificationPreference.objects.get_or_create(user=self.request.user)
         return preference
+
+
+class NotificationLogListView(generics.ListAPIView):
+    serializer_class = NotificationLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return NotificationLog.objects.filter(user=self.request.user).order_by("-created_at")[:50]
 
 
 class DeactivatePushTokenView(APIView):
