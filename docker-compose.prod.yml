@@ -121,10 +121,10 @@ services:
       - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
       - traefik.docker.network=inutriguide-prod_public
-      - traefik.http.routers.inutriguide-landing-http.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-landing-http.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`) || Host(`${ROOT_HOST:-matchcesoir.pro}`)
       - traefik.http.routers.inutriguide-landing-http.entrypoints=web
       - traefik.http.routers.inutriguide-landing-http.middlewares=redirect-to-https@file
-      - traefik.http.routers.inutriguide-landing.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`)
+      - traefik.http.routers.inutriguide-landing.rule=Host(`${LANDING_HOST:-landing.matchcesoir.pro}`) || Host(`${ROOT_HOST:-matchcesoir.pro}`)
       - traefik.http.routers.inutriguide-landing.entrypoints=websecure
       - traefik.http.routers.inutriguide-landing.tls.certresolver=letsencrypt
       - traefik.http.routers.inutriguide-landing.middlewares=secure-headers@file
