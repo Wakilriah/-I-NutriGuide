@@ -20,7 +20,7 @@ export default function ProfileSettingsScreen() {
   };
 
   return (
-    <Screen topBar={<AppTopBar title="Settings" />} contentStyle={{ paddingBottom: 104 }}>
+    <Screen topBar={<AppTopBar title="Settings" />}>
       <View style={{ gap: spacing.lg }}>
         <PageHeader eyebrow="Account" title="Settings" subtitle="Notification preferences and account actions." />
         <View style={styles.card}>

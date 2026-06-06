@@ -53,6 +53,11 @@ export function AuthBackgroundScreen({
   contentStyle?: ViewStyle;
   justifyContent?: ViewStyle["justifyContent"];
 }) {
+  const insets = useSafeAreaInsets();
+  const verticalPadding = typeof contentStyle?.paddingVertical === "number" ? contentStyle.paddingVertical : spacing.xl;
+  const bottomPadding = typeof contentStyle?.paddingBottom === "number" ? contentStyle.paddingBottom : verticalPadding;
+  const topPadding = typeof contentStyle?.paddingTop === "number" ? contentStyle.paddingTop : verticalPadding;
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ImageBackground resizeMode="cover" source={{ uri: images.welcomeBackground }} style={{ flex: 1 }}>
@@ -63,9 +68,12 @@ export function AuthBackgroundScreen({
                 flexGrow: 1,
                 justifyContent,
                 paddingHorizontal: spacing.md,
-                paddingVertical: spacing.xl,
               },
               contentStyle,
+              {
+                paddingBottom: bottomPadding + insets.bottom,
+                paddingTop: topPadding + insets.top,
+              },
             ]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
@@ -1448,7 +1456,7 @@ export function AiAssistantFab() {
       style={{
         position: "absolute",
         right: spacing.lg,
-        bottom: 104,
+        bottom: spacing.lg,
         width: 58,
         height: 58,
         alignItems: "center",

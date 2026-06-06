@@ -65,7 +65,7 @@ export default function TrackingScreen() {
   };
 
   return (
-    <Screen showAiAssistant topBar={<AppTopBar title="Track" subtitle="Daily wellness" />} contentStyle={{ paddingBottom: 122 }}>
+    <Screen showAiAssistant topBar={<AppTopBar title="Track" subtitle="Daily wellness" />}>
       <View style={{ gap: spacing.lg }}>
         <PageHeader eyebrow="Today's rhythm" title="Small progress counts" subtitle="A calm overview of calories, hydration, movement, and macros." />
 

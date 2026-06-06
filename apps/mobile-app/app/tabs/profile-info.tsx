@@ -132,7 +132,7 @@ export default function ProfileInfoScreen() {
   };
 
   return (
-    <Screen topBar={<AppTopBar title="Personal Info" />} contentStyle={{ paddingBottom: 104 }}>
+    <Screen topBar={<AppTopBar title="Personal Info" />}>
       <View style={{ gap: spacing.lg }}>
         <PageHeader eyebrow="Profile" title="Personal info" subtitle="Edit the profile used for goals, graphs, and recommendations." />
         {profile.isLoading ? <LoadingState message="Loading profile..." /> : null}

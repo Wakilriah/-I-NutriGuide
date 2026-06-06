@@ -44,7 +44,7 @@ export default function HomeScreen() {
   });
 
   return (
-    <Screen showAiAssistant topBar={<AppTopBar onAvatarPress={() => router.push("/tabs/profile" as never)} subtitle="Today" />} contentStyle={{ paddingBottom: 132 }}>
+    <Screen showAiAssistant topBar={<AppTopBar onAvatarPress={() => router.push("/tabs/profile" as never)} subtitle="Today" />}>
       <View style={{ gap: spacing.xl }}>
         <HomeHeroCard
           calories={calories}

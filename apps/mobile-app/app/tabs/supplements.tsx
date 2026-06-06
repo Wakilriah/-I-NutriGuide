@@ -18,7 +18,7 @@ export default function SupplementsScreen() {
   const activeCount = data?.filter((item) => item.active).length ?? 0;
 
   return (
-    <Screen topBar={<AppTopBar title="I-NutriGuide" subtitle="My Supplements" />} contentStyle={{ paddingBottom: 132 }} showAiAssistant>
+    <Screen topBar={<AppTopBar title="I-NutriGuide" subtitle="My Supplements" />} showAiAssistant>
       <View style={{ gap: spacing.lg }}>
         <View style={{ gap: spacing.xs }}>
           <Text style={typography.title}>My Supplements</Text>

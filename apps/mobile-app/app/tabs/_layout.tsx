@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MobileAppShell } from "../../src/components/MobileAppShell";
 import { ProtectedRoute } from "../../src/components/ProtectedRoute";
-import { colors, dockShadow, radii } from "../../src/theme/design";
+import { colors, dockShadow, radii, spacing } from "../../src/theme/design";
 
 type TabIconProps = {
   color: string;
@@ -23,26 +23,27 @@ export default function TabsLayout() {
             tabBarActiveBackgroundColor: "transparent",
             tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: colors.muted,
-            tabBarLabelStyle: { fontSize: 11, fontWeight: "900", marginTop: 2 },
+            tabBarIconStyle: { marginTop: 0 },
+            tabBarLabelStyle: { fontSize: 11, fontWeight: "900", lineHeight: 14, marginBottom: 0, marginTop: 0 },
             tabBarItemStyle: {
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: radii.pill,
-              marginHorizontal: 3,
-              marginVertical: 9,
-              paddingVertical: 4,
+              marginHorizontal: 2,
+              marginVertical: 5,
+              paddingVertical: 0,
               backgroundColor: "transparent",
             },
             tabBarStyle: {
-              position: "absolute",
-              left: 18,
-              right: 18,
-              bottom: Platform.OS === "web" ? 18 : Math.max(insets.bottom, 14),
-              height: 72,
+              height: 70 + (Platform.OS === "web" ? 0 : insets.bottom),
+              marginHorizontal: Platform.OS === "web" ? 18 : spacing.sm,
+              marginBottom: Platform.OS === "web" ? 18 : 0,
               borderColor: colors.borderSoft,
-              borderRadius: 30,
-              borderTopWidth: 0,
+              borderRadius: Platform.OS === "web" ? 30 : radii.lg,
+              borderTopWidth: 1,
               borderWidth: 1,
               backgroundColor: colors.surface,
-              paddingBottom: 8,
+              paddingBottom: Platform.OS === "web" ? 8 : Math.max(insets.bottom, 8),
               paddingTop: 8,
               ...dockShadow,
             },

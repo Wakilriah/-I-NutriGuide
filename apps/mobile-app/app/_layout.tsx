@@ -4,6 +4,7 @@ import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import axios from "axios";
 import type { AuthUser } from "../src/features/auth/api";
@@ -95,10 +96,12 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }} />
-      </QueryClientProvider>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ headerShown: false }} />
+        </QueryClientProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

@@ -25,7 +25,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <Screen topBar={<AppTopBar title="I-NutriGuide" subtitle="Profile" />} contentStyle={{ paddingBottom: 132 }}>
+    <Screen topBar={<AppTopBar title="I-NutriGuide" subtitle="Profile" />}>
       <View style={{ gap: spacing.xl }}>
         {profile.isLoading ? <LoadingState message="Loading profile..." /> : null}
 

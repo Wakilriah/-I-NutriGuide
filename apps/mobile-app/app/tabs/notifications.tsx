@@ -20,7 +20,7 @@ export default function NotificationsScreen() {
   const notifications = useQuery({ queryKey: ["notifications"], queryFn: listNotifications });
 
   return (
-    <Screen topBar={<AppTopBar title="Notifications" />} contentStyle={{ paddingBottom: 104 }}>
+    <Screen topBar={<AppTopBar title="Notifications" />}>
       <View style={{ gap: spacing.lg }}>
         <PageHeader eyebrow="History" title="Notifications" subtitle="Food reminders, supplement timing, and recommendation updates." />
         {notifications.isLoading ? <LoadingState message="Loading notifications..." /> : null}

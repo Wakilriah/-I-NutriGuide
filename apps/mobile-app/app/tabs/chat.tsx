@@ -8,6 +8,7 @@ import { MobileAppShell } from "../../src/components/MobileAppShell";
 import { AppCard, AppTopBar, Badge, ChatAssistant, ChatInputBar, ChatMessageBubble, ErrorState, QuickPromptChips, SkeletonCard, TypingIndicator } from "../../src/components/ui";
 import { ChatMessage, ChatSession, clearChatSessions, listChatSessions, sendChatMessage } from "../../src/features/chat/api";
 import { colors, radii, spacing, typography } from "../../src/theme/design";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const starterPrompts = [
   "What should I eat with iron?",
@@ -29,6 +30,7 @@ const welcomeMessage: ChatMessage = {
 };
 
 export default function ChatScreen() {
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
   const sessionsQuery = useQuery({ queryKey: ["chat-sessions"], queryFn: listChatSessions });
@@ -124,7 +126,7 @@ export default function ChatScreen() {
       <MobileAppShell>
         <AppTopBar title="I-NutriGuide Assistant" subtitle="Online" />
         <ScrollView
-          contentContainerStyle={{ gap: spacing.lg, padding: spacing.lg, paddingBottom: 204 }}
+          contentContainerStyle={{ gap: spacing.lg, padding: spacing.lg, paddingBottom: 124 + insets.bottom }}
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
           ref={scrollRef}
@@ -167,7 +169,7 @@ export default function ChatScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.inputDock}>
+        <View style={[styles.inputDock, { bottom: spacing.lg + insets.bottom }]}>
           <ChatInputBar disabled={sendMutation.isPending} onChangeText={setDraft} onSend={() => sendMessage()} value={draft} />
         </View>
       </MobileAppShell>
@@ -188,6 +190,5 @@ const styles = {
     position: "absolute" as const,
     left: spacing.lg,
     right: spacing.lg,
-    bottom: 92,
   },
 };

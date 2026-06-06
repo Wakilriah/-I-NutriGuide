@@ -55,7 +55,7 @@ export default function HistoryScreen() {
   const profileWeightKg = toNumber(profile.data?.weight_kg);
 
   return (
-    <Screen topBar={<AppTopBar title="History" />} contentStyle={{ paddingBottom: 104 }}>
+    <Screen topBar={<AppTopBar title="History" />}>
       <View style={{ gap: spacing.lg }}>
         <PageHeader eyebrow="Food diary" title="Daily Food Diary" subtitle="Review foods, meal totals, and recent wellness trends." />
         {history.isLoading ? <LoadingState message="Loading history..." /> : null}
