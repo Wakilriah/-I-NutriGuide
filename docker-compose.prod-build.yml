@@ -37,6 +37,8 @@ services:
       target: production
       args:
         EXPO_PUBLIC_API_BASE_URL: ${EXPO_PUBLIC_API_BASE_URL:-https://api.matchcesoir.pro/api/v1}
+        EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID}
+        EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
       cache_from:
         - ${DOCKER_IMAGE_NAMESPACE:-wakilrh}/inutriguide-mobile-web:${CACHE_TAG:-latest}
     platform: ${DOCKER_PLATFORM:-linux/amd64}

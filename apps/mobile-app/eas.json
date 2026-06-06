@@ -9,7 +9,9 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.matchcesoir.pro/api/v1"
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.matchcesoir.pro/api/v1",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "144917704622-h6k26bn4qu5poug0mhdkrecbasvlk3d8.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144917704622-ivclv32su28tl7cqdk6rceva77kkb7mm.apps.googleusercontent.com"
       }
     }
   }

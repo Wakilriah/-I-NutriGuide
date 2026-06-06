@@ -18,7 +18,7 @@ export function useGoogleSignIn() {
   const [request, _response, promptAsync] = Google.useAuthRequest({
     androidClientId: androidClientId || "missing-google-android-client-id",
     iosClientId: iosClientId || "missing-google-ios-client-id",
-    redirectUri: "inutriguide:/oauthredirect",
+    redirectUri: Platform.OS === "web" ? "https://app.matchcesoir.pro/oauthredirect" : "inutriguide:/oauthredirect",
     webClientId: webClientId || "missing-google-web-client-id",
     scopes: ["openid", "email", "profile"],
     selectAccount: true,
