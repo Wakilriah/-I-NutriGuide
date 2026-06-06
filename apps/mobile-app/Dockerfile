@@ -1,7 +1,8 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN (npm ci && test -x node_modules/.bin/expo) || \
+    (rm -rf node_modules && npm cache clean --force && npm ci && test -x node_modules/.bin/expo)
 
 FROM node:20-alpine AS build
 WORKDIR /app
