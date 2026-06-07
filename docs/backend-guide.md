@@ -165,8 +165,7 @@ Adaptive fusion weights:
 
 - Cold start: alpha 0.60, beta 0.30, gamma 0.10
 - Medical profile: alpha 0.50, beta 0.35, gamma 0.15
-- Active user: alpha 0.30, beta 0.30, gamma 0.40
-- Intermediate user: alpha 0.40, beta 0.35, gamma 0.25
+- Active user: alpha 0.40, beta 0.30, gamma 0.30
 
 Medical safety has priority. Foods matching allergies or excluded foods are never recommended.
 

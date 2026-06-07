@@ -28,6 +28,8 @@ SUPPLEMENT_SYNERGY_MAP = {
     "omega3": ["omega3", "vitamine_e", "fat", "lipides"],
 }
 
+PDF_CBF_WEIGHTS = {"objectif": 0.30, "medical": 0.35, "supplement": 0.25, "calorique": 0.10}
+
 
 @dataclass(frozen=True)
 class CBFResult:
@@ -43,21 +45,17 @@ class CBFResult:
 
 class ContentBasedFilter:
     def __init__(self, weights: dict[str, float] | None = None):
-        self.weights = weights or {"objectif": 0.30, "medical": 0.35, "supplement": 0.25, "calorique": 0.10}
+        self.weights = weights or PDF_CBF_WEIGHTS.copy()
 
     def score_food(self, user_profile: dict, food: dict) -> CBFResult | None:
         if self._is_excluded(user_profile, food):
             return None
 
-        objective_score, objective_matches = self._score_groups(user_profile.get("goals", []), food, GOAL_FOOD_MAP)
+        objective_score, objective_matches = self._score_objectives(user_profile.get("goals", []), food)
         medical_score, medical_matches = self._score_medical(user_profile, food)
         if medical_score == 0:
             return None
-        supplement_score, supplement_matches = self._score_groups(
-            user_profile.get("supplements", []),
-            food,
-            SUPPLEMENT_SYNERGY_MAP,
-        )
+        supplement_score, supplement_matches = self._score_supplements(user_profile.get("supplements", []), food)
         calorie_score = self._score_calories(user_profile, food)
         score = (
             self.weights["objectif"] * objective_score
@@ -85,14 +83,34 @@ class ContentBasedFilter:
                 candidates.append(result)
         return sorted(candidates, key=lambda item: item.score, reverse=True)
 
-    def _score_groups(self, labels: list[str], food: dict, mapping: dict[str, list[str]]) -> tuple[float, list[str]]:
-        labels = [normalize_token(label) for label in labels]
-        nutrients = sorted({nutrient for label in labels for nutrient in mapping.get(label, [])})
-        if not nutrients:
+    def _score_objectives(self, goals: list[str], food: dict) -> tuple[float, list[str]]:
+        goals = normalize_many(goals)
+        if not goals:
             return 0.5, []
-        values = [(nutrient, float(food.get(nutrient, 0) or 0)) for nutrient in nutrients]
-        matches = [nutrient for nutrient, value in values if value > 0]
-        return clamp(sum(value for _nutrient, value in values) / max(len(values), 1)), matches
+
+        compatible_goals = 0
+        matched_nutrients = set()
+        for goal in goals:
+            matches = [nutrient for nutrient in GOAL_FOOD_MAP.get(goal, []) if float(food.get(nutrient, 0) or 0) > 0]
+            if matches:
+                compatible_goals += 1
+                matched_nutrients.update(matches)
+        return compatible_goals / len(goals), sorted(matched_nutrients)
+
+    def _score_supplements(self, supplements: list[str], food: dict) -> tuple[float, list[str]]:
+        supplements = normalize_many(supplements)
+        if not supplements:
+            return 0.0, []
+
+        total_synergy = 0.0
+        matched_nutrients = set()
+        for supplement in supplements:
+            for nutrient in SUPPLEMENT_SYNERGY_MAP.get(supplement, []):
+                value = float(food.get(nutrient, 0) or 0)
+                total_synergy += value
+                if value > 0:
+                    matched_nutrients.add(nutrient)
+        return clamp(total_synergy / len(supplements)), sorted(matched_nutrients)
 
     def _score_medical(self, user_profile: dict, food: dict) -> tuple[float, list[str]]:
         diseases = [normalize_token(disease) for disease in user_profile.get("maladies", [])]

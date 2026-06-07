@@ -11,6 +11,14 @@ from .safety_filter import SafetyFilter
 from .scoring import calculate_nutrient_score
 from .training import build_food_database, load_artifacts
 
+
+PDF_HYBRID_WEIGHTS = {
+    "new_user": {"alpha": 0.60, "beta": 0.30, "gamma": 0.10},
+    "active_user": {"alpha": 0.40, "beta": 0.30, "gamma": 0.30},
+    "complex_medical_case": {"alpha": 0.50, "beta": 0.35, "gamma": 0.15},
+}
+
+
 @dataclass(frozen=True)
 class HybridRecommendation:
     food_id: int
@@ -222,20 +230,20 @@ class HybridRecommender:
         )
         if has_medical_constraints:
             user_type = "complex_medical_case"
-            return self._configured_weights(user_type, {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}), user_type
+            return self._configured_weights(user_type, PDF_HYBRID_WEIGHTS[user_type]), user_type
         if int(user_profile.get("n_sessions", 0) or 0) < 3:
             user_type = "new_user"
-            return self._configured_weights(user_type, {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}), user_type
+            return self._configured_weights(user_type, PDF_HYBRID_WEIGHTS[user_type]), user_type
         user_type = "active_user"
-        return self._configured_weights(user_type, {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}), user_type
+        return self._configured_weights(user_type, PDF_HYBRID_WEIGHTS[user_type]), user_type
 
     def _configured_weights(self, user_type: str, defaults: dict) -> dict:
         profile = RecommendationWeightProfile.objects.filter(user_type=user_type, is_active=True).first()
         if not profile:
-            return defaults
+            return defaults.copy()
         total = profile.alpha + profile.beta + profile.gamma
         if total <= 0:
-            return defaults
+            return defaults.copy()
         return {
             "alpha": round(profile.alpha / total, 4),
             "beta": round(profile.beta / total, 4),

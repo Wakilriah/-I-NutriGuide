@@ -119,7 +119,7 @@ def test_hybrid_food_endpoint_returns_subscores(authenticated_client, user, reco
     assert response.status_code == 200
     body = response.json()
     assert body["strategy"] == "ASSOCIATION_RULES_FILTERED"
-    assert body["weights"] == {"alpha": 0.25, "beta": 0.60, "gamma": 0.15}
+    assert body["weights"] == {"alpha": 0.60, "beta": 0.30, "gamma": 0.10}
     assert body["recommendations"] == sorted(
         body["recommendations"],
         key=lambda item: item["final_score"],

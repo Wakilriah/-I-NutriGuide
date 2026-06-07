@@ -68,7 +68,7 @@ def test_hybrid_recommender_scores_active_association_rules():
     assert first["matched_rules"][0]["id"] == 10
 
 
-def test_association_rules_are_primary_ranking_signal():
+def test_association_rules_can_improve_hybrid_ranking():
     fruits = FoodCategory.objects.create(name="Fruits", slug="fruits")
     snacks = FoodCategory.objects.create(name="Snacks", slug="snacks")
     generic = Food.objects.create(name="Generic high fit", slug="generic-high-fit", category=fruits)
@@ -91,7 +91,7 @@ def test_association_rules_are_primary_ranking_signal():
 
     payload = HybridRecommender(artifacts={"rules": rules, "cf": None}).recommend({"supplements": ["iron"]}, n=2, foods=foods)
 
-    assert payload["weights"]["beta"] > payload["weights"]["alpha"]
+    assert payload["weights"] == {"alpha": 0.60, "beta": 0.30, "gamma": 0.10}
     first = payload["recommendations"][0]
     assert first["food_slug"] == "rule-backed-food"
     assert first["matched_rules"][0]["id"] == 11
@@ -155,13 +155,40 @@ def test_bmi_normalization_uses_thesis_formula():
     assert normalize_bmi(27.5) == 0.5
 
 
+def test_cbf_uses_pdf_subscore_weights():
+    assert ContentBasedFilter().weights == {
+        "objectif": 0.30,
+        "medical": 0.35,
+        "supplement": 0.25,
+        "calorique": 0.10,
+    }
+
+
+def test_cbf_objective_score_uses_binary_goal_compatibility():
+    result = ContentBasedFilter().score_food(
+        {"goals": ["weight_loss", "healthy_lifestyle"]},
+        {"proteines": 0.8, "kcal_100g": 150},
+    )
+
+    assert result.objective_score == 0.5
+
+
+def test_cbf_supplement_score_averages_synergy_per_supplement():
+    result = ContentBasedFilter().score_food(
+        {"supplements": ["iron", "vitamin_d"]},
+        {"vitamine_c": 0.6, "folates": 0.2, "lipides": 0.4, "calcium": 0.3, "kcal_100g": 150},
+    )
+
+    assert result.supplement_score == 0.75
+
+
 def test_hybrid_dynamic_weights_for_user_types():
     recommender = HybridRecommender(artifacts={"rules": [], "cf": None})
 
-    assert recommender._weights_for_user({"n_sessions": 0}) == ({"alpha": 0.25, "beta": 0.60, "gamma": 0.15}, "new_user")
-    assert recommender._weights_for_user({"n_sessions": 5}) == ({"alpha": 0.25, "beta": 0.60, "gamma": 0.15}, "active_user")
+    assert recommender._weights_for_user({"n_sessions": 0}) == ({"alpha": 0.60, "beta": 0.30, "gamma": 0.10}, "new_user")
+    assert recommender._weights_for_user({"n_sessions": 5}) == ({"alpha": 0.40, "beta": 0.30, "gamma": 0.30}, "active_user")
     assert recommender._weights_for_user({"n_sessions": 5, "allergies": ["peanut"]}) == (
-        {"alpha": 0.25, "beta": 0.60, "gamma": 0.15},
+        {"alpha": 0.50, "beta": 0.35, "gamma": 0.15},
         "complex_medical_case",
     )
 
