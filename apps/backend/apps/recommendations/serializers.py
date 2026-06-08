@@ -4,6 +4,7 @@ from rest_framework import serializers
 from apps.supplements.models import Supplement
 
 from .models import RecommendationItem, RecommendationRun, RecommendationWeightProfile, SavedRecommendationItem
+from .services.confidence import confidence_label, normalize_score
 from .services.food_metadata import attach_food_metadata_to_rules, recommendation_food_payload
 
 
@@ -30,6 +31,8 @@ class RecommendedSupplementSerializer(serializers.Serializer):
 class RecommendationItemSerializer(serializers.ModelSerializer):
     food = serializers.SerializerMethodField()
     matched_supplement = serializers.SerializerMethodField()
+    confidence_score = serializers.SerializerMethodField()
+    confidence_label = serializers.SerializerMethodField()
     run_id = serializers.UUIDField(source="run.id", read_only=True)
     recommendation_id = serializers.IntegerField(source="id", read_only=True)
     explanation = serializers.SerializerMethodField()
@@ -95,6 +98,16 @@ class RecommendationItemSerializer(serializers.ModelSerializer):
         if not obj.supplement_id:
             return None
         return Supplement.objects.filter(id=obj.supplement_id).values("id", "name", "slug").first()
+
+    def get_confidence_score(self, obj):
+        if obj.score_breakdown or obj.confidence_score != 0:
+            return obj.confidence_score
+        return normalize_score(obj.score)
+
+    def get_confidence_label(self, obj):
+        if obj.score_breakdown or obj.confidence_score != 0:
+            return obj.confidence_label
+        return confidence_label(normalize_score(obj.score))
 
     def get_explanation(self, obj):
         return obj.explanation_details or {"summary": obj.explanation, "reasons": []}

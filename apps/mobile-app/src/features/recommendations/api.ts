@@ -103,6 +103,15 @@ export type RecommendationGenerationJob = {
   task_id: string;
 };
 
+export function resolveRecommendationConfidence(item: Pick<RecommendationItem, "confidence_score" | "score" | "score_breakdown">) {
+  const confidence = Number(item.confidence_score);
+  const hasCalculatedConfidence = Boolean(item.score_breakdown && Object.keys(item.score_breakdown).length);
+  const value = Number.isFinite(confidence) && (confidence !== 0 || hasCalculatedConfidence)
+    ? confidence
+    : Number(item.score);
+  return Math.max(0, Math.min(Number.isFinite(value) ? value : 0, 1));
+}
+
 export type SavedRecommendationItem = {
   id: number;
   recommendation_item: RecommendationItem;

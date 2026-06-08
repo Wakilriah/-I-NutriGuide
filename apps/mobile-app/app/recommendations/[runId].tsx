@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ImageBackground, Text, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, LoadingState, PageHeader, ProgressRing, RecommendationCard, StatCard } from "../../src/components/ui";
-import { getRecommendationRun, resolveFoodImageUri, saveRecommendationItem, type FeedbackType, type RecommendationItem, submitRecommendationFeedback } from "../../src/features/recommendations/api";
+import { getRecommendationRun, resolveFoodImageUri, resolveRecommendationConfidence, saveRecommendationItem, type FeedbackType, type RecommendationItem, submitRecommendationFeedback } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
 
 export default function RecommendationDetailScreen() {
@@ -48,7 +48,7 @@ export default function RecommendationDetailScreen() {
                 <ProgressRing color={colors.primary} label="match" progress={Number(run.data.items[0].score)} value={`${Math.round(Number(run.data.items[0].score) * 100)}%`} />
               </View>
               <StatCard icon="sparkles" label="Match" value={`${Math.round(Number(run.data.items[0].score) * 100)}%`} />
-              <StatCard icon="analytics" label="Confidence" value={`${Math.round(Number(run.data.items[0].confidence_score ?? run.data.items[0].score) * 100)}%`} />
+              <StatCard icon="analytics" label="Confidence" value={`${Math.round(resolveRecommendationConfidence(run.data.items[0]) * 100)}%`} />
               <StatCard icon="leaf" label="Synergy" tone="orange" value={`${Math.round(Number(run.data.items[0].score_breakdown?.nutrient_synergy_score ?? run.data.items[0].nutrient_score) * 100)}%`} />
             </View>
           </AppCard>
@@ -118,7 +118,7 @@ function ExplainableRecommendationItem({ item }: { item: RecommendationItem }) {
       <Badge label={`#${item.rank}`} tone="green" />
       <RecommendationCard
         category={item.food.category}
-        confidenceScore={Number(item.confidence_score ?? item.score)}
+        confidenceScore={resolveRecommendationConfidence(item)}
         confidenceLabel={item.confidence_label}
         explanation={item.explanation}
         fallbackImage={{ uri: resolveFoodImageUri() }}

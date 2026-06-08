@@ -158,6 +158,47 @@ def test_history_is_scoped_to_current_user(api_client, user, other_user, recomme
     assert detail_response.json()["run_id"] == own_response.json()["run_id"]
 
 
+def test_history_uses_match_score_as_confidence_for_legacy_items(authenticated_client, user, recommendation_data):
+    run = RecommendationRun.objects.create(user=user)
+    RecommendationItem.objects.create(
+        run=run,
+        food=recommendation_data["spinach"],
+        score=0.63,
+        confidence_score=0,
+        score_breakdown={},
+        rank=1,
+        explanation="Legacy recommendation created before confidence scoring.",
+    )
+
+    response = authenticated_client.get(reverse("recommendation-history"))
+
+    assert response.status_code == 200
+    item = response.json()[0]["items"][0]
+    assert item["confidence_score"] == 0.63
+    assert item["confidence_label"] == "Medium"
+
+
+def test_history_preserves_real_zero_confidence_for_modern_items(authenticated_client, user, recommendation_data):
+    run = RecommendationRun.objects.create(user=user)
+    RecommendationItem.objects.create(
+        run=run,
+        food=recommendation_data["spinach"],
+        score=0.63,
+        confidence_score=0,
+        confidence_label="Low",
+        score_breakdown={"content_based_score": 0, "safety_score": 1},
+        rank=1,
+        explanation="Modern recommendation with a calculated zero confidence.",
+    )
+
+    response = authenticated_client.get(reverse("recommendation-history"))
+
+    assert response.status_code == 200
+    item = response.json()[0]["items"][0]
+    assert item["confidence_score"] == 0
+    assert item["confidence_label"] == "Low"
+
+
 def test_user_can_save_and_unsave_recommendation_item(authenticated_client, user, recommendation_data):
     run_response = authenticated_client.post(reverse("recommendation-generate"), {"limit": 2}, format="json")
     item_id = run_response.json()["items"][0]["id"]

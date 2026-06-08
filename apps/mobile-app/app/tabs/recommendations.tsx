@@ -1,22 +1,39 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, LoadingState, PageHeader } from "../../src/components/ui";
-import { getMealPlan, getTimingPlan, listRecommendationHistory, queueRecommendationGeneration, resolveFoodImageUri, type RecommendationItem } from "../../src/features/recommendations/api";
+import { getMealPlan, getTimingPlan, listRecommendationHistory, queueRecommendationGeneration, resolveFoodImageUri, resolveRecommendationConfidence, type RecommendationItem } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
 
 export default function RecommendationsScreen() {
   const queryClient = useQueryClient();
-  const history = useQuery({ queryKey: ["recommendation-history"], queryFn: listRecommendationHistory });
+  const [pendingAfterRunId, setPendingAfterRunId] = useState<string | null | undefined>(undefined);
+  const history = useQuery({
+    queryKey: ["recommendation-history"],
+    queryFn: listRecommendationHistory,
+    refetchInterval: pendingAfterRunId !== undefined ? 3000 : false,
+  });
   const timingPlan = useQuery({ queryKey: ["recommendation-timing-plan"], queryFn: getTimingPlan });
   const mealPlan = useQuery({ queryKey: ["recommendation-meal-plan"], queryFn: getMealPlan });
   const generateMutation = useMutation({
     mutationFn: () => queueRecommendationGeneration(10),
     onSuccess: async () => {
+      setPendingAfterRunId(history.data?.[0]?.run_id ?? null);
       await queryClient.invalidateQueries({ queryKey: ["recommendation-history"] });
     },
   });
+
+  useEffect(() => {
+    if (pendingAfterRunId === undefined) {
+      return;
+    }
+    const latestRunId = history.data?.[0]?.run_id ?? null;
+    if (latestRunId !== pendingAfterRunId) {
+      setPendingAfterRunId(undefined);
+    }
+  }, [history.data, pendingAfterRunId]);
 
   return (
     <Screen showAiAssistant topBar={<AppTopBar title="Recommendations" subtitle="Smart food match" />}>
@@ -108,7 +125,7 @@ export default function RecommendationsScreen() {
                     >
                       <View style={{ flexDirection: "row", justifyContent: "space-between", padding: spacing.sm }}>
                         <Badge label={`${Math.round(Number(first.score) * 100)}% match`} tone="green" />
-                        <Badge label={`${Math.round(Number(first.confidence_score ?? first.score) * 100)}% confidence`} tone="orange" />
+                        <Badge label={`${Math.round(resolveRecommendationConfidence(first) * 100)}% confidence`} tone="orange" />
                       </View>
                       <View style={{ backgroundColor: "rgba(18,29,38,0.48)", padding: spacing.md }}>
                         <Text style={{ color: colors.surface, fontSize: 22, fontWeight: "900", lineHeight: 28 }}>{first.food.name}</Text>

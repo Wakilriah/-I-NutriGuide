@@ -9,6 +9,7 @@ jest.mock("../../../features/recommendations/api", () => ({
   listRecommendationHistory: jest.fn(),
   queueRecommendationGeneration: jest.fn(async () => ({ run_id: "run-1", created_at: "2026-05-08T12:00:00Z", disclaimer: "", items: [] })),
   resolveFoodImageUri: jest.fn(() => "https://example.com/food.webp"),
+  resolveRecommendationConfidence: jest.fn((item) => item.confidence_score || item.score || 0),
 }));
 
 jest.mock("@tanstack/react-query", () => ({
@@ -53,6 +54,32 @@ describe("RecommendationsScreen", () => {
     expect(screen.getByText("1 food recommendations")).toBeTruthy();
   });
 
+  it("uses the match score for legacy recommendations without calculated confidence", () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      data: [{
+        run_id: "run-1",
+        created_at: "2026-05-08T12:00:00Z",
+        disclaimer: "Disclaimer",
+        items: [{
+          id: 1,
+          score: 0.63,
+          confidence_score: 0,
+          score_breakdown: {},
+          nutrient_score: 0.5,
+          food: { id: 1, name: "Broccoli", slug: "broccoli", category: "Vegetables", image_path: "" },
+          matched_supplement: null,
+          explanation: "Legacy recommendation",
+        }],
+      }],
+      isError: false,
+      isLoading: false,
+    });
+
+    render(<RecommendationsScreen />);
+
+    expect(screen.getByText("63% confidence")).toBeTruthy();
+  });
+
   it("generates recommendations and opens the new run", async () => {
     const { queueRecommendationGeneration } = require("../../../features/recommendations/api");
     (useQuery as jest.Mock).mockReturnValue({ data: [], isError: false, isLoading: false });
@@ -60,7 +87,12 @@ describe("RecommendationsScreen", () => {
     render(<RecommendationsScreen />);
     fireEvent.press(screen.getByLabelText("Generate recommendations"));
 
-    expect(queueRecommendationGeneration).toHaveBeenCalledWith(10);
+    await waitFor(() => {
+      expect(queueRecommendationGeneration).toHaveBeenCalledWith(10);
+      expect((useQuery as jest.Mock).mock.calls.some(([options]) => (
+        options.queryKey?.[0] === "recommendation-history" && options.refetchInterval === 3000
+      ))).toBe(true);
+    });
   });
 
   it("shows a generate error message", () => {
