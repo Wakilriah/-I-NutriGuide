@@ -29,10 +29,20 @@ async function registerForPushNotifications() {
   }
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("daily-reminders", {
-      name: "Daily reminders",
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
+    await Promise.all([
+      Notifications.setNotificationChannelAsync("daily-reminders", {
+        name: "Daily reminders",
+        importance: Notifications.AndroidImportance.HIGH,
+      }),
+      Notifications.setNotificationChannelAsync("supplements", {
+        name: "Supplement reminders",
+        importance: Notifications.AndroidImportance.HIGH,
+      }),
+      Notifications.setNotificationChannelAsync("recommendations", {
+        name: "Recommendation updates",
+        importance: Notifications.AndroidImportance.HIGH,
+      }),
+    ]);
   }
 
   const existing = await Notifications.getPermissionsAsync();

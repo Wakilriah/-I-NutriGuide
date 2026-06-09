@@ -145,7 +145,7 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_BEAT_SCHEDULE = {
     "send-daily-habit-reminders": {
         "task": "apps.notifications.tasks.send_daily_habit_reminders",
-        "schedule": 900.0,
+        "schedule": 60.0,
     },
 }
 RECOMMENDER_ARTIFACT_DIR = Path(os.getenv("RECOMMENDER_ARTIFACT_DIR", BASE_DIR / "storage" / "recommender"))

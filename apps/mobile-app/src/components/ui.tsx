@@ -723,7 +723,7 @@ export function RecommendationCard({
     ...(matchedRule.antecedent_items ?? (matchedRule.antecedent ? [matchedRule.antecedent] : [])),
     ...(matchedRule.consequent_items ?? (matchedRule.consequent ? [matchedRule.consequent] : [])),
   ].join(" -> ") : "";
-  const synergyScore = Number(scoreBreakdown?.nutrient_synergy_score ?? scoreBreakdown?.supplement_score ?? 0);
+  const synergyScore = Number(scoreBreakdown?.supplement_score ?? scoreBreakdown?.nutrient_synergy_score ?? 0);
   const matchScore = Number(score) || 0;
   const visibleConfidence = Number(confidenceScore ?? matchScore) || 0;
 
@@ -844,15 +844,17 @@ export function ExplanationPanel({ explanation }: { explanation: { summary: stri
 export function ScoreBreakdown({ scores }: { scores: Record<string, number> }) {
   const labels: Record<string, string> = {
     content_based_score: "Nutrients",
+    supplement_score: "Supplement synergy",
     association_rule_score: "Rules",
     collaborative_score: "Similar users",
-    nutrient_synergy_score: "Nutrient synergy",
+    nutrient_synergy_score: "Interaction evidence",
     safety_score: "Safety",
     profile_match_score: "Profile",
     feedback_score: "Feedback",
   };
   const preferredKeys = [
     "content_based_score",
+    "supplement_score",
     "nutrient_synergy_score",
     "association_rule_score",
     "collaborative_score",

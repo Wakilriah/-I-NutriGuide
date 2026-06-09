@@ -22,7 +22,7 @@ services:
       - apps/backend/.env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
-    command: sh -c "pip install -r requirements/dev.txt && python manage.py runserver 0.0.0.0:8000 --noreload"
+    command: python manage.py runserver 0.0.0.0:8000 --noreload
     restart: unless-stopped
     volumes:
       - ./apps/backend:/app
@@ -44,7 +44,7 @@ services:
       - apps/backend/.env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
-    command: sh -c "pip install -r requirements/dev.txt && celery -A config worker -l info"
+    command: celery -A config worker -l info
     volumes:
       - ./apps/backend:/app
     depends_on:
@@ -59,7 +59,7 @@ services:
       - apps/backend/.env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
-    command: sh -c "pip install -r requirements/dev.txt && celery -A config beat -l info"
+    command: celery -A config beat -l info
     volumes:
       - ./apps/backend:/app
     depends_on:

@@ -33,6 +33,7 @@ def send_push_notification(user, *, notification_type: str, title: str, body: st
             "title": title,
             "body": body,
             "data": data or {},
+            "channelId": _channel_id(notification_type),
         }
         for token in tokens
     ]
@@ -45,8 +46,9 @@ def send_push_notification(user, *, notification_type: str, title: str, body: st
     try:
         with urlopen(request, timeout=10) as response:
             payload = json.loads(response.read().decode("utf-8"))
-        log.status = NotificationLog.Status.SENT
-        log.sent_at = timezone.now()
+        ticket_errors = _ticket_errors(payload)
+        log.status = NotificationLog.Status.FAILED if ticket_errors else NotificationLog.Status.SENT
+        log.sent_at = timezone.now() if not ticket_errors else None
         log.provider_response = {"expo": payload, "data": data or {}}
         _deactivate_invalid_tokens(messages, payload)
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
@@ -54,6 +56,21 @@ def send_push_notification(user, *, notification_type: str, title: str, body: st
         log.provider_response = {"error": str(exc), "data": data or {}}
     log.save(update_fields=["status", "sent_at", "provider_response"])
     return log
+
+
+def _channel_id(notification_type: str) -> str:
+    if notification_type == NotificationLog.NotificationType.RECOMMENDATION_READY:
+        return "recommendations"
+    if notification_type == NotificationLog.NotificationType.SUPPLEMENT_REMINDER:
+        return "supplements"
+    return "daily-reminders"
+
+
+def _ticket_errors(payload: dict) -> list[dict]:
+    tickets = payload.get("data") if isinstance(payload, dict) else None
+    if not isinstance(tickets, list):
+        return [{"message": "Invalid Expo push response"}]
+    return [ticket for ticket in tickets if not isinstance(ticket, dict) or ticket.get("status") != "ok"]
 
 
 def _expo_headers():

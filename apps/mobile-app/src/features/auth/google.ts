@@ -1,24 +1,16 @@
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import { Platform } from "react-native";
 import { loginWithGoogle } from "./api";
 
 WebBrowser.maybeCompleteAuthSession();
 
+const WEB_REDIRECT_URI = "https://app.matchcesoir.pro/oauthredirect";
+
 export function useGoogleSignIn() {
   const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-  const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
-  const androidClientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
-  const isConfigured = Platform.select({
-    android: Boolean(androidClientId),
-    ios: Boolean(iosClientId),
-    web: Boolean(webClientId),
-    default: Boolean(webClientId || iosClientId || androidClientId),
-  });
-  const [request, _response, promptAsync] = Google.useAuthRequest({
-    androidClientId: androidClientId || "missing-google-android-client-id",
-    iosClientId: iosClientId || "missing-google-ios-client-id",
-    redirectUri: Platform.OS === "web" ? "https://app.matchcesoir.pro/oauthredirect" : "inutriguide:/oauthredirect",
+  const isConfigured = Boolean(webClientId);
+  const [request, _response, promptAsync] = Google.useIdTokenAuthRequest({
+    redirectUri: WEB_REDIRECT_URI,
     webClientId: webClientId || "missing-google-web-client-id",
     scopes: ["openid", "email", "profile"],
     selectAccount: true,

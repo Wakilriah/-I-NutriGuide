@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, LoadingState, PageHeader } from "../../src/components/ui";
-import { getMealPlan, getTimingPlan, listRecommendationHistory, queueRecommendationGeneration, resolveFoodImageUri, resolveRecommendationConfidence, type RecommendationItem } from "../../src/features/recommendations/api";
+import { getMealPlan, getTimingPlan, listRecommendationHistory, queueRecommendationGeneration, resolveFoodImageUri, resolveRecommendationConfidence, resolveRecommendationSynergy, type RecommendationItem } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
 
 export default function RecommendationsScreen() {
@@ -133,7 +133,7 @@ export default function RecommendationsScreen() {
                       </View>
                     </ImageBackground>
                     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs }}>
-                      <Badge label={`${Math.round(Number(first.score_breakdown?.nutrient_synergy_score ?? first.nutrient_score) * 100)}% synergy`} tone="neutral" />
+                      <Badge label={`${Math.round(resolveRecommendationSynergy(first) * 100)}% synergy`} tone="neutral" />
                       {first.matched_supplement ? <Badge label={`With ${first.matched_supplement.name}`} tone="orange" /> : null}
                     </View>
                     <View style={{ borderRadius: 18, backgroundColor: colors.surfaceContainerLow, padding: spacing.md }}>

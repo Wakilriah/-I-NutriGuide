@@ -35,7 +35,7 @@ services:
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,${WINDOWS_HOST_IP:-localhost}"
       CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-localhost}:5173,http://${WINDOWS_HOST_IP:-localhost}:3000"
       CSRF_TRUSTED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://${WINDOWS_HOST_IP:-localhost}:5173,http://${WINDOWS_HOST_IP:-localhost}:3000"
-    command: sh -c "pip install -r requirements/dev.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./apps/backend:/app
     ports:
@@ -57,7 +57,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       WINDOWS_HOST_IP: "${WINDOWS_HOST_IP:-localhost}"
-    command: sh -c "pip install -r requirements/dev.txt && celery -A config worker -l info"
+    command: celery -A config worker -l info
     volumes:
       - ./apps/backend:/app
     depends_on:
@@ -73,7 +73,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       WINDOWS_HOST_IP: "${WINDOWS_HOST_IP:-localhost}"
-    command: sh -c "pip install -r requirements/dev.txt && celery -A config beat -l info"
+    command: celery -A config beat -l info
     volumes:
       - ./apps/backend:/app
     depends_on:

@@ -25,31 +25,77 @@ def send_daily_habit_reminders():
 
 
 def _send_due_supplement_reminder(preference: NotificationPreference) -> int:
-    if not preference.supplement_reminders_enabled or not _is_due_now(preference, preference.supplement_reminder_time):
+    if not preference.supplement_reminders_enabled:
         return 0
-    today = _local_date(preference)
-    if _already_sent(preference.user, NotificationLog.NotificationType.SUPPLEMENT_REMINDER, today):
+    now = _local_now(preference)
+    if _in_quiet_hours(now.time(), preference.quiet_hours_start, preference.quiet_hours_end):
         return 0
-    active_supplements = list(
-        UserSupplement.objects.filter(user=preference.user, active=True).values_list("supplement__name", flat=True)
-    )
-    if not active_supplements:
-        return 0
+    today = now.date()
     tracking = DailyTracking.objects.filter(user=preference.user, date=today).first()
     taken = set(tracking.supplements_taken if tracking else [])
-    remaining = [name for name in active_supplements if name not in taken]
-    if not remaining:
-        return 0
-    names = ", ".join(remaining[:3])
-    suffix = "" if len(remaining) <= 3 else f" and {len(remaining) - 3} more"
-    send_push_notification(
-        preference.user,
-        notification_type=NotificationLog.NotificationType.SUPPLEMENT_REMINDER,
-        title="Supplement reminder",
-        body=f"Time to take {names}{suffix}.",
-        data={"screen": "tracking", "type": "supplement_reminder"},
-    )
-    return 1
+    due_by_slot: dict[str, list[UserSupplement]] = {}
+    active_supplements = UserSupplement.objects.filter(user=preference.user, active=True).select_related("supplement")
+    for entry in active_supplements:
+        if entry.supplement.name in taken:
+            continue
+        for reminder_time in _supplement_reminder_times(entry.time_of_day, preference.supplement_reminder_time):
+            if _time_is_due(now, reminder_time):
+                due_by_slot.setdefault(reminder_time.strftime("%H:%M"), []).append(entry)
+
+    sent = 0
+    for slot, entries in due_by_slot.items():
+        if _already_sent(preference.user, NotificationLog.NotificationType.SUPPLEMENT_REMINDER, today, slot=slot):
+            continue
+        names = ", ".join(entry.supplement.name for entry in entries[:3])
+        suffix = "" if len(entries) <= 3 else f" and {len(entries) - 3} more"
+        log = send_push_notification(
+            preference.user,
+            notification_type=NotificationLog.NotificationType.SUPPLEMENT_REMINDER,
+            title="Supplement reminder",
+            body=f"Time to take {names}{suffix}.",
+            data={
+                "url": "inutriguide://tabs/tracking",
+                "screen": "tracking",
+                "type": "supplement_reminder",
+                "slot": slot,
+                "supplement_ids": [entry.id for entry in entries],
+            },
+        )
+        sent += int(log.status == NotificationLog.Status.SENT)
+    return sent
+
+
+def _supplement_reminder_times(value: str, fallback: time) -> list[time]:
+    named_times = {
+        "morning": time(8, 0),
+        "breakfast": time(8, 0),
+        "noon": time(12, 0),
+        "lunch": time(12, 0),
+        "afternoon": time(15, 0),
+        "evening": time(19, 0),
+        "dinner": time(19, 0),
+        "night": time(21, 0),
+        "bedtime": time(21, 0),
+    }
+    parsed = []
+    for raw_value in (value or "").split(","):
+        token = raw_value.strip().lower()
+        if not token:
+            continue
+        if token in named_times:
+            parsed.append(named_times[token])
+            continue
+        try:
+            hour_text, minute_text = token.split(":", 1)
+            parsed.append(time(int(hour_text), int(minute_text)))
+        except (TypeError, ValueError):
+            continue
+    return list(dict.fromkeys(parsed or [fallback]))
+
+
+def _time_is_due(now, reminder_time: time) -> bool:
+    reminder_at = now.replace(hour=reminder_time.hour, minute=reminder_time.minute, second=0, microsecond=0)
+    return reminder_at <= now < reminder_at + timedelta(minutes=REMINDER_WINDOW_MINUTES)
 
 
 def _send_due_water_reminder(preference: NotificationPreference) -> int:
@@ -86,8 +132,7 @@ def _is_due_now(preference: NotificationPreference, reminder_time) -> bool:
     now = _local_now(preference)
     if _in_quiet_hours(now.time(), preference.quiet_hours_start, preference.quiet_hours_end):
         return False
-    reminder_at = now.replace(hour=reminder_time.hour, minute=reminder_time.minute, second=0, microsecond=0)
-    return reminder_at <= now < reminder_at + timedelta(minutes=REMINDER_WINDOW_MINUTES)
+    return _time_is_due(now, reminder_time)
 
 
 def _already_sent(user, notification_type: str, local_date, *, slot: str | None = None) -> bool:

@@ -112,6 +112,14 @@ export function resolveRecommendationConfidence(item: Pick<RecommendationItem, "
   return Math.max(0, Math.min(Number.isFinite(value) ? value : 0, 1));
 }
 
+export function resolveRecommendationSynergy(item: Pick<RecommendationItem, "score_breakdown" | "nutrient_score">) {
+  const breakdown = item.score_breakdown;
+  const value = breakdown && "supplement_score" in breakdown
+    ? Number(breakdown.supplement_score)
+    : Number(breakdown?.nutrient_synergy_score ?? item.nutrient_score);
+  return Math.max(0, Math.min(Number.isFinite(value) ? value : 0, 1));
+}
+
 export type SavedRecommendationItem = {
   id: number;
   recommendation_item: RecommendationItem;

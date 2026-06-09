@@ -10,6 +10,7 @@ jest.mock("../../../features/recommendations/api", () => ({
   queueRecommendationGeneration: jest.fn(async () => ({ run_id: "run-1", created_at: "2026-05-08T12:00:00Z", disclaimer: "", items: [] })),
   resolveFoodImageUri: jest.fn(() => "https://example.com/food.webp"),
   resolveRecommendationConfidence: jest.fn((item) => item.confidence_score || item.score || 0),
+  resolveRecommendationSynergy: jest.fn((item) => item.score_breakdown?.supplement_score ?? item.score_breakdown?.nutrient_synergy_score ?? item.nutrient_score ?? 0),
 }));
 
 jest.mock("@tanstack/react-query", () => ({

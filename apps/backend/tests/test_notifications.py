@@ -1,4 +1,5 @@
-from datetime import time
+import json
+from datetime import datetime, time, timezone as dt_timezone
 from unittest.mock import patch
 
 import pytest
@@ -7,7 +8,10 @@ from django.utils import timezone
 
 from apps.accounts.models import DailyTracking
 from apps.notifications.models import DevicePushToken, NotificationLog, NotificationPreference
+from apps.notifications.services import send_push_notification
 from apps.notifications.tasks import send_daily_habit_reminders
+from apps.recommendations.models import RecommendationRun
+from apps.recommendations.tasks import generate_recommendations_for_user
 from apps.supplements.models import Supplement, UserSupplement
 
 
@@ -100,7 +104,9 @@ def test_registered_token_reminder_is_visible_in_notification_history(authentica
     assert response.status_code == 200
     assert response.data[0]["notification_type"] == "supplement_reminder"
     assert response.data[0]["title"] == "Supplement reminder"
-    assert response.data[0]["data"] == {"screen": "tracking", "type": "supplement_reminder"}
+    assert response.data[0]["data"]["url"] == "inutriguide://tabs/tracking"
+    assert response.data[0]["data"]["screen"] == "tracking"
+    assert response.data[0]["data"]["slot"] == now.strftime("%H:%M")
     log = NotificationLog.objects.get(user=user)
     assert log.provider_response["expo"] == {"data": [{"status": "ok"}]}
 
@@ -125,3 +131,74 @@ def test_water_reminder_skips_when_goal_met(user):
     assert result["sent"] == 0
     assert not urlopen.called
     assert NotificationLog.objects.count() == 0
+
+
+def test_supplement_reminders_use_each_saved_time_and_allow_multiple_daily_slots(user):
+    supplement = Supplement.objects.create(name="Vitamin D", slug="vitamin-d")
+    UserSupplement.objects.create(
+        user=user,
+        supplement=supplement,
+        frequency="twice daily",
+        time_of_day="08:00, 12:00",
+        active=True,
+    )
+    DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
+    NotificationPreference.objects.create(
+        user=user,
+        notifications_enabled=True,
+        timezone="UTC",
+        supplement_reminder_time=time(9, 0),
+        water_reminders_enabled=False,
+        quiet_hours_start=time(0, 0),
+        quiet_hours_end=time(0, 0),
+    )
+
+    with patch("apps.notifications.tasks.timezone.now") as now, patch("apps.notifications.services.urlopen") as urlopen:
+        urlopen.return_value.__enter__.return_value.read.return_value = b'{"data":[{"status":"ok"}]}'
+        now.return_value = datetime(2026, 6, 8, 8, 7, tzinfo=dt_timezone.utc)
+        morning = send_daily_habit_reminders()
+        now.return_value = datetime(2026, 6, 8, 12, 7, tzinfo=dt_timezone.utc)
+        noon = send_daily_habit_reminders()
+
+    assert morning["sent"] == 1
+    assert noon["sent"] == 1
+    assert set(NotificationLog.objects.values_list("provider_response__data__slot", flat=True)) == {"08:00", "12:00"}
+
+
+def test_push_uses_notification_channel_and_marks_expo_ticket_error_failed(user):
+    DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
+
+    with patch("apps.notifications.services.urlopen") as urlopen:
+        urlopen.return_value.__enter__.return_value.read.return_value = (
+            b'{"data":[{"status":"error","message":"Invalid credentials","details":{"error":"InvalidCredentials"}}]}'
+        )
+        log = send_push_notification(
+            user,
+            notification_type=NotificationLog.NotificationType.RECOMMENDATION_READY,
+            title="Recommendations ready",
+            body="Your plan is ready.",
+        )
+
+    messages = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
+    assert messages[0]["channelId"] == "recommendations"
+    assert log.status == NotificationLog.Status.FAILED
+    assert log.sent_at is None
+
+
+def test_background_recommendation_generation_sends_ready_notification(user):
+    DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
+    run = RecommendationRun.objects.create(user=user)
+
+    with (
+        patch("apps.recommendations.tasks.generate_recommendations", return_value=run),
+        patch("apps.recommendations.tasks.get_recommendation_cache_key", return_value="recommendations:test"),
+        patch("apps.recommendations.tasks.set_cached_recommendations"),
+        patch("apps.notifications.services.urlopen") as urlopen,
+    ):
+        urlopen.return_value.__enter__.return_value.read.return_value = b'{"data":[{"status":"ok"}]}'
+        result = generate_recommendations_for_user(user.id)
+
+    log = NotificationLog.objects.get(user=user, notification_type=NotificationLog.NotificationType.RECOMMENDATION_READY)
+    assert result == str(run.id)
+    assert log.status == NotificationLog.Status.SENT
+    assert log.provider_response["data"]["url"] == f"inutriguide://tabs/recommendation-detail/{run.id}"

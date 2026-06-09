@@ -19,7 +19,7 @@ describe("RecommendationCard explainability", () => {
         nutrients={["Iron-rich"]}
         onFeedback={onFeedback}
         score={0.91}
-        scoreBreakdown={{ nutrient_synergy_score: 0.9, safety_score: 1 }}
+        scoreBreakdown={{ supplement_score: 0.42, nutrient_synergy_score: 0.9, safety_score: 1 }}
         synergyReason="Vitamin C support makes this a useful iron pairing."
         warnings={[{ level: "caution", type: "timing", title: "Avoid calcium", message: "Calcium may reduce iron absorption." }]}
       />,
@@ -33,6 +33,8 @@ describe("RecommendationCard explainability", () => {
     expect(screen.getByText("Rule confidence 82%, lift 1.60")).toBeTruthy();
     expect(screen.getByText("Vitamin C support makes this a useful iron pairing.")).toBeTruthy();
     expect(screen.getByText("Synergy")).toBeTruthy();
+    expect(screen.getAllByText("42%").length).toBeGreaterThan(0);
+    expect(screen.getByText("Interaction evidence")).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText("Toggle recommendation explanation"));
     expect(screen.getByText("Vitamin C may improve non-heme iron absorption.")).toBeTruthy();

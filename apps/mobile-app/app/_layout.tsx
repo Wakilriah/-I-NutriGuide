@@ -26,7 +26,10 @@ export default function RootLayout() {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+    const openNotification = (response: Notifications.NotificationResponse | null) => {
+      if (!response) {
+        return;
+      }
       const data = response.notification.request.content.data;
       const url = data?.url;
       if (typeof url === "string") {
@@ -36,6 +39,15 @@ export default function RootLayout() {
       const screen = data?.screen;
       if (screen === "tracking") {
         router.push("/tabs/tracking");
+      }
+    };
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      openNotification(response);
+    });
+    void Notifications.getLastNotificationResponseAsync().then(async (response) => {
+      openNotification(response);
+      if (response) {
+        await Notifications.clearLastNotificationResponseAsync();
       }
     });
 

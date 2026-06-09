@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ImageBackground, Text, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppButton, AppCard, AppTopBar, Badge, EmptyState, ErrorState, LoadingState, PageHeader, ProgressRing, RecommendationCard, StatCard } from "../../src/components/ui";
-import { getRecommendationRun, resolveFoodImageUri, resolveRecommendationConfidence, saveRecommendationItem, type FeedbackType, type RecommendationItem, submitRecommendationFeedback } from "../../src/features/recommendations/api";
+import { getRecommendationRun, resolveFoodImageUri, resolveRecommendationConfidence, resolveRecommendationSynergy, saveRecommendationItem, type FeedbackType, type RecommendationItem, submitRecommendationFeedback } from "../../src/features/recommendations/api";
 import { colors, spacing } from "../../src/theme/design";
 
 export default function RecommendationDetailScreen() {
@@ -49,7 +49,7 @@ export default function RecommendationDetailScreen() {
               </View>
               <StatCard icon="sparkles" label="Match" value={`${Math.round(Number(run.data.items[0].score) * 100)}%`} />
               <StatCard icon="analytics" label="Confidence" value={`${Math.round(resolveRecommendationConfidence(run.data.items[0]) * 100)}%`} />
-              <StatCard icon="leaf" label="Synergy" tone="orange" value={`${Math.round(Number(run.data.items[0].score_breakdown?.nutrient_synergy_score ?? run.data.items[0].nutrient_score) * 100)}%`} />
+              <StatCard icon="leaf" label="Synergy" tone="orange" value={`${Math.round(resolveRecommendationSynergy(run.data.items[0]) * 100)}%`} />
             </View>
           </AppCard>
         ) : null}
