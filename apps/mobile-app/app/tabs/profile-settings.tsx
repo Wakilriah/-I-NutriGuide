@@ -6,12 +6,14 @@ import { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppTopBar, PageHeader } from "../../src/components/ui";
+import { registerForPushNotificationsOnce } from "../../src/lib/notifications";
 import { useAuthStore } from "../../src/stores/auth-store";
 import { cards, colors, radii, spacing, typography } from "../../src/theme/design";
 
 export default function ProfileSettingsScreen() {
   const clearSession = useAuthStore((state) => state.clearSession);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState<"idle" | "enabling" | "enabled" | "blocked">("idle");
 
   const logout = async () => {
     setIsLoggingOut(true);
@@ -25,6 +27,22 @@ export default function ProfileSettingsScreen() {
         <PageHeader eyebrow="Account" title="Settings" subtitle="Notification preferences and account actions." />
         <View style={styles.card}>
           <Text style={typography.section}>Notifications</Text>
+          <ActionRow
+            icon="notifications"
+            label={notificationStatus === "enabled" ? "Notifications enabled" : "Enable notifications"}
+            onPress={async () => {
+              setNotificationStatus("enabling");
+              const enabled = await registerForPushNotificationsOnce().catch(() => false);
+              setNotificationStatus(enabled ? "enabled" : "blocked");
+            }}
+            value={
+              notificationStatus === "enabling"
+                ? "Requesting permission..."
+                : notificationStatus === "blocked"
+                  ? "Permission was blocked or push is unavailable"
+                  : "Receive reminders even when the app is closed"
+            }
+          />
           <SettingRow icon="restaurant" label="Food reminders" value="Lunch and evening if no food is logged" />
           <SettingRow icon="medkit" label="Supplement reminders" value="Based on supplement frequency and timing" />
           <SettingRow icon="sparkles" label="Recommendation updates" value="Sent when background generation finishes" />

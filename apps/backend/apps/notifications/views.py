@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.utils import timezone
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -26,6 +28,41 @@ class NotificationLogListView(generics.ListAPIView):
 
     def get_queryset(self):
         return NotificationLog.objects.filter(user=self.request.user).order_by("-created_at")[:50]
+
+
+class NotificationUnreadCountView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        count = NotificationLog.objects.filter(user=request.user, read_at__isnull=True).count()
+        return Response({"count": count})
+
+
+class MarkNotificationReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, notification_id):
+        updated = NotificationLog.objects.filter(
+            id=notification_id,
+            user=request.user,
+            read_at__isnull=True,
+        ).update(read_at=timezone.now())
+        return Response({"updated": updated})
+
+
+class MarkAllNotificationsReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        updated = NotificationLog.objects.filter(user=request.user, read_at__isnull=True).update(read_at=timezone.now())
+        return Response({"updated": updated})
+
+
+class WebPushConfigView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        return Response({"public_key": settings.WEB_PUSH_VAPID_PUBLIC_KEY})
 
 
 class DeactivatePushTokenView(APIView):

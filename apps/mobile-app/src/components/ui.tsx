@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from
 import { ActivityIndicator, Animated, Image, ImageBackground, Modal, ScrollView, Text, TextInput, TouchableOpacity, View, type DimensionValue, type ImageSourcePropType, type TextInputProps, type ViewStyle } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { getProfile } from "../features/profile/api";
+import { getNotificationUnreadCount } from "../features/notifications/api";
 import type { FoodEntry } from "../features/tracking/api";
 import { useAuthStore } from "../stores/auth-store";
 import { cards, colors, iconSizes, images, radii, shadow, spacing, typography } from "../theme/design";
@@ -145,6 +146,13 @@ export function AppTopBar({ onAvatarPress, onNotificationsPress, subtitle, title
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const profile = useQuery({ enabled: Boolean(user), queryKey: ["profile"], queryFn: getProfile, staleTime: 5 * 60 * 1000 });
+  const unread = useQuery({
+    enabled: Boolean(user),
+    queryKey: ["notification-unread-count"],
+    queryFn: getNotificationUnreadCount,
+    refetchInterval: 60_000,
+  });
+  const unreadCount = unread.data?.count ?? 0;
   const profileExtras = profile.data as (typeof profile.data & { avatar_url?: string | null; name?: string | null }) | undefined;
   return (
     <View
@@ -189,6 +197,26 @@ export function AppTopBar({ onAvatarPress, onNotificationsPress, subtitle, title
         }}
       >
         <Ionicons color={colors.surface} name="notifications-outline" size={iconSizes.lg} />
+        {unreadCount > 0 ? (
+          <View
+            style={{
+              position: "absolute",
+              right: -4,
+              top: -5,
+              minWidth: 20,
+              height: 20,
+              alignItems: "center",
+              justifyContent: "center",
+              borderColor: colors.primary,
+              borderRadius: radii.pill,
+              borderWidth: 2,
+              backgroundColor: colors.danger,
+              paddingHorizontal: 4,
+            }}
+          >
+            <Text style={{ color: colors.surface, fontSize: 10, fontWeight: "900" }}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+          </View>
+        ) : null}
       </TouchableOpacity>
     </View>
   );

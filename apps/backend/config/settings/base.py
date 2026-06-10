@@ -148,6 +148,9 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60.0,
     },
 }
+WEB_PUSH_VAPID_PUBLIC_KEY = os.getenv("WEB_PUSH_VAPID_PUBLIC_KEY", "")
+WEB_PUSH_VAPID_PRIVATE_KEY = os.getenv("WEB_PUSH_VAPID_PRIVATE_KEY", "")
+WEB_PUSH_VAPID_SUBJECT = os.getenv("WEB_PUSH_VAPID_SUBJECT", "mailto:admin@matchcesoir.pro")
 RECOMMENDER_ARTIFACT_DIR = Path(os.getenv("RECOMMENDER_ARTIFACT_DIR", BASE_DIR / "storage" / "recommender"))
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")

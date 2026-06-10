@@ -60,3 +60,23 @@ export async function listNotifications() {
   const response = await apiClient.get<NotificationLog[]>("/notifications/");
   return response.data;
 }
+
+export async function getNotificationUnreadCount() {
+  const response = await apiClient.get<{ count: number }>("/notifications/unread-count/");
+  return response.data;
+}
+
+export async function markNotificationRead(notificationId: number) {
+  const response = await apiClient.post<{ updated: number }>(`/notifications/${notificationId}/read/`);
+  return response.data;
+}
+
+export async function markAllNotificationsRead() {
+  const response = await apiClient.post<{ updated: number }>("/notifications/read-all/");
+  return response.data;
+}
+
+export async function getWebPushConfig() {
+  const response = await apiClient.get<{ public_key: string }>("/notifications/web-config/");
+  return response.data;
+}

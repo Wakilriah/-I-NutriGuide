@@ -9,7 +9,7 @@ class DevicePushToken(models.Model):
         WEB = "web", "Web"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="push_tokens", on_delete=models.CASCADE)
-    token = models.CharField(max_length=255, unique=True)
+    token = models.TextField(unique=True)
     platform = models.CharField(max_length=20, choices=Platform.choices)
     device_id = models.CharField(max_length=120, blank=True)
     active = models.BooleanField(default=True)
@@ -72,6 +72,7 @@ class NotificationLog(models.Model):
     provider_response = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

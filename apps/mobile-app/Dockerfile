@@ -15,7 +15,7 @@ ENV EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID}
 ENV EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build:web
+RUN npm run typecheck && npm run build:web && cp public/notifications-sw.js dist/notifications-sw.js
 
 FROM nginx:1.27-alpine AS production
 COPY --from=build /app/dist /usr/share/nginx/html

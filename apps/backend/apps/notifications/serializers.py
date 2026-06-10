@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 
 from .models import DevicePushToken, NotificationLog, NotificationPreference
@@ -9,10 +11,19 @@ class DevicePushTokenSerializer(serializers.ModelSerializer):
         fields = ["id", "token", "platform", "device_id", "active", "last_seen_at", "created_at"]
         read_only_fields = ["id", "active", "last_seen_at", "created_at"]
 
-    def validate_token(self, value):
-        if not value.startswith("ExponentPushToken[") and not value.startswith("ExpoPushToken["):
-            raise serializers.ValidationError("Token must be an Expo push token.")
-        return value
+    def validate(self, attrs):
+        token = attrs["token"]
+        if attrs["platform"] == DevicePushToken.Platform.WEB:
+            try:
+                subscription = json.loads(token)
+                keys = subscription["keys"]
+                if not subscription["endpoint"] or not keys["p256dh"] or not keys["auth"]:
+                    raise KeyError
+            except (TypeError, ValueError, KeyError):
+                raise serializers.ValidationError({"token": "Token must be a valid web push subscription."})
+        elif not token.startswith(("ExponentPushToken[", "ExpoPushToken[")):
+            raise serializers.ValidationError({"token": "Token must be an Expo push token."})
+        return attrs
 
     def create(self, validated_data):
         user = self.context["request"].user
@@ -60,7 +71,6 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
 class NotificationLogSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
     sent_at = serializers.DateTimeField(source="created_at", read_only=True)
-    read_at = serializers.SerializerMethodField()
 
     class Meta:
         model = NotificationLog
@@ -70,6 +80,3 @@ class NotificationLogSerializer(serializers.ModelSerializer):
     def get_data(self, obj):
         response = obj.provider_response if isinstance(obj.provider_response, dict) else {}
         return response.get("data", {})
-
-    def get_read_at(self, obj):
-        return None

@@ -8,6 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import axios from "axios";
 import type { AuthUser } from "../src/features/auth/api";
+import { markNotificationRead } from "../src/features/notifications/api";
 import { getProfile, isProfileComplete } from "../src/features/profile/api";
 import { apiClient } from "../src/lib/api";
 import { registerForPushNotificationsOnce } from "../src/lib/notifications";
@@ -31,6 +32,13 @@ export default function RootLayout() {
         return;
       }
       const data = response.notification.request.content.data;
+      const notificationId = Number(data?.notification_id);
+      if (Number.isFinite(notificationId)) {
+        void markNotificationRead(notificationId).finally(() => {
+          void queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
+          void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        });
+      }
       const url = data?.url;
       if (typeof url === "string") {
         router.push(url.replace("inutriguide://", "/") as never);
@@ -43,6 +51,10 @@ export default function RootLayout() {
     };
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
       openNotification(response);
+    });
+    const receivedSubscription = Notifications.addNotificationReceivedListener(() => {
+      void queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });
     void Notifications.getLastNotificationResponseAsync().then(async (response) => {
       openNotification(response);
@@ -97,6 +109,7 @@ export default function RootLayout() {
     return () => {
       mounted = false;
       subscription.remove();
+      receivedSubscription.remove();
     };
   }, []);
 

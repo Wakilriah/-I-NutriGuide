@@ -3,6 +3,7 @@ from datetime import datetime, time, timezone as dt_timezone
 from unittest.mock import patch
 
 import pytest
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -30,6 +31,24 @@ def test_user_can_register_expo_push_token(authenticated_client, user):
     assert token.token == "ExponentPushToken[test-token]"
     assert token.platform == "android"
     assert token.active is True
+
+
+def test_user_can_register_web_push_subscription(authenticated_client, user):
+    subscription = {
+        "endpoint": "https://push.example.test/subscription",
+        "keys": {"p256dh": "public-key", "auth": "auth-secret"},
+    }
+
+    response = authenticated_client.post(
+        reverse("notification-register-token"),
+        {"token": json.dumps(subscription), "platform": "web", "device_id": subscription["endpoint"]},
+        format="json",
+    )
+
+    assert response.status_code == 201
+    token = DevicePushToken.objects.get(user=user)
+    assert json.loads(token.token) == subscription
+    assert token.platform == DevicePushToken.Platform.WEB
 
 
 def test_user_can_update_notification_preferences(authenticated_client, user):
@@ -165,6 +184,27 @@ def test_supplement_reminders_use_each_saved_time_and_allow_multiple_daily_slots
     assert set(NotificationLog.objects.values_list("provider_response__data__slot", flat=True)) == {"08:00", "12:00"}
 
 
+def test_as_needed_supplement_does_not_send_scheduled_reminder(user):
+    supplement = Supplement.objects.create(name="Melatonin", slug="melatonin")
+    UserSupplement.objects.create(user=user, supplement=supplement, frequency="as needed", time_of_day="21:00", active=True)
+    DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
+    NotificationPreference.objects.create(
+        user=user,
+        notifications_enabled=True,
+        timezone="UTC",
+        water_reminders_enabled=False,
+        quiet_hours_start=time(0, 0),
+        quiet_hours_end=time(0, 0),
+    )
+
+    with patch("apps.notifications.tasks.timezone.now") as now, patch("apps.notifications.services.urlopen") as urlopen:
+        now.return_value = datetime(2026, 6, 8, 21, 7, tzinfo=dt_timezone.utc)
+        result = send_daily_habit_reminders()
+
+    assert result["sent"] == 0
+    assert not urlopen.called
+
+
 def test_push_uses_notification_channel_and_marks_expo_ticket_error_failed(user):
     DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
 
@@ -183,6 +223,60 @@ def test_push_uses_notification_channel_and_marks_expo_ticket_error_failed(user)
     assert messages[0]["channelId"] == "recommendations"
     assert log.status == NotificationLog.Status.FAILED
     assert log.sent_at is None
+
+
+@override_settings(
+    WEB_PUSH_VAPID_PRIVATE_KEY="private-key",
+    WEB_PUSH_VAPID_SUBJECT="mailto:test@example.com",
+)
+def test_web_push_subscription_receives_background_notification(user):
+    subscription = {
+        "endpoint": "https://push.example.test/subscription",
+        "keys": {"p256dh": "public-key", "auth": "auth-secret"},
+    }
+    DevicePushToken.objects.create(user=user, token=json.dumps(subscription), platform=DevicePushToken.Platform.WEB)
+
+    with patch("apps.notifications.services.webpush") as webpush:
+        log = send_push_notification(
+            user,
+            notification_type=NotificationLog.NotificationType.RECOMMENDATION_READY,
+            title="Recommendations ready",
+            body="Your plan is ready.",
+        )
+
+    assert log.status == NotificationLog.Status.SENT
+    assert webpush.call_args.kwargs["subscription_info"] == subscription
+    payload = json.loads(webpush.call_args.kwargs["data"])
+    assert payload["data"]["notification_id"] == log.id
+    assert payload["badge"] == 1
+
+
+def test_user_can_read_notifications_and_clear_unread_count(authenticated_client, user):
+    first = NotificationLog.objects.create(
+        user=user,
+        notification_type=NotificationLog.NotificationType.GENERAL,
+        title="First",
+        body="First notification",
+    )
+    NotificationLog.objects.create(
+        user=user,
+        notification_type=NotificationLog.NotificationType.GENERAL,
+        title="Second",
+        body="Second notification",
+    )
+
+    count_response = authenticated_client.get(reverse("notification-unread-count"))
+    read_response = authenticated_client.post(reverse("notification-read", kwargs={"notification_id": first.id}))
+    after_read_response = authenticated_client.get(reverse("notification-unread-count"))
+    read_all_response = authenticated_client.post(reverse("notification-read-all"))
+    final_response = authenticated_client.get(reverse("notification-unread-count"))
+
+    assert count_response.data == {"count": 2}
+    assert read_response.data == {"updated": 1}
+    assert after_read_response.data == {"count": 1}
+    assert read_all_response.data == {"updated": 1}
+    assert final_response.data == {"count": 0}
+    assert NotificationLog.objects.get(id=first.id).read_at is not None
 
 
 def test_background_recommendation_generation_sends_ready_notification(user):

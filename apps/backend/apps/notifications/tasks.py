@@ -36,7 +36,7 @@ def _send_due_supplement_reminder(preference: NotificationPreference) -> int:
     due_by_slot: dict[str, list[UserSupplement]] = {}
     active_supplements = UserSupplement.objects.filter(user=preference.user, active=True).select_related("supplement")
     for entry in active_supplements:
-        if entry.supplement.name in taken:
+        if entry.supplement.name in taken or not _supplement_is_due_today(entry, now):
             continue
         for reminder_time in _supplement_reminder_times(entry.time_of_day, preference.supplement_reminder_time):
             if _time_is_due(now, reminder_time):
@@ -63,6 +63,15 @@ def _send_due_supplement_reminder(preference: NotificationPreference) -> int:
         )
         sent += int(log.status == NotificationLog.Status.SENT)
     return sent
+
+
+def _supplement_is_due_today(entry: UserSupplement, now) -> bool:
+    frequency = (entry.frequency or "daily").strip().lower()
+    if frequency == "as needed":
+        return False
+    if frequency == "weekly":
+        return entry.created_at.astimezone(now.tzinfo).weekday() == now.weekday()
+    return True
 
 
 def _supplement_reminder_times(value: str, fallback: time) -> list[time]:

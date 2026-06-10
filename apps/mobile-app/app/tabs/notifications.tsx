@@ -1,12 +1,13 @@
 "use client";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppTopBar, EmptyState, ErrorState, LoadingState, PageHeader } from "../../src/components/ui";
-import { listNotifications } from "../../src/features/notifications/api";
+import { listNotifications, markAllNotificationsRead, type NotificationLog } from "../../src/features/notifications/api";
 import { cards, colors, radii, spacing } from "../../src/theme/design";
 
 const icons = {
@@ -17,7 +18,19 @@ const icons = {
 } as const;
 
 export default function NotificationsScreen() {
+  const queryClient = useQueryClient();
   const notifications = useQuery({ queryKey: ["notifications"], queryFn: listNotifications });
+
+  useEffect(() => {
+    if (!notifications.data?.some((item) => !item.read_at)) {
+      return;
+    }
+    void markAllNotificationsRead().then(() => {
+      const readAt = new Date().toISOString();
+      queryClient.setQueryData<NotificationLog[]>(["notifications"], (current) => current?.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
+      queryClient.setQueryData(["notification-unread-count"], { count: 0 });
+    });
+  }, [notifications.data, queryClient]);
 
   return (
     <Screen topBar={<AppTopBar title="Notifications" />}>
