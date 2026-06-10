@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppTopBar, PageHeader } from "../../src/components/ui";
-import { registerForPushNotificationsOnce } from "../../src/lib/notifications";
+import { PushRegistrationError, registerForPushNotificationsOnce } from "../../src/lib/notifications";
 import { useAuthStore } from "../../src/stores/auth-store";
 import { cards, colors, radii, spacing, typography } from "../../src/theme/design";
 
@@ -14,6 +14,7 @@ export default function ProfileSettingsScreen() {
   const clearSession = useAuthStore((state) => state.clearSession);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<"idle" | "enabling" | "enabled" | "blocked">("idle");
+  const [notificationMessage, setNotificationMessage] = useState("Receive reminders even when the app is closed");
 
   const logout = async () => {
     setIsLoggingOut(true);
@@ -32,15 +33,19 @@ export default function ProfileSettingsScreen() {
             label={notificationStatus === "enabled" ? "Notifications enabled" : "Enable notifications"}
             onPress={async () => {
               setNotificationStatus("enabling");
-              const enabled = await registerForPushNotificationsOnce().catch(() => false);
-              setNotificationStatus(enabled ? "enabled" : "blocked");
+              try {
+                const enabled = await registerForPushNotificationsOnce({ requestWebPermission: true });
+                setNotificationStatus(enabled ? "enabled" : "blocked");
+                setNotificationMessage(enabled ? "This device is registered for push notifications" : "Notification permission was not granted");
+              } catch (error) {
+                setNotificationStatus("blocked");
+                setNotificationMessage(error instanceof PushRegistrationError ? error.message : "Push registration failed. Check your connection and try again.");
+              }
             }}
             value={
               notificationStatus === "enabling"
                 ? "Requesting permission..."
-                : notificationStatus === "blocked"
-                  ? "Permission was blocked or push is unavailable"
-                  : "Receive reminders even when the app is closed"
+                : notificationMessage
             }
           />
           <SettingRow icon="restaurant" label="Food reminders" value="Lunch and evening if no food is logged" />
