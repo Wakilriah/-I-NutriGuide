@@ -1,6 +1,8 @@
 from django.urls import path
 
 from .views import (
+    AdminNotificationAudienceCountView,
+    AdminNotificationCampaignListCreateView,
     DeactivatePushTokenView,
     MarkAllNotificationsReadView,
     MarkNotificationReadView,
@@ -12,6 +14,8 @@ from .views import (
 )
 
 urlpatterns = [
+    path("admin/notification-campaigns/", AdminNotificationCampaignListCreateView.as_view(), name="admin-notification-campaign-list"),
+    path("admin/notification-campaigns/audience-count/", AdminNotificationAudienceCountView.as_view(), name="admin-notification-audience-count"),
     path("notifications/", NotificationLogListView.as_view(), name="notification-history"),
     path("notifications/unread-count/", NotificationUnreadCountView.as_view(), name="notification-unread-count"),
     path("notifications/read-all/", MarkAllNotificationsReadView.as_view(), name="notification-read-all"),

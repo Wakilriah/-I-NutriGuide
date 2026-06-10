@@ -7,7 +7,7 @@ from django.utils import timezone
 from apps.accounts.models import DailyTracking
 from apps.supplements.models import UserSupplement
 
-from .models import NotificationLog, NotificationPreference
+from .models import NotificationCampaign, NotificationLog, NotificationPreference
 from .services import send_push_notification
 
 
@@ -22,6 +22,64 @@ def send_daily_habit_reminders():
         sent += _send_due_supplement_reminder(preference)
         sent += _send_due_water_reminder(preference)
     return {"sent": sent}
+
+
+@shared_task
+def send_notification_campaign(campaign_id: int):
+    campaign = NotificationCampaign.objects.get(id=campaign_id)
+    if campaign.status != NotificationCampaign.Status.QUEUED:
+        return {"status": campaign.status}
+
+    campaign.status = NotificationCampaign.Status.SENDING
+    campaign.started_at = timezone.now()
+    campaign.save(update_fields=["status", "started_at"])
+    sent = failed = skipped = 0
+    try:
+        recipients = notification_campaign_recipients(campaign)
+        campaign.recipient_count = recipients.count()
+        campaign.save(update_fields=["recipient_count"])
+        for user in recipients.iterator():
+            data = {"type": "admin_campaign", "campaign_id": campaign.id}
+            if campaign.destination_url:
+                data["url"] = campaign.destination_url
+            log = send_push_notification(
+                user,
+                notification_type=NotificationLog.NotificationType.GENERAL,
+                title=campaign.title,
+                body=campaign.body,
+                data=data,
+            )
+            sent += int(log.status == NotificationLog.Status.SENT)
+            failed += int(log.status == NotificationLog.Status.FAILED)
+            skipped += int(log.status == NotificationLog.Status.SKIPPED)
+        campaign.status = NotificationCampaign.Status.COMPLETED
+    except Exception as exc:
+        campaign.status = NotificationCampaign.Status.FAILED
+        campaign.error_message = str(exc)
+    campaign.sent_count = sent
+    campaign.failed_count = failed
+    campaign.skipped_count = skipped
+    campaign.completed_at = timezone.now()
+    campaign.save(
+        update_fields=[
+            "status",
+            "sent_count",
+            "failed_count",
+            "skipped_count",
+            "error_message",
+            "completed_at",
+        ]
+    )
+    return {"status": campaign.status, "sent": sent, "failed": failed, "skipped": skipped}
+
+
+def notification_campaign_recipients(campaign: NotificationCampaign):
+    from django.contrib.auth import get_user_model
+
+    users = get_user_model().objects.filter(is_active=True).order_by("id")
+    if campaign.audience == NotificationCampaign.Audience.ENABLED_USERS:
+        return users.filter(notification_preference__notifications_enabled=True)
+    return users.filter(id__in=campaign.recipient_ids)
 
 
 def _send_due_supplement_reminder(preference: NotificationPreference) -> int:

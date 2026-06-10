@@ -3,20 +3,34 @@ from datetime import datetime, time, timezone as dt_timezone
 from unittest.mock import patch
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
+from rest_framework.test import APIClient
 
 from apps.accounts.models import DailyTracking
-from apps.notifications.models import DevicePushToken, NotificationLog, NotificationPreference
+from apps.notifications.models import DevicePushToken, NotificationCampaign, NotificationLog, NotificationPreference
 from apps.notifications.services import send_push_notification
-from apps.notifications.tasks import send_daily_habit_reminders
+from apps.notifications.tasks import send_daily_habit_reminders, send_notification_campaign
 from apps.recommendations.models import RecommendationRun
 from apps.recommendations.tasks import generate_recommendations_for_user
 from apps.supplements.models import Supplement, UserSupplement
 
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def notification_admin_client():
+    admin = get_user_model().objects.create_superuser(
+        email="notification-admin@example.com",
+        password="StrongPassword123",
+        name="Notification Admin",
+    )
+    client = APIClient()
+    client.force_authenticate(user=admin)
+    return client
 
 
 def test_user_can_register_expo_push_token(authenticated_client, user):
@@ -68,6 +82,68 @@ def test_user_can_update_notification_preferences(authenticated_client, user):
     assert preference.notifications_enabled is True
     assert preference.timezone == "Africa/Algiers"
     assert preference.supplement_reminder_time == time(8, 30)
+
+
+def test_admin_can_preview_notification_campaign_audience(notification_admin_client, user, other_user):
+    NotificationPreference.objects.create(user=user, notifications_enabled=True)
+    NotificationPreference.objects.create(user=other_user, notifications_enabled=False)
+
+    response = notification_admin_client.post(
+        reverse("admin-notification-audience-count"),
+        {
+            "audience": NotificationCampaign.Audience.ENABLED_USERS,
+            "recipient_ids": [],
+            "title": "New update",
+            "body": "A new update is available.",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"count": 1}
+
+
+def test_admin_can_create_notification_campaign(notification_admin_client, user):
+    with patch("apps.notifications.views.send_notification_campaign.delay") as delay:
+        response = notification_admin_client.post(
+            reverse("admin-notification-campaign-list"),
+            {
+                "audience": NotificationCampaign.Audience.SPECIFIC_USERS,
+                "recipient_ids": [user.id],
+                "title": "New update",
+                "body": "A new update is available.",
+                "destination_url": "inutriguide://tabs/notifications",
+            },
+            format="json",
+        )
+
+    assert response.status_code == 201
+    campaign = NotificationCampaign.objects.get()
+    assert campaign.created_by.email == "notification-admin@example.com"
+    assert campaign.recipient_count == 1
+    delay.assert_called_once_with(campaign.id)
+
+
+def test_notification_campaign_task_sends_and_tracks_delivery(user, other_user):
+    DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
+    campaign = NotificationCampaign.objects.create(
+        audience=NotificationCampaign.Audience.SPECIFIC_USERS,
+        recipient_ids=[user.id, other_user.id],
+        title="New update",
+        body="A new update is available.",
+        destination_url="inutriguide://tabs/notifications",
+    )
+
+    with patch("apps.notifications.services.urlopen") as urlopen:
+        urlopen.return_value.__enter__.return_value.read.return_value = b'{"data":[{"status":"ok"}]}'
+        result = send_notification_campaign(campaign.id)
+
+    campaign.refresh_from_db()
+    assert result == {"status": "completed", "sent": 1, "failed": 0, "skipped": 1}
+    assert campaign.recipient_count == 2
+    assert campaign.sent_count == 1
+    assert campaign.skipped_count == 1
+    assert NotificationLog.objects.filter(provider_response__data__campaign_id=campaign.id).count() == 2
 
 
 def test_supplement_reminder_sends_when_supplement_not_taken(user):

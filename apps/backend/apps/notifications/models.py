@@ -83,3 +83,43 @@ class NotificationLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user_id} {self.notification_type} {self.status}"
+
+
+class NotificationCampaign(models.Model):
+    class Audience(models.TextChoices):
+        ENABLED_USERS = "enabled_users", "All notification-enabled users"
+        SPECIFIC_USERS = "specific_users", "Specific users"
+
+    class Status(models.TextChoices):
+        QUEUED = "queued", "Queued"
+        SENDING = "sending", "Sending"
+        COMPLETED = "completed", "Completed"
+        FAILED = "failed", "Failed"
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="notification_campaigns_created",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    audience = models.CharField(max_length=30, choices=Audience.choices)
+    recipient_ids = models.JSONField(default=list, blank=True)
+    title = models.CharField(max_length=120)
+    body = models.CharField(max_length=255)
+    destination_url = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.QUEUED)
+    recipient_count = models.PositiveIntegerField(default=0)
+    sent_count = models.PositiveIntegerField(default=0)
+    failed_count = models.PositiveIntegerField(default=0)
+    skipped_count = models.PositiveIntegerField(default=0)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"], name="notif_campaign_status_idx")]
+
+    def __str__(self) -> str:
+        return f"{self.id} {self.title} {self.status}"

@@ -13,6 +13,7 @@ import { EvaluationPage } from "../features/recommendations/EvaluationPage";
 import { AssociationDatasetPage } from "../features/rules/AssociationDatasetPage";
 import { RulesPage } from "../features/rules/RulesPage";
 import { UserDetailPage, UsersPage } from "../features/users/UsersPage";
+import { NotificationsPage } from "../features/notifications/NotificationsPage";
 import { queryClient } from "../lib/query-client";
 import { useAuthStore } from "../store/auth-store";
 
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="chats/:userId" element={<UserChatsPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:userId" element={<UserDetailPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
       </Route>
       <Route path="*" element={<Navigate replace to={accessToken ? "/" : "/login"} />} />
     </Routes>

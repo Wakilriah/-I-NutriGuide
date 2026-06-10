@@ -4,8 +4,14 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import DevicePushToken, NotificationLog, NotificationPreference
-from .serializers import DevicePushTokenSerializer, NotificationLogSerializer, NotificationPreferenceSerializer
+from .models import DevicePushToken, NotificationCampaign, NotificationLog, NotificationPreference
+from .serializers import (
+    DevicePushTokenSerializer,
+    NotificationCampaignSerializer,
+    NotificationLogSerializer,
+    NotificationPreferenceSerializer,
+)
+from .tasks import notification_campaign_recipients, send_notification_campaign
 
 
 class RegisterPushTokenView(generics.CreateAPIView):
@@ -71,3 +77,25 @@ class DeactivatePushTokenView(APIView):
     def delete(self, request, token_id):
         DevicePushToken.objects.filter(id=token_id, user=request.user).update(active=False)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AdminNotificationCampaignListCreateView(generics.ListCreateAPIView):
+    serializer_class = NotificationCampaignSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = NotificationCampaign.objects.select_related("created_by")
+
+    def perform_create(self, serializer):
+        campaign = serializer.save(created_by=self.request.user)
+        campaign.recipient_count = notification_campaign_recipients(campaign).count()
+        campaign.save(update_fields=["recipient_count"])
+        send_notification_campaign.delay(campaign.id)
+
+
+class AdminNotificationAudienceCountView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        serializer = NotificationCampaignSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        campaign = NotificationCampaign(**serializer.validated_data)
+        return Response({"count": notification_campaign_recipients(campaign).count()})

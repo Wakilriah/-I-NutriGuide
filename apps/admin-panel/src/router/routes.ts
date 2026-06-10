@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Network,
   BarChart3,
+  Bell,
   Plus,
   ShieldCheck,
   Users,
@@ -25,7 +26,8 @@ export type AdminRouteId =
   | "evaluation"
   | "feedback"
   | "chats"
-  | "users";
+  | "users"
+  | "notifications";
 
 export const adminRoutes = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -40,4 +42,5 @@ export const adminRoutes = [
   { id: "feedback", label: "Feedback", icon: MessageSquare, path: "/feedback" },
   { id: "chats", label: "Chats", icon: MessageSquare, path: "/chats" },
   { id: "users", label: "Users", icon: Users, path: "/users" },
+  { id: "notifications", label: "Notifications", icon: Bell, path: "/notifications" },
 ] as const satisfies ReadonlyArray<{ id: AdminRouteId; label: string; icon: LucideIcon; path: string }>;

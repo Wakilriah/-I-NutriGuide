@@ -2,7 +2,7 @@ import json
 
 from rest_framework import serializers
 
-from .models import DevicePushToken, NotificationLog, NotificationPreference
+from .models import DevicePushToken, NotificationCampaign, NotificationLog, NotificationPreference
 
 
 class DevicePushTokenSerializer(serializers.ModelSerializer):
@@ -80,3 +80,55 @@ class NotificationLogSerializer(serializers.ModelSerializer):
     def get_data(self, obj):
         response = obj.provider_response if isinstance(obj.provider_response, dict) else {}
         return response.get("data", {})
+
+
+class NotificationCampaignSerializer(serializers.ModelSerializer):
+    created_by_email = serializers.EmailField(source="created_by.email", read_only=True)
+
+    class Meta:
+        model = NotificationCampaign
+        fields = [
+            "id",
+            "audience",
+            "recipient_ids",
+            "title",
+            "body",
+            "destination_url",
+            "status",
+            "recipient_count",
+            "sent_count",
+            "failed_count",
+            "skipped_count",
+            "error_message",
+            "created_by_email",
+            "created_at",
+            "started_at",
+            "completed_at",
+        ]
+        read_only_fields = [
+            "id",
+            "status",
+            "recipient_count",
+            "sent_count",
+            "failed_count",
+            "skipped_count",
+            "error_message",
+            "created_by_email",
+            "created_at",
+            "started_at",
+            "completed_at",
+        ]
+
+    def validate_recipient_ids(self, value):
+        if not isinstance(value, list) or any(not isinstance(user_id, int) for user_id in value):
+            raise serializers.ValidationError("Recipient IDs must be a list of integers.")
+        return list(dict.fromkeys(value))
+
+    def validate(self, attrs):
+        audience = attrs.get("audience")
+        recipient_ids = attrs.get("recipient_ids", [])
+        if audience == NotificationCampaign.Audience.SPECIFIC_USERS and not recipient_ids:
+            raise serializers.ValidationError({"recipient_ids": "Select at least one user."})
+        if audience == NotificationCampaign.Audience.ENABLED_USERS:
+            attrs["recipient_ids"] = []
+        return attrs
