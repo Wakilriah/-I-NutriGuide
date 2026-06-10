@@ -1,0 +1,518 @@
+Project inutriguide_nutrition_recommendation {
+  database_type: "PostgreSQL"
+  Note: "Focused database design for collected nutrition data and the recommendation engine. Application tables such as users, profiles, auth, chat, and notifications are intentionally excluded."
+}
+
+// -----------------------------
+// Core Nutrition Knowledge Base
+// -----------------------------
+
+Table food_categories {
+  id bigint [pk, increment]
+  name varchar [unique, not null]
+  slug varchar [unique, not null]
+  ciqual_group_code varchar
+  ciqual_subgroup_code varchar
+  ciqual_subsubgroup_code varchar
+  source varchar
+  created_at timestamp
+  updated_at timestamp
+
+  Note: "Groups foods by source taxonomy, for example CIQUAL food groups."
+}
+
+Table foods {
+  id bigint [pk, increment]
+  category_id bigint [not null]
+  name varchar [not null]
+  slug varchar [unique, not null]
+  description text
+  scientific_name varchar
+  ciqual_code varchar [unique]
+  source varchar
+  serving_size_g decimal
+  image_url varchar
+  image_path varchar
+  image_alt varchar
+  nutrient_tags json
+  allergen_tags json
+  diet_tags json
+  recommended_for_supplements json
+  synergy_reason text
+  avoid_or_caution text
+  association_rule_items json
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    is_active
+    ciqual_code
+    source
+    (category_id, source)
+  }
+
+  Note: "Food records imported from CIQUAL and curated by admins."
+}
+
+Table nutrients {
+  id bigint [pk, increment]
+  name varchar [unique, not null]
+  slug varchar [unique, not null]
+  unit varchar
+  description text
+  original_name_fr varchar
+  source_column varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    is_active
+  }
+
+  Note: "Nutrient dictionary, including CIQUAL column mapping."
+}
+
+Table food_nutrients {
+  id bigint [pk, increment]
+  food_id bigint [not null]
+  nutrient_id bigint [not null]
+  amount decimal [not null]
+  unit varchar
+  per_quantity decimal
+  per_unit varchar
+
+  Indexes {
+    (food_id, nutrient_id) [unique]
+  }
+
+  Note: "Composition facts, for example Vitamin C mg per 100g of orange."
+}
+
+Table nutrient_intake_references {
+  id bigint [pk, increment]
+  nutrient_id bigint [not null]
+  reference_type varchar
+  life_stage varchar
+  sex varchar
+  amount decimal
+  unit varchar
+  note text
+  source varchar
+  source_url varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    reference_type
+    active
+    (nutrient_id, reference_type, life_stage, sex) [unique]
+  }
+
+  Note: "RDA, AI, UL, and DV references used for nutrition guidance and warnings."
+}
+
+// -----------------------------
+// Supplement Knowledge Base
+// -----------------------------
+
+Table supplements {
+  id bigint [pk, increment]
+  name varchar [not null]
+  slug varchar [unique, not null]
+  description text
+  common_dose varchar
+  source varchar
+  source_id varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    is_active
+    (source, source_id)
+  }
+}
+
+Table supplement_nutrients {
+  id bigint [pk, increment]
+  supplement_id bigint [not null]
+  nutrient_id bigint [not null]
+  amount decimal
+  unit varchar
+
+  Indexes {
+    (supplement_id, nutrient_id) [unique]
+  }
+
+  Note: "Connects a supplement to its main nutrient or active nutrient component."
+}
+
+Table supplement_aliases {
+  id bigint [pk, increment]
+  supplement_id bigint [not null]
+  alias varchar
+  slug varchar
+  source varchar
+  source_url varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    active
+    (supplement_id, slug) [unique]
+  }
+
+  Note: "Alternative supplement names used during imports and normalization."
+}
+
+Table supplement_fact_sheets {
+  id bigint [pk, increment]
+  source varchar
+  source_id varchar
+  title varchar
+  slug varchar [unique]
+  audience varchar
+  url varchar [unique]
+  description text
+  benefits text
+  safety text
+  interactions text
+  recommended_intake text
+  deficiency text
+  food_sources text
+  raw_sections json
+  raw_data json
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (source, source_id)
+    audience
+    slug
+    (source, source_id, audience) [unique]
+  }
+
+  Note: "External supplement knowledge, for example NIH ODS fact sheets."
+}
+
+// -----------------------------
+// Interactions and Safety Logic
+// -----------------------------
+
+Table nutrient_interactions {
+  id bigint [pk, increment]
+  source_type varchar
+  source_key varchar
+  target_type varchar
+  target_key varchar
+  interaction_type varchar
+  mechanism text
+  evidence_level varchar
+  severity varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (source_type, source_key)
+    (target_type, target_key)
+    interaction_type
+    severity
+    active
+    (source_type, source_key, target_type, target_key, interaction_type) [unique]
+  }
+
+  Note: "Models nutrition logic such as enhances, inhibits, requires, competes_with, or should_not_combine."
+}
+
+Table supplement_safety_rules {
+  id bigint [pk, increment]
+  supplement_id bigint [not null]
+  rule_type varchar
+  interacting_entity varchar
+  severity varchar
+  title varchar
+  description text
+  recommendation text
+  source varchar
+  source_url varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    rule_type
+    severity
+    active
+    (supplement_id, rule_type, interacting_entity, title) [unique]
+  }
+
+  Note: "Curated safety rules for absorption, upper limits, side effects, medical cautions, and interactions."
+}
+
+Table safety_constraints {
+  id bigint [pk, increment]
+  supplement_category_id bigint
+  supplement_category_name varchar
+  avoid_or_review_item varchar
+  constraint_type varchar
+  safety_level varchar
+  reason text
+  how_to_use text
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (supplement_category_name, avoid_or_review_item, constraint_type) [unique]
+  }
+
+  Note: "Recommendation guardrails, for example avoid timing, exclusion, medical caution, or medical review."
+}
+
+// -----------------------------
+// Collected Association Dataset
+// -----------------------------
+
+Table supplement_categories {
+  id bigint [pk, increment]
+  category varchar [unique]
+  canonical_item varchar [unique]
+  keywords json
+  main_nutrient varchar
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Note: "Normalizes many supplement names into canonical categories used by the association engine."
+}
+
+Table supplement_normalizations {
+  id bigint [pk, increment]
+  supplement_category_id bigint
+  original_supplement_name varchar
+  original_supplement_slug varchar [unique]
+  normalized_category varchar
+  primary_keyword varchar
+  main_nutrient varchar
+  notes text
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    normalized_category
+    original_supplement_slug
+    is_active
+  }
+
+  Note: "Maps raw collected supplement names to the canonical supplement category."
+}
+
+Table food_supplement_synergy_rules {
+  id bigint [pk, increment]
+  rule_seed_id varchar [unique]
+  supplement_category_id bigint
+  supplement_category_name varchar
+  supplement_item varchar
+  food varchar
+  food_item varchar
+  nutrient_relation varchar
+  association_type varchar
+  reason text
+  seed_weight float
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    supplement_item
+    food_item
+    association_type
+    is_active
+  }
+
+  Note: "Curated seed rules saying which foods support which supplement categories and why."
+}
+
+Table association_transactions {
+  id bigint [pk, increment]
+  transaction_id varchar [unique]
+  source varchar
+  raw_payload json
+  one_hot_items json
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    transaction_id
+    source
+  }
+
+  Note: "Collected rows transformed into market-basket style transactions for association mining."
+}
+
+Table association_transaction_items {
+  id bigint [pk, increment]
+  transaction_id bigint [not null]
+  item_type varchar
+  item_value varchar
+  item varchar
+
+  Indexes {
+    item
+    item_type
+    (transaction_id, item) [unique]
+  }
+
+  Note: "One normalized item inside a collected transaction, for example supp:iron or food:orange."
+}
+
+Table mined_association_rules {
+  id bigint [pk, increment]
+  rule_key varchar [unique]
+  antecedent_items json
+  consequent_items json
+  support float
+  confidence float
+  lift float
+  score float
+  rule_type varchar
+  review_status varchar
+  admin_note text
+  safety_conflict_status varchar
+  safety_conflict_details json
+  source varchar
+  explanation text
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    rule_type
+    confidence
+    lift
+    is_active
+  }
+
+  Note: "Rules discovered from collected transactions before or after admin review."
+}
+
+Table association_rules {
+  id bigint [pk, increment]
+  antecedent_type varchar
+  antecedent_slug varchar
+  consequent_type varchar
+  consequent_slug varchar
+  support float
+  confidence float
+  lift float
+  score float
+  explanation text
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    antecedent_slug
+    consequent_slug
+    is_active
+    (antecedent_type, antecedent_slug, consequent_type, consequent_slug) [unique]
+  }
+
+  Note: "Approved association rules used directly by the recommender."
+}
+
+// -----------------------------
+// Recommendation Engine Output
+// -----------------------------
+
+Table recommendation_weight_profiles {
+  id bigint [pk, increment]
+  user_type varchar [unique]
+  alpha float
+  beta float
+  gamma float
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Note: "Controls hybrid scoring weights. alpha = content-based, beta = association rules, gamma = collaborative or learned signal."
+}
+
+Table recommendation_runs {
+  id uuid [pk]
+  input_snapshot json
+  profile_snapshot json
+  supplements_snapshot json
+  disclaimer text
+  created_at timestamp
+
+  Note: "A recommendation execution. User ownership is excluded here because this diagram focuses on nutrition/recommendation logic."
+}
+
+Table recommendation_items {
+  id bigint [pk, increment]
+  run_id uuid [not null]
+  food_id bigint [not null]
+  supplement_id bigint
+  score float
+  nutrient_score float
+  rule_score float
+  preference_score float
+  confidence_score float
+  confidence_label varchar
+  score_breakdown json
+  matched_nutrients json
+  matched_rules json
+  explanation text
+  explanation_details json
+  warnings json
+  tags json
+  rank int
+  created_at timestamp
+
+  Indexes {
+    (run_id, rank) [unique]
+    (run_id, food_id) [unique]
+  }
+
+  Note: "Final ranked food recommendations with explainability, warnings, and score breakdown."
+}
+
+// -----------------------------
+// Relationships
+// -----------------------------
+
+Ref: foods.category_id > food_categories.id
+
+Ref: food_nutrients.food_id > foods.id
+Ref: food_nutrients.nutrient_id > nutrients.id
+Ref: nutrient_intake_references.nutrient_id > nutrients.id
+
+Ref: supplement_nutrients.supplement_id > supplements.id
+Ref: supplement_nutrients.nutrient_id > nutrients.id
+Ref: supplement_aliases.supplement_id > supplements.id
+Ref: supplement_safety_rules.supplement_id > supplements.id
+
+Ref: supplement_normalizations.supplement_category_id > supplement_categories.id
+Ref: food_supplement_synergy_rules.supplement_category_id > supplement_categories.id
+Ref: safety_constraints.supplement_category_id > supplement_categories.id
+
+Ref: association_transaction_items.transaction_id > association_transactions.id
+
+Ref: recommendation_items.run_id > recommendation_runs.id
+Ref: recommendation_items.food_id > foods.id
+Ref: recommendation_items.supplement_id > supplements.id

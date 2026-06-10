@@ -1,0 +1,65 @@
+erDiagram
+    USER ||--|| HEALTH_PROFILE : has
+    HEALTH_PROFILE ||--o{ HEALTH_MEASUREMENT : records
+    HEALTH_PROFILE ||--o{ PROFILE_DISEASE : has
+    DISEASE ||--o{ PROFILE_DISEASE : classifies
+    HEALTH_PROFILE ||--o{ PROFILE_GOAL : pursues
+    NUTRITIONAL_GOAL ||--o{ PROFILE_GOAL : defines
+
+    USER {
+        bigint user_id PK
+        varchar email UK
+        varchar username UK
+        varchar name
+        varchar country
+        date date_of_birth
+        varchar gender
+        timestamp created_at
+    }
+    HEALTH_PROFILE {
+        bigint profile_id PK
+        bigint user_id FK,UK
+        smallint sports_days_per_week
+        varchar activity_level
+        varchar timezone
+    }
+    HEALTH_MEASUREMENT {
+        bigint measurement_id PK
+        bigint profile_id FK
+        decimal height_cm
+        decimal weight_kg
+        date measured_on
+    }
+    DISEASE {
+        bigint disease_id PK
+        varchar name UK
+        varchar description
+        boolean is_chronic
+        boolean is_active
+    }
+    PROFILE_DISEASE {
+        bigint profile_disease_id PK
+        bigint profile_id FK
+        bigint disease_id FK
+        varchar status
+        varchar severity
+        date diagnosed_on
+        text notes
+    }
+    NUTRITIONAL_GOAL {
+        bigint goal_id PK
+        varchar name UK
+        varchar description
+        boolean is_active
+    }
+    PROFILE_GOAL {
+        bigint profile_goal_id PK
+        bigint profile_id FK
+        bigint goal_id FK
+        varchar status
+        decimal target_value
+        varchar target_unit
+        date started_on
+        date target_date
+    }
+

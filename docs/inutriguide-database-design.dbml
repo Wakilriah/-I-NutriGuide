@@ -1,0 +1,708 @@
+Project inutriguide {
+  database_type: "PostgreSQL"
+  Note: "I-NutriGuide database design for dbdiagram.io"
+}
+
+Table accounts_user {
+  id bigint [pk, increment]
+  password varchar
+  last_login timestamp
+  is_superuser boolean
+  email varchar [unique, not null]
+  name varchar
+  is_staff boolean
+  is_active boolean
+  date_joined timestamp
+}
+
+Table accounts_userprofile {
+  id bigint [pk, increment]
+  user_id bigint [unique, not null]
+  country varchar
+  age smallint
+  gender varchar
+  height_cm decimal
+  weight_kg decimal
+  bmi decimal
+  sports_days_per_week smallint
+  goal varchar
+  goals json
+  health_conditions json
+  activity_level varchar
+  diet_type varchar
+  expo_push_token varchar
+  timezone varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table accounts_allergy {
+  id bigint [pk, increment]
+  name varchar [unique, not null]
+  slug varchar [unique, not null]
+}
+
+Table accounts_dietaryrestriction {
+  id bigint [pk, increment]
+  name varchar [unique, not null]
+  slug varchar [unique, not null]
+}
+
+Table accounts_userprofile_allergies {
+  id bigint [pk, increment]
+  userprofile_id bigint [not null]
+  allergy_id bigint [not null]
+
+  Indexes {
+    (userprofile_id, allergy_id) [unique]
+  }
+}
+
+Table accounts_userprofile_dietary_restrictions {
+  id bigint [pk, increment]
+  userprofile_id bigint [not null]
+  dietaryrestriction_id bigint [not null]
+
+  Indexes {
+    (userprofile_id, dietaryrestriction_id) [unique]
+  }
+}
+
+Table accounts_dislikedfood {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  name varchar
+  slug varchar
+
+  Indexes {
+    (user_id, slug) [unique]
+  }
+}
+
+Table accounts_dailytracking {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  date date [not null]
+  weight_kg decimal
+  water_ml int
+  calories int
+  protein_g decimal
+  fiber_g decimal
+  steps int
+  supplements_taken json
+  food_entries json
+  goals_completed boolean
+  notes text
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (user_id, date) [unique]
+  }
+}
+
+Table accounts_notificationlog {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  notification_type varchar
+  title varchar
+  body text
+  data json
+  sent_at timestamp
+  read_at timestamp
+
+  Indexes {
+    (user_id, sent_at)
+    notification_type
+  }
+}
+
+Table foods_foodcategory {
+  id bigint [pk, increment]
+  name varchar [unique, not null]
+  slug varchar [unique, not null]
+  ciqual_group_code varchar
+  ciqual_subgroup_code varchar
+  ciqual_subsubgroup_code varchar
+  source varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table foods_food {
+  id bigint [pk, increment]
+  name varchar [not null]
+  slug varchar [unique, not null]
+  category_id bigint [not null]
+  description text
+  scientific_name varchar
+  ciqual_code varchar [unique]
+  source varchar
+  serving_size_g decimal
+  image_url varchar
+  image_path varchar
+  image_alt varchar
+  recommended_for_supplements json
+  nutrient_tags json
+  synergy_reason text
+  avoid_or_caution text
+  allergen_tags json
+  diet_tags json
+  association_rule_items json
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    is_active
+    ciqual_code
+    source
+    (category_id, source)
+  }
+}
+
+Table nutrients_nutrient {
+  id bigint [pk, increment]
+  name varchar [unique, not null]
+  slug varchar [unique, not null]
+  unit varchar
+  description text
+  original_name_fr varchar
+  source_column varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    is_active
+  }
+}
+
+Table foods_foodnutrient {
+  id bigint [pk, increment]
+  food_id bigint [not null]
+  nutrient_id bigint [not null]
+  amount decimal
+  unit varchar
+  per_quantity decimal
+  per_unit varchar
+
+  Indexes {
+    (food_id, nutrient_id) [unique]
+  }
+}
+
+Table nutrients_nutrientinteraction {
+  id bigint [pk, increment]
+  source_type varchar
+  source_key varchar
+  target_type varchar
+  target_key varchar
+  interaction_type varchar
+  mechanism text
+  evidence_level varchar
+  severity varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (source_type, source_key)
+    (target_type, target_key)
+    interaction_type
+    severity
+    active
+    (source_type, source_key, target_type, target_key, interaction_type) [unique]
+  }
+}
+
+Table nutrients_nutrientintakereference {
+  id bigint [pk, increment]
+  nutrient_id bigint [not null]
+  reference_type varchar
+  life_stage varchar
+  sex varchar
+  amount decimal
+  unit varchar
+  note text
+  source varchar
+  source_url varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    reference_type
+    active
+    (nutrient_id, reference_type, life_stage, sex) [unique]
+  }
+}
+
+Table supplements_supplement {
+  id bigint [pk, increment]
+  name varchar [not null]
+  slug varchar [unique, not null]
+  description text
+  common_dose varchar
+  source varchar
+  source_id varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    is_active
+    (source, source_id)
+  }
+}
+
+Table supplements_supplementnutrient {
+  id bigint [pk, increment]
+  supplement_id bigint [not null]
+  nutrient_id bigint [not null]
+  amount decimal
+  unit varchar
+
+  Indexes {
+    (supplement_id, nutrient_id) [unique]
+  }
+}
+
+Table supplements_supplementalias {
+  id bigint [pk, increment]
+  supplement_id bigint [not null]
+  alias varchar
+  slug varchar
+  source varchar
+  source_url varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    slug
+    active
+    (supplement_id, slug) [unique]
+  }
+}
+
+Table supplements_supplementsafetyrule {
+  id bigint [pk, increment]
+  supplement_id bigint [not null]
+  rule_type varchar
+  interacting_entity varchar
+  severity varchar
+  title varchar
+  description text
+  recommendation text
+  source varchar
+  source_url varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    rule_type
+    severity
+    active
+    (supplement_id, rule_type, interacting_entity, title) [unique]
+  }
+}
+
+Table supplements_supplementfactsheet {
+  id bigint [pk, increment]
+  source varchar
+  source_id varchar
+  title varchar
+  slug varchar [unique]
+  audience varchar
+  url varchar [unique]
+  description text
+  benefits text
+  safety text
+  interactions text
+  recommended_intake text
+  deficiency text
+  food_sources text
+  raw_sections json
+  raw_data json
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (source, source_id)
+    audience
+    slug
+    (source, source_id, audience) [unique]
+  }
+}
+
+Table supplements_supplementdataimportcheckpoint {
+  id bigint [pk, increment]
+  source varchar [unique]
+  cursor int
+  total_count int
+  status varchar
+  metadata json
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table supplements_usersupplement {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  supplement_id bigint [not null]
+  dose varchar
+  frequency varchar
+  time_of_day varchar
+  active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (user_id, active)
+  }
+}
+
+Table rules_associationrule {
+  id bigint [pk, increment]
+  antecedent_type varchar
+  antecedent_slug varchar
+  consequent_type varchar
+  consequent_slug varchar
+  support float
+  confidence float
+  lift float
+  score float
+  explanation text
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    antecedent_slug
+    consequent_slug
+    is_active
+    (antecedent_type, antecedent_slug, consequent_type, consequent_slug) [unique]
+  }
+}
+
+Table rules_supplementcategory {
+  id bigint [pk, increment]
+  category varchar [unique]
+  canonical_item varchar [unique]
+  keywords json
+  main_nutrient varchar
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table rules_supplementnormalization {
+  id bigint [pk, increment]
+  original_supplement_name varchar
+  original_supplement_slug varchar [unique]
+  category_id bigint
+  normalized_category varchar
+  primary_keyword varchar
+  main_nutrient varchar
+  notes text
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table rules_foodsupplementsynergyrule {
+  id bigint [pk, increment]
+  rule_seed_id varchar [unique]
+  supplement_category_id bigint
+  supplement_category_name varchar
+  supplement_item varchar
+  food varchar
+  food_item varchar
+  nutrient_relation varchar
+  association_type varchar
+  reason text
+  seed_weight float
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table rules_safetyconstraint {
+  id bigint [pk, increment]
+  supplement_category_id bigint
+  supplement_category_name varchar
+  avoid_or_review_item varchar
+  constraint_type varchar
+  safety_level varchar
+  reason text
+  how_to_use text
+  source_url varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (supplement_category_name, avoid_or_review_item, constraint_type) [unique]
+  }
+}
+
+Table rules_associationtransaction {
+  id bigint [pk, increment]
+  transaction_id varchar [unique]
+  source varchar
+  raw_payload json
+  one_hot_items json
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table rules_associationtransactionitem {
+  id bigint [pk, increment]
+  transaction_id bigint [not null]
+  item_type varchar
+  item_value varchar
+  item varchar
+
+  Indexes {
+    item
+    item_type
+    (transaction_id, item) [unique]
+  }
+}
+
+Table rules_minedassociationrule {
+  id bigint [pk, increment]
+  rule_key varchar [unique]
+  antecedent_items json
+  consequent_items json
+  support float
+  confidence float
+  lift float
+  score float
+  rule_type varchar
+  review_status varchar
+  admin_note text
+  safety_conflict_status varchar
+  safety_conflict_details json
+  source varchar
+  explanation text
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table recommendations_recommendationrun {
+  id uuid [pk]
+  user_id bigint [not null]
+  input_snapshot json
+  profile_snapshot json
+  supplements_snapshot json
+  disclaimer text
+  created_at timestamp
+
+  Indexes {
+    (user_id, created_at)
+  }
+}
+
+Table recommendations_recommendationitem {
+  id bigint [pk, increment]
+  run_id uuid [not null]
+  food_id bigint [not null]
+  supplement_id bigint
+  score float
+  nutrient_score float
+  rule_score float
+  preference_score float
+  confidence_score float
+  confidence_label varchar
+  score_breakdown json
+  matched_nutrients json
+  matched_rules json
+  explanation text
+  explanation_details json
+  warnings json
+  tags json
+  rank int
+  created_at timestamp
+
+  Indexes {
+    (run_id, rank) [unique]
+    (run_id, food_id) [unique]
+  }
+}
+
+Table recommendations_savedrecommendationitem {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  recommendation_item_id bigint [not null]
+  created_at timestamp
+
+  Indexes {
+    (user_id, recommendation_item_id) [unique]
+    (user_id, created_at)
+  }
+}
+
+Table recommendations_recommendationweightprofile {
+  id bigint [pk, increment]
+  user_type varchar [unique]
+  alpha float
+  beta float
+  gamma float
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table feedback_recommendationfeedback {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  recommendation_item_id bigint [not null]
+  food_id bigint
+  feedback_type varchar
+  rating smallint
+  is_helpful boolean
+  reason varchar
+  supplement_context json
+  comment text
+  context json
+  created_at timestamp
+
+  Indexes {
+    (user_id, recommendation_item_id) [unique]
+  }
+}
+
+Table chat_chatsession {
+  id uuid [pk]
+  user_id bigint [not null]
+  title varchar
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (user_id, updated_at)
+  }
+}
+
+Table chat_chatmessage {
+  id bigint [pk, increment]
+  session_id uuid [not null]
+  role varchar
+  content text
+  metadata json
+  recommendation_run_id uuid
+  groq_model varchar
+  token_usage json
+  error_code varchar
+  created_at timestamp
+
+  Indexes {
+    (session_id, created_at)
+    recommendation_run_id
+  }
+}
+
+Table notifications_devicepushtoken {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  token varchar [unique]
+  platform varchar
+  device_id varchar
+  active boolean
+  last_seen_at timestamp
+  created_at timestamp
+
+  Indexes {
+    (user_id, active)
+    token
+  }
+}
+
+Table notifications_notificationpreference {
+  id bigint [pk, increment]
+  user_id bigint [unique, not null]
+  notifications_enabled boolean
+  timezone varchar
+  supplement_reminders_enabled boolean
+  supplement_reminder_time time
+  water_reminders_enabled boolean
+  water_morning_time time
+  water_afternoon_time time
+  water_evening_time time
+  quiet_hours_start time
+  quiet_hours_end time
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notifications_notificationlog {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  notification_type varchar
+  title varchar
+  body varchar
+  status varchar
+  provider_response json
+  created_at timestamp
+  sent_at timestamp
+
+  Indexes {
+    (user_id, notification_type, created_at)
+    status
+  }
+}
+
+Ref: accounts_userprofile.user_id - accounts_user.id
+Ref: accounts_userprofile_allergies.userprofile_id > accounts_userprofile.id
+Ref: accounts_userprofile_allergies.allergy_id > accounts_allergy.id
+Ref: accounts_userprofile_dietary_restrictions.userprofile_id > accounts_userprofile.id
+Ref: accounts_userprofile_dietary_restrictions.dietaryrestriction_id > accounts_dietaryrestriction.id
+Ref: accounts_dislikedfood.user_id > accounts_user.id
+Ref: accounts_dailytracking.user_id > accounts_user.id
+Ref: accounts_notificationlog.user_id > accounts_user.id
+
+Ref: foods_food.category_id > foods_foodcategory.id
+Ref: foods_foodnutrient.food_id > foods_food.id
+Ref: foods_foodnutrient.nutrient_id > nutrients_nutrient.id
+Ref: nutrients_nutrientintakereference.nutrient_id > nutrients_nutrient.id
+
+Ref: supplements_supplementnutrient.supplement_id > supplements_supplement.id
+Ref: supplements_supplementnutrient.nutrient_id > nutrients_nutrient.id
+Ref: supplements_supplementalias.supplement_id > supplements_supplement.id
+Ref: supplements_supplementsafetyrule.supplement_id > supplements_supplement.id
+Ref: supplements_usersupplement.user_id > accounts_user.id
+Ref: supplements_usersupplement.supplement_id > supplements_supplement.id
+
+Ref: rules_supplementnormalization.category_id > rules_supplementcategory.id
+Ref: rules_foodsupplementsynergyrule.supplement_category_id > rules_supplementcategory.id
+Ref: rules_safetyconstraint.supplement_category_id > rules_supplementcategory.id
+Ref: rules_associationtransactionitem.transaction_id > rules_associationtransaction.id
+
+Ref: recommendations_recommendationrun.user_id > accounts_user.id
+Ref: recommendations_recommendationitem.run_id > recommendations_recommendationrun.id
+Ref: recommendations_recommendationitem.food_id > foods_food.id
+Ref: recommendations_recommendationitem.supplement_id > supplements_supplement.id
+Ref: recommendations_savedrecommendationitem.user_id > accounts_user.id
+Ref: recommendations_savedrecommendationitem.recommendation_item_id > recommendations_recommendationitem.id
+
+Ref: feedback_recommendationfeedback.user_id > accounts_user.id
+Ref: feedback_recommendationfeedback.recommendation_item_id > recommendations_recommendationitem.id
+Ref: feedback_recommendationfeedback.food_id > foods_food.id
+
+Ref: chat_chatsession.user_id > accounts_user.id
+Ref: chat_chatmessage.session_id > chat_chatsession.id
+Ref: chat_chatmessage.recommendation_run_id > recommendations_recommendationrun.id
+
+Ref: notifications_devicepushtoken.user_id > accounts_user.id
+Ref: notifications_notificationpreference.user_id - accounts_user.id
+Ref: notifications_notificationlog.user_id > accounts_user.id

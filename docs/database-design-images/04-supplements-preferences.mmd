@@ -1,0 +1,47 @@
+erDiagram
+    HEALTH_PROFILE ||--o{ PROFILE_SUPPLEMENT : uses_or_considers
+    SUPPLEMENT ||--o{ PROFILE_SUPPLEMENT : identifies
+    SUPPLEMENT ||--o{ SUPPLEMENT_NUTRIENT : contains
+    NUTRIENT ||--o{ SUPPLEMENT_NUTRIENT : measures
+    HEALTH_PROFILE ||--o{ DIETARY_PREFERENCE : follows
+
+    HEALTH_PROFILE {
+        bigint profile_id PK
+        bigint user_id FK,UK
+    }
+    SUPPLEMENT {
+        bigint supplement_id PK
+        varchar name UK
+        text description
+        boolean is_active
+    }
+    PROFILE_SUPPLEMENT {
+        bigint profile_supplement_id PK
+        bigint profile_id FK
+        bigint supplement_id FK
+        varchar status
+        varchar dose
+        varchar frequency
+        date started_on
+        date ended_on
+        text reason
+    }
+    NUTRIENT {
+        bigint nutrient_id PK
+        varchar name UK
+        varchar default_unit
+        text description
+    }
+    SUPPLEMENT_NUTRIENT {
+        bigint supplement_nutrient_id PK
+        bigint supplement_id FK
+        bigint nutrient_id FK
+        decimal amount
+        varchar unit
+    }
+    DIETARY_PREFERENCE {
+        bigint dietary_preference_id PK
+        bigint profile_id FK
+        varchar preference_type
+        boolean is_active
+    }

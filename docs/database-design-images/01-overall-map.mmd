@@ -1,0 +1,22 @@
+erDiagram
+    USER ||--|| HEALTH_PROFILE : has
+    HEALTH_PROFILE ||--o{ HEALTH_MEASUREMENT : records
+    HEALTH_PROFILE ||--o{ PROFILE_DISEASE : has
+    DISEASE ||--o{ PROFILE_DISEASE : classifies
+    HEALTH_PROFILE ||--o{ PROFILE_GOAL : pursues
+    NUTRITIONAL_GOAL ||--o{ PROFILE_GOAL : defines
+    HEALTH_PROFILE ||--o{ PROFILE_ALLERGY : reports
+    ALLERGEN ||--o{ PROFILE_ALLERGY : identifies
+    HEALTH_PROFILE ||--o{ FOOD_PREFERENCE : expresses
+    FOOD_ITEM ||--o{ FOOD_PREFERENCE : receives
+    FOOD_CATEGORY ||--o{ FOOD_ITEM : groups
+    FOOD_ITEM ||--o{ FOOD_ALLERGEN : may_contain
+    ALLERGEN ||--o{ FOOD_ALLERGEN : identifies
+    FOOD_ITEM ||--o{ FOOD_NUTRIENT : contains
+    NUTRIENT ||--o{ FOOD_NUTRIENT : measures
+    HEALTH_PROFILE ||--o{ PROFILE_SUPPLEMENT : uses
+    SUPPLEMENT ||--o{ PROFILE_SUPPLEMENT : identifies
+    SUPPLEMENT ||--o{ SUPPLEMENT_NUTRIENT : contains
+    NUTRIENT ||--o{ SUPPLEMENT_NUTRIENT : measures
+    HEALTH_PROFILE ||--o{ DIETARY_PREFERENCE : follows
+

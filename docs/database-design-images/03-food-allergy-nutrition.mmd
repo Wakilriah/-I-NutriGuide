@@ -1,0 +1,71 @@
+erDiagram
+    HEALTH_PROFILE ||--o{ PROFILE_ALLERGY : reports
+    ALLERGEN ||--o{ PROFILE_ALLERGY : identifies
+    FOOD_CATEGORY ||--o{ FOOD_ITEM : groups
+    FOOD_ITEM ||--o{ FOOD_ALLERGEN : may_contain
+    ALLERGEN ||--o{ FOOD_ALLERGEN : identifies
+    HEALTH_PROFILE ||--o{ FOOD_PREFERENCE : expresses
+    FOOD_ITEM ||--o{ FOOD_PREFERENCE : receives
+    FOOD_ITEM ||--o{ FOOD_NUTRIENT : contains
+    NUTRIENT ||--o{ FOOD_NUTRIENT : measures
+
+    HEALTH_PROFILE {
+        bigint profile_id PK
+        bigint user_id FK,UK
+    }
+    PROFILE_ALLERGY {
+        bigint profile_allergy_id PK
+        bigint profile_id FK
+        bigint allergen_id FK
+        varchar severity
+        text reaction_notes
+        boolean medically_confirmed
+    }
+    ALLERGEN {
+        bigint allergen_id PK
+        varchar name UK
+        varchar description
+        boolean is_active
+    }
+    FOOD_CATEGORY {
+        bigint category_id PK
+        varchar name UK
+        varchar description
+    }
+    FOOD_ITEM {
+        bigint food_id PK
+        bigint category_id FK
+        varchar name
+        text description
+        decimal serving_size_g
+        boolean is_active
+    }
+    FOOD_ALLERGEN {
+        bigint food_allergen_id PK
+        bigint food_id FK
+        bigint allergen_id FK
+        varchar presence_type
+    }
+    FOOD_PREFERENCE {
+        bigint food_preference_id PK
+        bigint profile_id FK
+        bigint food_id FK
+        varchar preference_type
+        text reason
+    }
+    NUTRIENT {
+        bigint nutrient_id PK
+        varchar name UK
+        varchar default_unit
+        text description
+    }
+    FOOD_NUTRIENT {
+        bigint food_nutrient_id PK
+        bigint food_id FK
+        bigint nutrient_id FK
+        decimal amount
+        varchar unit
+        decimal per_quantity
+        varchar per_unit
+    }
+
