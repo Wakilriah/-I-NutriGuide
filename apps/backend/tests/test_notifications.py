@@ -3,6 +3,7 @@ from datetime import datetime, time, timezone as dt_timezone
 from unittest.mock import patch
 
 import pytest
+from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -19,6 +20,13 @@ from apps.supplements.models import Supplement, UserSupplement
 
 
 pytestmark = pytest.mark.django_db
+
+
+def test_notification_models_are_registered_in_django_admin():
+    assert admin.site.is_registered(DevicePushToken)
+    assert admin.site.is_registered(NotificationPreference)
+    assert admin.site.is_registered(NotificationLog)
+    assert admin.site.is_registered(NotificationCampaign)
 
 
 @pytest.fixture
