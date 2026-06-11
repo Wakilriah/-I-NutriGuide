@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "144917704622",
+    "project_id": "project-8305edbf-84b6-47c6-834",
+    "storage_bucket": "project-8305edbf-84b6-47c6-834.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144917704622:android:07154e5e23e41e4204623f",
+        "android_client_info": {
+          "package_name": "pro.matchcesoir.inutriguide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "144917704622-h6k26bn4qu5poug0mhdkrecbasvlk3d8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA81PRo7F_B3Oy1rE59GCTxdC8o5nAVbeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "144917704622-h6k26bn4qu5poug0mhdkrecbasvlk3d8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
