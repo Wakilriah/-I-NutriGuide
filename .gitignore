@@ -27,3 +27,4 @@ pnpm-debug.log*
 *.log
 celerybeat-schedule
 .DS_Store
+google_secrets/
