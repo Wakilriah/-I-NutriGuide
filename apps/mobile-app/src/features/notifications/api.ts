@@ -56,6 +56,11 @@ export async function registerPushToken(payload: { token: string; platform: "ios
   return response.data;
 }
 
+export async function getPushTokenStatus() {
+  const response = await apiClient.get<{ registered: boolean; platforms: Array<"ios" | "android" | "web">; token_count: number }>("/notifications/push-status/");
+  return response.data;
+}
+
 export async function listNotifications() {
   const response = await apiClient.get<NotificationLog[]>("/notifications/");
   return response.data;

@@ -19,6 +19,20 @@ class RegisterPushTokenView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class PushTokenStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        tokens = DevicePushToken.objects.filter(user=request.user, active=True)
+        return Response(
+            {
+                "registered": tokens.exists(),
+                "platforms": list(tokens.order_by("platform").values_list("platform", flat=True).distinct()),
+                "token_count": tokens.count(),
+            }
+        )
+
+
 class NotificationPreferenceView(generics.RetrieveUpdateAPIView):
     serializer_class = NotificationPreferenceSerializer
     permission_classes = [permissions.IsAuthenticated]

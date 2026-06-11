@@ -1,11 +1,13 @@
 "use client";
 
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { AppTopBar, PageHeader } from "../../src/components/ui";
+import { getPushTokenStatus } from "../../src/features/notifications/api";
 import { PushRegistrationError, registerForPushNotificationsOnce } from "../../src/lib/notifications";
 import { useAuthStore } from "../../src/stores/auth-store";
 import { cards, colors, radii, spacing, typography } from "../../src/theme/design";
@@ -15,6 +17,8 @@ export default function ProfileSettingsScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<"idle" | "enabling" | "enabled" | "blocked">("idle");
   const [notificationMessage, setNotificationMessage] = useState("Receive reminders even when the app is closed");
+  const pushStatus = useQuery({ queryKey: ["push-token-status"], queryFn: getPushTokenStatus });
+  const deviceRegistered = pushStatus.data?.registered === true;
 
   const logout = async () => {
     setIsLoggingOut(true);
@@ -30,13 +34,14 @@ export default function ProfileSettingsScreen() {
           <Text style={typography.section}>Notifications</Text>
           <ActionRow
             icon="notifications"
-            label={notificationStatus === "enabled" ? "Notifications enabled" : "Enable notifications"}
+            label={deviceRegistered ? "Push notifications enabled" : "Enable push notifications"}
             onPress={async () => {
               setNotificationStatus("enabling");
               try {
                 const enabled = await registerForPushNotificationsOnce({ requestWebPermission: true });
                 setNotificationStatus(enabled ? "enabled" : "blocked");
                 setNotificationMessage(enabled ? "This device is registered for push notifications" : "Notification permission was not granted");
+                await pushStatus.refetch();
               } catch (error) {
                 setNotificationStatus("blocked");
                 setNotificationMessage(error instanceof PushRegistrationError ? error.message : "Push registration failed. Check your connection and try again.");
@@ -45,6 +50,8 @@ export default function ProfileSettingsScreen() {
             value={
               notificationStatus === "enabling"
                 ? "Requesting permission..."
+                : deviceRegistered
+                  ? `Server registered: ${pushStatus.data?.platforms.join(", ")}`
                 : notificationMessage
             }
           />

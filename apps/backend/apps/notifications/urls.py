@@ -9,6 +9,7 @@ from .views import (
     NotificationLogListView,
     NotificationPreferenceView,
     NotificationUnreadCountView,
+    PushTokenStatusView,
     RegisterPushTokenView,
     WebPushConfigView,
 )
@@ -22,6 +23,7 @@ urlpatterns = [
     path("notifications/<int:notification_id>/read/", MarkNotificationReadView.as_view(), name="notification-read"),
     path("notifications/preferences/", NotificationPreferenceView.as_view(), name="notification-preferences"),
     path("notifications/register-token/", RegisterPushTokenView.as_view(), name="notification-register-token"),
+    path("notifications/push-status/", PushTokenStatusView.as_view(), name="notification-push-status"),
     path("notifications/web-config/", WebPushConfigView.as_view(), name="notification-web-config"),
     path("notifications/tokens/<int:token_id>/", DeactivatePushTokenView.as_view(), name="notification-token-delete"),
 ]

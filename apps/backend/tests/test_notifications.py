@@ -65,6 +65,15 @@ def test_user_can_register_web_push_subscription(authenticated_client, user):
     assert token.platform == DevicePushToken.Platform.WEB
 
 
+def test_user_can_check_push_registration_status(authenticated_client, user):
+    DevicePushToken.objects.create(user=user, token="ExponentPushToken[test-token]", platform="android")
+
+    response = authenticated_client.get(reverse("notification-push-status"))
+
+    assert response.status_code == 200
+    assert response.json() == {"registered": True, "platforms": ["android"], "token_count": 1}
+
+
 def test_user_can_update_notification_preferences(authenticated_client, user):
     response = authenticated_client.patch(
         reverse("notification-preferences"),
