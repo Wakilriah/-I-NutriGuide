@@ -6,9 +6,24 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
-import { AppButton, AppTopBar, Badge, FoodLogItem, MacroProgressBar, PageHeader, ProgressRing, SafetyAlertCard, TrackingCard, TrackingSummaryCards, WaterTrackerCard } from "../../src/components/ui";
+import {
+  AppButton,
+  AppTopBar,
+  Badge,
+  FoodLogItem,
+  MacroProgressBar,
+  PageHeader,
+  ProgressRing,
+  SafetyAlertCard,
+  TrackingCard,
+  TrackingSummaryCards,
+  WaterTrackerCard,
+} from "../../src/components/ui";
 import { getProfile } from "../../src/features/profile/api";
-import { getTodayTracking, updateTodayTracking } from "../../src/features/tracking/api";
+import {
+  getTodayTracking,
+  updateTodayTracking,
+} from "../../src/features/tracking/api";
 import { colors, radii, spacing, typography } from "../../src/theme/design";
 
 function toNumber(value: number | string | null | undefined) {
@@ -18,16 +33,34 @@ function toNumber(value: number | string | null | undefined) {
 
 export default function TrackingScreen() {
   const queryClient = useQueryClient();
-  const today = useQuery({ queryKey: ["tracking", "today"], queryFn: getTodayTracking });
+  const today = useQuery({
+    queryKey: ["tracking", "today"],
+    queryFn: getTodayTracking,
+  });
   const profile = useQuery({ queryKey: ["profile"], queryFn: getProfile });
   const [waterMl, setWaterMl] = useState("0");
   const [steps, setSteps] = useState("0");
   const [status, setStatus] = useState("");
 
-  const calorieTarget = profile.data?.goal === "weight_loss" ? 1800 : profile.data?.goal === "muscle" ? 2800 : 2200;
-  const proteinTarget = Math.round((toNumber(profile.data?.weight_kg) || 70) * (profile.data?.goal === "muscle" ? 1.8 : 1.2));
+  const calorieTarget =
+    profile.data?.goal === "weight_loss"
+      ? 1800
+      : profile.data?.goal === "muscle"
+        ? 2800
+        : 2200;
+  const proteinTarget = Math.round(
+    (toNumber(profile.data?.weight_kg) || 70) *
+      (profile.data?.goal === "muscle" ? 1.8 : 1.2),
+  );
   const waterTarget = 2500;
-  const stepsTarget = profile.data?.activity_level === "active" ? 10000 : profile.data?.activity_level === "moderate" ? 8000 : profile.data?.activity_level === "light" ? 6000 : 5000;
+  const stepsTarget =
+    profile.data?.activity_level === "active"
+      ? 10000
+      : profile.data?.activity_level === "moderate"
+        ? 8000
+        : profile.data?.activity_level === "light"
+          ? 6000
+          : 5000;
   const calories = toNumber(today.data?.calories);
   const protein = toNumber(today.data?.protein_g);
   const fiber = toNumber(today.data?.fiber_g);
@@ -44,7 +77,8 @@ export default function TrackingScreen() {
   }, [today.data]);
 
   const saveMutation = useMutation({
-    mutationFn: (payload: { water_ml?: number; steps?: number }) => updateTodayTracking(payload),
+    mutationFn: (payload: { water_ml?: number; steps?: number }) =>
+      updateTodayTracking(payload),
     onError: () => setStatus("Unable to save the update."),
     onSuccess: async () => {
       setStatus("Tracking updated.");
@@ -59,28 +93,58 @@ export default function TrackingScreen() {
   };
 
   const saveSteps = () => {
-    const normalized = Math.max(0, Math.min(100000, Math.round(toNumber(steps))));
+    const normalized = Math.max(
+      0,
+      Math.min(100000, Math.round(toNumber(steps))),
+    );
     setSteps(String(normalized));
     saveMutation.mutate({ steps: normalized });
   };
 
   return (
-    <Screen showAiAssistant topBar={<AppTopBar title="Track" subtitle="Daily wellness" />}>
+    <Screen
+      showAiAssistant
+      topBar={<AppTopBar title="Track" subtitle="Daily wellness" />}
+    >
       <View style={{ gap: spacing.lg }}>
-        <PageHeader eyebrow="Today's rhythm" title="Small progress counts" subtitle="A calm overview of calories, hydration, movement, and macros." />
+        <PageHeader
+          eyebrow="Today's rhythm"
+          title="Small progress counts"
+          subtitle="A calm overview of calories, hydration, movement, and macros."
+        />
 
         <View style={styles.heroCard}>
           <View style={{ flex: 1, gap: spacing.xs }}>
             <Badge label="Today" tone="orange" />
-            <Text style={styles.heroTitle}>{Math.round(calories).toLocaleString()} kcal logged</Text>
-            <Text style={styles.heroText}>{today.data?.food_entries.length ?? 0} foods, {today.data?.supplements_taken.length ?? 0} supplements, {currentWater.toLocaleString()} ml water.</Text>
+            <Text style={styles.heroTitle}>
+              {Math.round(calories).toLocaleString()} kcal logged
+            </Text>
+            <Text style={styles.heroText}>
+              {today.data?.food_entries.length ?? 0} foods,{" "}
+              {today.data?.supplements_taken.length ?? 0} supplements,{" "}
+              {currentWater.toLocaleString()} ml water.
+            </Text>
           </View>
-          <ProgressRing color={colors.primary} label="calories" progress={calorieTarget ? calories / calorieTarget : 0} size={110} value={`${Math.round((calories / calorieTarget) * 100) || 0}%`} />
+          <ProgressRing
+            color={colors.primary}
+            label="calories"
+            progress={calorieTarget ? calories / calorieTarget : 0}
+            size={110}
+            value={`${Math.round((calories / calorieTarget) * 100) || 0}%`}
+          />
         </View>
 
         <View style={styles.quickActions}>
-          <QuickAction icon="restaurant" label="Add Food" onPress={() => router.push("/tabs/log-food" as never)} />
-          <QuickAction icon="water" label="Add Water" onPress={() => saveWater(currentWater + 250)} />
+          <QuickAction
+            icon="restaurant"
+            label="Add Food"
+            onPress={() => router.push("/tabs/log-food" as never)}
+          />
+          <QuickAction
+            icon="water"
+            label="Add Water"
+            onPress={() => saveWater(currentWater + 250)}
+          />
           <QuickAction icon="walk" label="Log Steps" onPress={saveSteps} />
         </View>
 
@@ -101,47 +165,121 @@ export default function TrackingScreen() {
 
         <View style={styles.ringGrid}>
           <View style={styles.ringTile}>
-            <ProgressRing color={colors.primary} label="calories" progress={calorieTarget ? calories / calorieTarget : 0} value={`${Math.round(calories)}`} />
+            <ProgressRing
+              color={colors.primary}
+              label="calories"
+              progress={calorieTarget ? calories / calorieTarget : 0}
+              value={`${Math.round(calories)}`}
+            />
           </View>
           <View style={styles.ringTile}>
-            <ProgressRing color={colors.tomato} label="steps" progress={stepsTarget ? currentSteps / stepsTarget : 0} value={currentSteps.toLocaleString()} />
+            <ProgressRing
+              color={colors.tomato}
+              label="steps"
+              progress={stepsTarget ? currentSteps / stepsTarget : 0}
+              value={currentSteps.toLocaleString()}
+            />
           </View>
         </View>
 
-        <WaterTrackerCard onAdd={() => saveWater(currentWater + 250)} targetMl={waterTarget} valueMl={currentWater} />
+        <WaterTrackerCard
+          onAdd={() => saveWater(currentWater + 250)}
+          targetMl={waterTarget}
+          valueMl={currentWater}
+        />
 
         <TrackingCard icon="walk" title="Steps">
           <View style={styles.inputRow}>
             <Ionicons color={colors.tomato} name="walk" size={20} />
-            <TextInput keyboardType="numeric" onChangeText={setSteps} placeholder="0" placeholderTextColor={colors.placeholder} style={styles.input} value={steps} />
-            <TouchableOpacity disabled={saveMutation.isPending} onPress={saveSteps} style={styles.orangeButton}>
-              <Text style={styles.orangeButtonText}>{saveMutation.isPending ? "Saving" : "Save"}</Text>
+            <TextInput
+              keyboardType="numeric"
+              onChangeText={setSteps}
+              placeholder="0"
+              placeholderTextColor={colors.placeholder}
+              style={styles.input}
+              value={steps}
+            />
+            <TouchableOpacity
+              disabled={saveMutation.isPending}
+              onPress={saveSteps}
+              style={styles.orangeButton}
+            >
+              <Text style={styles.orangeButtonText}>
+                {saveMutation.isPending ? "Saving" : "Save"}
+              </Text>
             </TouchableOpacity>
           </View>
-          <MacroProgressBar color={colors.tomato} label="Movement" target={stepsTarget} unit="steps" value={currentSteps} />
+          <MacroProgressBar
+            color={colors.tomato}
+            label="Movement"
+            target={stepsTarget}
+            unit="steps"
+            value={currentSteps}
+          />
         </TrackingCard>
 
         <TrackingCard icon="bar-chart" title="Nutrition">
-          <MacroProgressBar color={colors.primary} label="Calories" target={calorieTarget} unit="kcal" value={calories} />
-          <MacroProgressBar color={colors.secondaryContainer} label="Protein" target={proteinTarget} value={protein} />
-          <MacroProgressBar color={colors.blue} label="Fiber" target={30} value={fiber} />
-          <Text style={typography.body}>Carbs and fats use estimated goals until detailed macro entries are connected to tracking.</Text>
-          <MacroProgressBar color={colors.warning} label="Carbs" target={260} value={carbs} />
-          <MacroProgressBar color={colors.tomato} label="Fat" target={70} value={fat} />
+          <MacroProgressBar
+            color={colors.primary}
+            label="Calories"
+            target={calorieTarget}
+            unit="kcal"
+            value={calories}
+          />
+          <MacroProgressBar
+            color={colors.secondaryContainer}
+            label="Protein"
+            target={proteinTarget}
+            value={protein}
+          />
+          <MacroProgressBar
+            color={colors.blue}
+            label="Fiber"
+            target={30}
+            value={fiber}
+          />
+          <MacroProgressBar
+            color={colors.warning}
+            label="Carbs"
+            target={260}
+            value={carbs}
+          />
+          <MacroProgressBar
+            color={colors.tomato}
+            label="Fat"
+            target={70}
+            value={fat}
+          />
         </TrackingCard>
 
         <TrackingCard icon="restaurant" title="Food Diary">
           {today.data?.food_entries.length ? (
-            today.data.food_entries.slice(0, 4).map((entry, index) => (
-              <FoodLogItem calories={entry.calories} key={`${entry.timestamp}-${index}`} name={entry.food_name} protein={entry.protein_g} serving={entry.serving_g} />
-            ))
+            today.data.food_entries
+              .slice(0, 4)
+              .map((entry, index) => (
+                <FoodLogItem
+                  calories={entry.calories}
+                  key={`${entry.timestamp}-${index}`}
+                  name={entry.food_name}
+                  protein={entry.protein_g}
+                  serving={entry.serving_g}
+                />
+              ))
           ) : (
             <Text style={typography.body}>No food logged yet today.</Text>
           )}
-          <AppButton icon="add-circle" label="Add food" onPress={() => router.push("/tabs/log-food" as never)} variant="secondary" />
+          <AppButton
+            icon="add-circle"
+            label="Add food"
+            onPress={() => router.push("/tabs/log-food" as never)}
+            variant="secondary"
+          />
         </TrackingCard>
 
-        <SafetyAlertCard message="Tracking uses your saved profile targets. Medical safety rules still apply inside recommendations before foods are ranked." tone="info" />
+        <SafetyAlertCard
+          message="Tracking uses your saved profile targets. Medical safety rules still apply inside recommendations before foods are ranked."
+          tone="info"
+        />
 
         {status ? <Text style={styles.statusText}>{status}</Text> : null}
       </View>
@@ -149,7 +287,15 @@ export default function TrackingScreen() {
   );
 }
 
-function QuickAction({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+function QuickAction({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
   return (
     <TouchableOpacity onPress={onPress} style={styles.quickAction}>
       <Ionicons color={colors.primary} name={icon} size={21} />
