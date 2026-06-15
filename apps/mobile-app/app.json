@@ -3,7 +3,7 @@
     "name": "I-NutriGuide",
     "slug": "inutriguide",
     "scheme": ["inutriguide", "pro.matchcesoir.inutriguide"],
-    "version": "0.1.6",
+    "version": "0.1.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "pro.matchcesoir.inutriguide",
-      "versionCode": 7,
+      "versionCode": 8,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
